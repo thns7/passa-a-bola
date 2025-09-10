@@ -15,8 +15,8 @@ const CardSection = ({
 
   const sizeClasses = {
     sm: "h-[42%] rounded-tr-[40%]",
-    base: "h-[53%] rounded-tr-[30%]",
-    lg: "h-[42%] rounded-tr-[40%]",
+    base: "h-[50%] rounded-tr-[30%]",
+    lg: "h-[65%] rounded-tr-[20%]",
   };
 
   return (

@@ -1,22 +1,42 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import HeroImage from "../components/HeroImage";
 import CardSection from "../components/CardSection";
+import AuthForm from "../components/AuthForm";
+import FormInput from "../components/FormInput";
+import FormButton from "../components/FormButton";
 
 export default function RegisterPage() {
-  return (
-    <CardSection title="Registro">
-      <form className="flex flex-col gap-3">
-        <input type="text" placeholder="Nome" className="border p-2 rounded" />
-        <input type="text" placeholder="Username" className="border p-2 rounded" />
-        <input type="email" placeholder="Email" className="border p-2 rounded" />
-        <input type="password" placeholder="Senha" className="border p-2 rounded" />
-        <button className="bg-purple-600 text-white rounded p-2">
-          Registrar
-        </button>
-      </form>
+  const router = useRouter();
 
-      <p className="text-center text-sm mt-3">
-        Já tem uma conta?{" "}
-        <span className="text-purple-600 cursor-pointer">Login</span>
-      </p>
-    </CardSection>
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    router.push("/"); 
+  };
+
+  return (
+    <div className="bg-[var(--primary-color)] h-screen relative">
+      <HeroImage />
+      <CardSection title="Registrar" size="lg">
+        <AuthForm onSubmit={handleSubmit}>
+          <FormInput label="Nome" type="text" />
+          <FormInput label="Email" type="email" />
+          <FormInput label="Senha" type="password" />
+          <FormInput label="Confirmar Senha" type="password" />
+          <FormButton type="submit">Registrar</FormButton>
+        </AuthForm>
+
+        <p className="text-center text-sm mt-4">
+          Já tem conta?{" "}
+          <span
+            className="text-[var(--primary-color)] font-semibold cursor-pointer"
+            onClick={() => router.push("/login")}
+          >
+            Entrar
+          </span>
+        </p>
+      </CardSection>
+    </div>
   );
 }
