@@ -12,7 +12,7 @@ export default function LoginPage() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    router.push("/");
+    router.push("/home");
   };
 
   return (
