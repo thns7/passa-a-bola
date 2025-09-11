@@ -1,3 +1,7 @@
+'use client'
+
+import { useState } from "react"
+import BottomNav from "../components/BottomNav"
 import Header from "../components/Header"
 import MatchCard from "../components/MatchCard"
 import NextMatchCard from "../components/NextMatch"
@@ -5,6 +9,8 @@ import TextLink from "../components/TextLink"
 import TituloAlt from "../components/TituloAlt"
 
 export default function HomePage(){
+    const [active, setActive] = useState(0)
+
     return(
         <div className="bg-[#F0F0F0] h-screen">
             <Header name="Thiago" />
@@ -48,8 +54,9 @@ export default function HomePage(){
                     hora="18:00"
                     data="14 de maio"
                 />
-                <TituloAlt titulo="Principais Noticias"/>   
+                <TituloAlt titulo="Principais Noticias"/>
             </main>
+            <BottomNav activeIndex={active} onChange={setActive} />   
         </div>
     )
 }

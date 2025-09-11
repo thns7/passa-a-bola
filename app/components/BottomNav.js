@@ -1,0 +1,39 @@
+import { Home, Trophy, Users, User } from "lucide-react"
+
+const BottomNav = ({ activeIndex, onChange }) => {
+  const items = [
+    { icon: <Home size={24} />, label: "Home" },
+    { icon: <Trophy size={24} />, label: "Torneios" },
+    { icon: <Users size={24} />, label: "Times" },
+    { icon: <User size={24} />, label: "Perfil" },
+  ]
+
+  return (
+    <div className="fixed bottom-5 left-0 w-full bg-white shadow-lg flex justify-around items-center h-16 rounded-[3rem]">
+      {items.map((item, index) => (
+        <button
+          key={index}
+          onClick={() => onChange(index)}
+          className={`flex flex-col items-center text-sm transition ${
+            activeIndex === index
+              ? "text-[var(--primary-color)]"
+              : "text-[#A8C3E6]"
+          }`}
+        >
+          {/* Ícone */}
+          <div
+            className={`${
+              activeIndex === index
+                ? "bg-white p-5 rounded-full shadow-md -mt-15"
+                : ""
+            }`}
+          >
+            {item.icon}
+          </div>
+        </button>
+      ))}
+    </div>
+  )
+}
+
+export default BottomNav

@@ -22,7 +22,7 @@ const CardSection = ({
   return (
     <div className={`absolute left-0 right-0 bottom-0 bg-white p-6 shadow-lg flex flex-col justify-evenly ${sizeClasses[size]}`}>
       <div>
-        <h1 className="text-4xl font-semibold mb-5">{title}</h1>
+        <h1 className="text-4xl font-semibold mb-4">{title}</h1>
         {description && (
           <p className="text-[#949494] text-sm">{description}</p>
         )}

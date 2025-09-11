@@ -7,7 +7,7 @@ const poppins = Poppins({
 });
 
 export const metadata = {
-  title: "Meu App",
+  title: "Passa Bola",
   description: "Exemplo com Poppins global",
 };
 
