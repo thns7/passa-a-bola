@@ -14,7 +14,7 @@ export default function Header({ name }) {
       <div className="absolute top-20 left-6 right-6 flex justify-between items-center text-white">
         <h1 className="text-[2rem]">Olá, {name}</h1>
         <button className="bg-[#501386] p-2 rounded-full">
-          
+          <img src="/search_logo.png" alt="Lupa de Pesquisa" className="h-6" />
         </button>
       </div>
     </div>

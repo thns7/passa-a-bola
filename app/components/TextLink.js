@@ -1,11 +1,11 @@
 const TextLink = ({ children, onClick }) => {
   return (
-    <p
+    <h3
       onClick={onClick}
       className="text-[var(--primary-color)] font-medium text-center cursor-pointer mt-3"
     >
       {children}
-    </p>
+    </h3>
   );
 };
 
