@@ -1,0 +1,49 @@
+{
+  "eventos": [
+    {
+      "id": 1,
+      "titulo": "Encontro PAB",
+      "hora": "05:25",
+      "local": "Apipito Arena Limão",
+      "data": "2025-05-29",
+      "img": "/encontropab.png"
+    }
+    
+  ],
+  "copas": [
+    {
+      "id": 1,
+      "titulo": "Copa Passa a Bola",
+      "local": "São Paulo",
+      "hora": "08h às 18h",
+      "data": "2025-10-01",
+      "img": "/copa.png"
+    }
+  ],
+  "peneiras": [
+    {
+      "id": 1,
+      "clube": "Corinthians",
+      "data": "10/06/2025",
+      "idade": "15-20",
+      "local": "Parque São Jorge",
+      "valor": "R$60,00"
+    },
+    {
+      "id": 2,
+      "clube": "Santos FC",
+      "data": "12/06/2025",
+      "idade": "14-18",
+      "local": "Vila Belmiro",
+      "valor": "R$80,00"
+    },
+    {
+      "id": 3,
+      "clube": "Palmeiras",
+      "data": "15/06/2025",
+      "idade": "15-21",
+      "local": "Allianz Parque",
+      "valor": "Gratuito"
+    }
+  ]
+}
