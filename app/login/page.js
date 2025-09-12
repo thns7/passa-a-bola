@@ -18,10 +18,7 @@ export default function LoginPage() {
     const email = form.get("email");
     const password = form.get("password");
 
-    
     const users = JSON.parse(localStorage.getItem("users")) || [];
-
-    
     const user = users.find(
       (u) => u.email === email && u.password === password
     );
@@ -36,27 +33,63 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="bg-[var(--primary-color)] h-screen relative">
-      <HeroImage />
-      <CardSection title="Login" size="base">
-        <AuthForm onSubmit={handleSubmit}>
-          <FormInput label="Email" type="text" name="email" />
-          <FormInput label="Senha" type="password" name="password" />
-          <FormButton type="submit">Entrar</FormButton>
-        </AuthForm>
+    <div className="h-screen w-full">
+      {/* Mobile: Hero em cima + Card embaixo */}
+      <div className="md:hidden relative h-full bg-[var(--primary-color)]">
+        <HeroImage />
+        <CardSection title="Login" size="base">
+          <AuthForm onSubmit={handleSubmit}>
+            <FormInput label="Email" type="text" name="email" />
+            <FormInput label="Senha" type="password" name="password" />
+            <FormButton type="submit">Entrar</FormButton>
+          </AuthForm>
 
-        {error && <p className="text-red-500 text-center mt-2">{error}</p>}
+          {error && <p className="text-red-500 text-center mt-2">{error}</p>}
 
-        <p className="text-center text-sm mt-4">
-          Não tem conta?{" "}
-          <span
-            className="text-[var(--primary-color)] font-semibold cursor-pointer"
-            onClick={() => router.push("/register")}
-          >
-            Registrar
-          </span>
-        </p>
-      </CardSection>
+          <p className="text-center text-sm mt-4">
+            Não tem conta?{" "}
+            <span
+              className="text-[var(--primary-color)] font-semibold cursor-pointer"
+              onClick={() => router.push("/register")}
+            >
+              Registrar
+            </span>
+          </p>
+        </CardSection>
+      </div>
+
+      {/* Desktop: duas colunas */}
+      <div className="hidden md:grid grid-cols-2 h-full">
+        {/* Esquerda: Hero */}
+        <div className="bg-[var(--primary-color)] flex items-center justify-center">
+          <HeroImage />
+        </div>
+
+        {/* Direita: Formulário alinhado à esquerda */}
+        <div className="flex items-center bg-white p-12">
+          <div className="max-w-md w-full text-left">
+            <h1 className="text-4xl font-bold mb-6">Login</h1>
+
+            <AuthForm onSubmit={handleSubmit}>
+              <FormInput label="Email" type="text" name="email" />
+              <FormInput label="Senha" type="password" name="password" />
+              <FormButton type="submit">Entrar</FormButton>
+            </AuthForm>
+
+            {error && <p className="text-red-500 mt-2">{error}</p>}
+
+            <p className="text-sm mt-4">
+              Não tem conta?{" "}
+              <span
+                className="text-[var(--primary-color)] font-semibold cursor-pointer"
+                onClick={() => router.push("/register")}
+              >
+                Registrar
+              </span>
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

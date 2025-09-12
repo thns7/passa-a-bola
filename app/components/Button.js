@@ -7,13 +7,14 @@ const Button = ({ children, onClick, size = "base" }) => {
   };
 
   return (
-    <button
-      onClick={onClick}
-      className={`w-full bg-[var(--primary-color)]
-         text-white rounded-[1rem] hover:bg-purple-700 transition ${sizeClasses[size]}`}
-    >
-      {children}
-    </button>
+      <button
+        onClick={onClick}
+        className={`w-full bg-[var(--primary-color)] text-white 
+          rounded-[1rem] transform transition-transform duration-300 ease-out 
+          hover:-translate-y-1 hover:shadow-xl ${sizeClasses[size]}`}
+      >
+        {children}
+      </button>
   );
 };
 

@@ -20,15 +20,22 @@ const CardSection = ({
   };
 
   return (
-    <div className={`absolute left-0 right-0 bottom-0 bg-white p-6 shadow-lg flex flex-col justify-evenly ${sizeClasses[size]}`}>
+    <div
+      className={`
+        bg-white p-6 shadow-lg flex flex-col justify-evenly
+        md:static md:shadow-none md:p-0
+        ${sizeClasses[size]} md:h-auto md:rounded-none
+        absolute left-0 right-0 bottom-0
+      `}
+    >
       <div>
-        <h1 className="text-4xl font-semibold mb-4">{title}</h1>
+        {title && <h1 className="text-4xl font-semibold mb-4">{title}</h1>}
         {description && (
-          <p className="text-[#949494] text-sm">{description}</p>
+          <p className="text-[#949494] text-sm md:text-base">{description}</p>
         )}
       </div>
 
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 mt-6">
         {children}
 
         {showRegisterLogin && (
@@ -36,7 +43,7 @@ const CardSection = ({
             <Button size="lg" onClick={() => router.push("/register")}>
               Registrar
             </Button>
-            <TextLink onClick={() => router.push("/login")}>Login</TextLink>
+            <TextLink className="text-left" onClick={() => router.push("/login")}>Login</TextLink>
           </>
         )}
       </div>
