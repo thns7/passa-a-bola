@@ -26,23 +26,35 @@ export default function HomePage() {
   }, [router]);
 
   useEffect(() => {
-    const matches = [
-      {
-        id: 1,
-        campeonato: "Brasileirão Feminino",
-        timeCasa: "Corinthians",
-        timeVisitante: "São Paulo",
-        logoCasa: "/corinthians.png",
-        logoVisitante: "/spfc.png",
-        placarCasa: 0,
-        placarVisitante: 3,
-        tempo: "76’",
-        data: "14 de maio",
-        hora: "18:00",
+  const matches = [
+    {
+      id: 1,
+      campeonato: "Brasileirão Feminino",
+      timeCasa: "Corinthians",
+      timeVisitante: "São Paulo",
+      logoCasa: "/corinthians.png",
+      logoVisitante: "/spfc.png",
+      placarCasa: 0,
+      placarVisitante: 3,
+      tempo: "76’",
+      data: "14 de maio",
+      hora: "18:00",
+      stats: {
+        chutes: [5, 7],
+        chutesAoGol: [2, 4],
+        posse: ["33%", "67%"],
+        passes: [387, 523],
+        precisao: ["65%", "77%"],
+        faltas: [6, 7],
+        amarelos: [0, 1],
+        vermelhos: [1, 0],
+        impedimentos: [3, 2],
+        escanteios: [5, 9],
       },
-    ];
-    localStorage.setItem("matches", JSON.stringify(matches));
-  }, []);
+    },
+  ];
+  localStorage.setItem("matches", JSON.stringify(matches));
+}, []);
 
   if (!user) {
     return (
@@ -59,7 +71,7 @@ export default function HomePage() {
       <main className="max-w-[23.75rem] mx-auto px-4">
         <TituloAlt titulo="Ao vivo" />
 
-        {/* MatchCard clicável */}
+        
         <Link href="/match/1">
           <div className="cursor-pointer">
             <MatchCard
