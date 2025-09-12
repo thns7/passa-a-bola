@@ -1,9 +1,14 @@
+"use client"   // <<== IMPORTANTE PARA USAR useRouter
+
+import { useRouter } from "next/navigation"  // note que no App Router é navigation, não router
 import { Home, Trophy, Users, User } from "lucide-react"
 
 const BottomNav = ({ activeIndex, onChange }) => {
+  const router = useRouter()
+
   const items = [
       { icon: <Home size={24} />, label: "Home", href: "/" },
-      { icon: <Trophy size={24} />, label: "Torneios", href: "/torneios" },
+      { icon: <Trophy size={24} />, label: "Torneios", href: "/events" },
       { icon: <Users size={24} />, label: "Times", href: "/times" },
       { icon: <User size={24} />, label: "Perfil", href: "/perfil" },
   ]
@@ -13,7 +18,10 @@ const BottomNav = ({ activeIndex, onChange }) => {
       {items.map((item, index) => (
         <button
           key={index}
-          onClick={() => onChange(index)}
+          onClick={() => {
+            onChange(index)
+            router.push(item.href)
+          }}
           className={`flex flex-col items-center text-sm transition ${
             activeIndex === index
               ? "text-[var(--primary-color)]"
