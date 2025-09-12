@@ -7,13 +7,13 @@ import BottomNav from "../components/BottomNav";
 
 export default function HomePage() {
   const [user, setUser] = useState(null);
-  const [active, setActive] = useState(0);
+  const [active, setActive] = useState(1);
   const [eventos, setEventos] = useState([]);
   const [copas, setCopas] = useState([]);
   const [peneiras, setPeneiras] = useState([]);
   const router = useRouter();
 
-  // Carrega usuário do localStorage
+  
   useEffect(() => {
     const currentUser = localStorage.getItem("currentUser");
     if (currentUser) {
@@ -23,7 +23,7 @@ export default function HomePage() {
     }
   }, [router]);
 
-  // Carrega dados da API fake
+  
   useEffect(() => {
     async function load() {
       try {
@@ -49,12 +49,12 @@ export default function HomePage() {
 
   return (
     <div className="bg-[#F0F0F0] min-h-screen flex flex-col">
-      {/* Header */}
+      
       <Header name={user.name || "Usuário"} />
 
-      {/* Conteúdo principal */}
+      
       <main className="flex-1 max-w-[24rem] mx-auto px-4 py-4 space-y-6 pb-24">
-        {/* Eventos */}
+        
         <section>
           <h2 className="text-xl font-bold mb-2">Eventos</h2>
           <div className="flex gap-4 overflow-x-auto pb-2">
@@ -136,7 +136,7 @@ export default function HomePage() {
         
       </main>
 
-      {/* BottomNav fixo */}
+      
       <div className="fixed bottom-0 left-0 w-full z-50">
         <BottomNav activeIndex={active} onChange={setActive} />
       </div>
