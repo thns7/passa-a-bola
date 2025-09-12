@@ -2,10 +2,10 @@ import { Home, Trophy, Users, User } from "lucide-react"
 
 const BottomNav = ({ activeIndex, onChange }) => {
   const items = [
-    { icon: <Home size={24} />, label: "Home" },
-    { icon: <Trophy size={24} />, label: "Torneios" },
-    { icon: <Users size={24} />, label: "Times" },
-    { icon: <User size={24} />, label: "Perfil" },
+      { icon: <Home size={24} />, label: "Home", href: "/" },
+      { icon: <Trophy size={24} />, label: "Torneios", href: "/torneios" },
+      { icon: <Users size={24} />, label: "Times", href: "/times" },
+      { icon: <User size={24} />, label: "Perfil", href: "/perfil" },
   ]
 
   return (
@@ -20,7 +20,6 @@ const BottomNav = ({ activeIndex, onChange }) => {
               : "text-[#A8C3E6]"
           }`}
         >
-          {/* Ícone */}
           <div
             className={`${
               activeIndex === index

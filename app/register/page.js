@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import HeroImage from "../components/HeroImage";
 import CardSection from "../components/CardSection";
 import AuthForm from "../components/AuthForm";
@@ -9,10 +10,38 @@ import FormButton from "../components/FormButton";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const [error, setError] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    router.push("/home"); 
+    setError("");
+
+    const form = e.target;
+    const name = form[0].value;
+    const email = form[1].value;
+    const password = form[2].value;
+    const confirmPassword = form[3].value;
+
+    if (password !== confirmPassword) {
+      setError("As senhas não coincidem.");
+      return;
+    }
+
+    
+    const users = JSON.parse(localStorage.getItem("users") || "[]");
+
+    
+    if (users.find((u) => u.email === email)) {
+      setError("Esse email já está registrado.");
+      return;
+    }
+
+    
+    users.push({ name, email, password });
+    localStorage.setItem("users", JSON.stringify(users));
+
+    
+    router.push("/login");
   };
 
   return (
@@ -26,6 +55,8 @@ export default function RegisterPage() {
           <FormInput label="Confirmar Senha" type="password" />
           <FormButton type="submit">Registrar</FormButton>
         </AuthForm>
+
+        {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
 
         <p className="text-center text-sm mt-4">
           Já tem conta?{" "}
