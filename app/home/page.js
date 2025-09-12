@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import BottomNav from "../components/BottomNav";
 import Header from "../components/Header";
 import MatchCard from "../components/MatchCard";
@@ -14,6 +15,7 @@ export default function HomePage() {
   const [user, setUser] = useState(null);
   const router = useRouter();
 
+
   useEffect(() => {
     const currentUser = localStorage.getItem("currentUser");
     if (currentUser) {
@@ -22,6 +24,25 @@ export default function HomePage() {
       router.push("/login");
     }
   }, [router]);
+
+  useEffect(() => {
+    const matches = [
+      {
+        id: 1,
+        campeonato: "Brasileirão Feminino",
+        timeCasa: "Corinthians",
+        timeVisitante: "São Paulo",
+        logoCasa: "/corinthians.png",
+        logoVisitante: "/spfc.png",
+        placarCasa: 0,
+        placarVisitante: 3,
+        tempo: "76’",
+        data: "14 de maio",
+        hora: "18:00",
+      },
+    ];
+    localStorage.setItem("matches", JSON.stringify(matches));
+  }, []);
 
   if (!user) {
     return (
@@ -37,16 +58,22 @@ export default function HomePage() {
 
       <main className="max-w-[23.75rem] mx-auto px-4">
         <TituloAlt titulo="Ao vivo" />
-        <MatchCard
-          campeonato="Brasileirão Feminino"
-          timeCasa="Corinthians"
-          timeVisitante="São Paulo"
-          logoCasa="/corinthians.png"
-          logoVisitante="/spfc.png"
-          placarCasa={0}
-          placarVisitante={3}
-          tempo="76’"
-        />
+
+        {/* MatchCard clicável */}
+        <Link href="/match/1">
+          <div className="cursor-pointer">
+            <MatchCard
+              campeonato="Brasileirão Feminino"
+              timeCasa="Corinthians"
+              timeVisitante="São Paulo"
+              logoCasa="/corinthians.png"
+              logoVisitante="/spfc.png"
+              placarCasa={0}
+              placarVisitante={3}
+              tempo="76’"
+            />
+          </div>
+        </Link>
 
         <div className="flex justify-between">
           <TituloAlt titulo="Partidas" />
@@ -74,7 +101,6 @@ export default function HomePage() {
 
         <TituloAlt titulo="Principais Notícias" />
 
-        
         <button
           onClick={() => {
             localStorage.removeItem("currentUser");
