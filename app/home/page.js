@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Header from "../components/Header";
+import BottomNav from "../components/BottomNav";
 import MatchCard from "../components/MatchCard";
 import NextMatchCard from "../components/NextMatch";
 import TextLink from "../components/TextLink";
@@ -11,6 +12,7 @@ import TituloAlt from "../components/TituloAlt";
 
 export default function HomePage() {
   const [user, setUser] = useState(null);
+  const [active, setActive] = useState(0); // Para o BottomNav mobile
   const router = useRouter();
 
   useEffect(() => {
@@ -48,7 +50,6 @@ export default function HomePage() {
 
   return (
     <div className="bg-[#F0F0F0] min-h-screen">
-      
       <Header name={user.name || "Usuário"} />
 
       {/* Mobile */}
@@ -105,11 +106,16 @@ export default function HomePage() {
         >
           Sair
         </button>
+
+        {/* BottomNav mobile */}
+        <div className="fixed bottom-0 left-0 right-0 md:hidden">
+          <BottomNav activeIndex={active} onChange={setActive} />
+        </div>
       </div>
 
       {/* Desktop */}
       <div className="hidden md:grid md:grid-cols-3 gap-6 p-12">
-        
+        {/* Coluna 1: Ao vivo + Partidas */}
         <div className="space-y-6">
           <TituloAlt titulo="Ao vivo" />
           <Link href="/match/1">
@@ -152,6 +158,7 @@ export default function HomePage() {
           />
         </div>
 
+        {/* Coluna 2 & 3: Notícias / Destaques */}
         <div className="col-span-2 bg-white p-8 rounded-2xl shadow-lg space-y-6">
           <h1 className="text-3xl font-bold">Bem-vindo, {user.name}</h1>
           <p className="text-gray-600">

@@ -9,7 +9,7 @@ const BottomNav = ({ activeIndex, onChange }) => {
   const items = [
       { icon: <Home size={24} />, label: "Home", href: "/home" },
       { icon: <Trophy size={24} />, label: "Torneios", href: "/events" },
-      { icon: <Users size={24} />, label: "Times", href: "/times" },
+      { icon: <Users size={24} />, label: "Comunidade", href: "/comunidade" },
       { icon: <User size={24} />, label: "Perfil", href: "/perfil" },
   ]
 
