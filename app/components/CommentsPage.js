@@ -63,7 +63,7 @@ export default function CommentsPage() {
 
   return (
     <div className="min-h-screen bg-gray-100 p-4">
-      <button onClick={() => router.back()} className="text-blue-500 mb-4">← Voltar</button>
+      <button onClick={() => router.back()} className="text-[var(--primary-color)] mb-4">← Voltar</button>
 
       {post ? (
         <div className="bg-white p-4 rounded-lg shadow mb-4">
@@ -94,7 +94,7 @@ export default function CommentsPage() {
           placeholder="Digite seu comentário..."
           className="flex-1 border rounded p-2"
         />
-        <button onClick={handleAddComment} className="bg-purple-600 text-white px-4 py-2 rounded">Enviar</button>
+        <button onClick={handleAddComment} className="bg-[var(--primary-color)] text-white px-4 py-2 rounded">Enviar</button>
       </div>
     </div>
   );

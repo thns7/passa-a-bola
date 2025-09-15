@@ -103,12 +103,12 @@ export default function HomePage() {
             </div>
           </section>
 
-          {/* Peneiras */}
+          
           <section className="pt-6">
             <h2 className="text-xl font-bold mb-2">Peneiras</h2>
             <div className="overflow-x-auto">
               <table className="w-full bg-white shadow-md rounded-md text-[11px] md:text-sm lg:text-base">
-                <thead className="bg-purple-700 text-white">
+                <thead className="bg-[var(--primary-color)] text-white">
                   <tr>
                     <th className="p-2 md:p-4 text-left">Clube</th>
                     <th className="p-2 md:p-4 text-left">Data</th>
@@ -133,7 +133,7 @@ export default function HomePage() {
           </section>
       </main>
 
-      {/* BottomNav fixa no mobile */}
+      
       <div className="fixed bottom-0 left-0 w-full z-50 md:hidden">
         <BottomNav activeIndex={active} onChange={setActive} />
       </div>
