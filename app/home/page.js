@@ -12,7 +12,7 @@ import TituloAlt from "../components/TituloAlt";
 
 export default function HomePage() {
   const [user, setUser] = useState(null);
-  const [active, setActive] = useState(0); // Para o BottomNav mobile
+  const [active, setActive] = useState(0); 
   const router = useRouter();
 
   useEffect(() => {
@@ -52,7 +52,7 @@ export default function HomePage() {
     <div className="bg-[#F0F0F0] min-h-screen">
       <Header name={user.name || "Usuário"} />
 
-      {/* Mobile */}
+      
       <div className="md:hidden px-4">
         <TituloAlt titulo="Ao vivo" />
 
@@ -107,7 +107,7 @@ export default function HomePage() {
           Sair
         </button>
 
-        {/* BottomNav mobile */}
+        
         <div className="fixed bottom-0 left-0 right-0 md:hidden">
           <BottomNav activeIndex={active} onChange={setActive} />
         </div>

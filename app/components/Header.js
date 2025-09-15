@@ -71,7 +71,7 @@ export default function Header({ name }) {
 
           {/* Overlay menu full height */}
           {menuOpen && (
-            <div className="fixed inset-0 flex">
+            <div className="fixed inset-0 flex bg-[var(--black-opacity)]">
               
                 onClick={() => setMenuOpen(false)}
               
