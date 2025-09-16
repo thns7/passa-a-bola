@@ -61,8 +61,10 @@ export default function EditarPerfil() {
   }
 
   return (
-    <div className="max-w-md mx-auto bg-[#F0F0F0] min-h-screen pb-10">
-      <div className="relative h-[180px] animate-duration-400 animate-fade-down">
+    <div className="bg-[#F0F0F0] min-h-screen pb-10">
+      {/* Mobile */}
+      <div className="relative md:hidden">
+      <div className=" max-w-md mx-auto h-[180px] animate-duration-400 animate-fade-down">
         <img
           src="/svgs/headerPerfil.svg"
           alt="Header background"
@@ -157,6 +159,101 @@ export default function EditarPerfil() {
           </button>
         </div>
       </div>
+      </div>
+      {/* Desktop */}
+      <div className="hidden md:block">
+      <div className=" h-[180px] animate-duration-400 animate-fade-down">
+
+        
+        <button
+          onClick={() => router.back()}
+          className="absolute top-4 left-4 text-black"
+        >
+          <ArrowLeft className="h-6 w-6" />
+        </button>
+
+        
+        <div className="absolute left-1/2 -bottom-9 transform -translate-x-1/2">
+          <img
+            src={user.avatar || "/perfilPadrao.jpg"}
+            alt="Foto de perfil"
+            className="h-24 w-24 rounded-full border-4 border-white object-cover"
+          />
+        </div>
+      </div>
+
+      
+      <div className="max-w-md mx-auto mt-16 px-6 space-y-6">
+        <div>
+          <label className="block text-sm text-gray-500 mb-1">Seu Nome</label>
+          <input
+            type="text"
+            value={form.name}
+            onChange={(e) => handleChange("name", e.target.value)}
+            className="w-full border-b border-gray-300 bg-transparent focus:outline-none py-2"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm text-gray-500 mb-1">Local</label>
+          <input
+            type="text"
+            value={form.location}
+            onChange={(e) => handleChange("location", e.target.value)} // <-- agora salva no location
+            className="w-full border-b border-gray-300 bg-transparent focus:outline-none py-2"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm text-gray-500 mb-1">Biografia</label>
+          <input
+            type="text"
+            value={form.bio}
+            onChange={(e) => handleChange("bio", e.target.value)}
+            className="w-full border-b border-gray-300 bg-transparent focus:outline-none py-2"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm text-gray-500 mb-1">Email</label>
+          <input
+            type="email"
+            value={form.email}
+            onChange={(e) => handleChange("email", e.target.value)}
+            className="w-full border-b border-gray-300 bg-transparent focus:outline-none py-2"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm text-gray-500 mb-1">Senha</label>
+          <input
+            type="password"
+            value={form.password}
+            onChange={(e) => handleChange("password", e.target.value)}
+            className="w-full border-b border-gray-300 bg-transparent focus:outline-none py-2"
+          />
+        </div>
+
+        
+        <button
+          onClick={handleSave}
+          className="w-full bg-[var(--primary-color)] text-white py-3 rounded-lg mt-4"
+        >
+          Salvar
+        </button>
+
+        
+        <div className="flex justify-center">
+          <button
+            onClick={handleLogout}
+            className="w-40 bg-red-500 text-white py-2 rounded-lg"
+          >
+            Sair
+          </button>
+        </div>
+      </div>
+      </div>
     </div>
+    
   );
 }

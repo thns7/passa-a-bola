@@ -46,11 +46,11 @@ export default function HomePage() {
   }
 
   return (
-    <div className="bg-[#F0F0F0] min-h-screen flex flex-col">
+    <div className="bg-[#F0F0F0] min-h-screen flex flex-col ">
       {/* Header */}
       <Header name={user.name || "Usuário"} />
 
-      <main className="flex-1 w-full max-w-[24rem] md:max-w-5xl mx-auto px-4 md:px-8 py-6 space-y-10 pb-28 divide-y divide-gray-300">
+      <main className="md:mt-24 flex-1 w-full max-w-[24rem] md:max-w-5xl mx-auto px-4 md:px-8 py-6 space-y-10 pb-28 divide-y divide-gray-300">
           {/* Eventos */}
           <section className="pb-6 ">
             <h2 className="text-xl font-bold mb-2">Eventos</h2>

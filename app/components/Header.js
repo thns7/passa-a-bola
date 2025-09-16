@@ -52,48 +52,48 @@ export default function Header({ name }) {
       </div>
 
       {/* Desktop */}
-      <div className="hidden md:flex animate-duration-500 animate-fade-down  items-center justify-between bg-[var(--primary-color)] text-white p-6 relative">
+      <div className="hidden md:flex fixed top-0 left-0 right-0 animate-duration-500 animate-fade-down items-center justify-between bg-[var(--primary-color)] text-white p-6 z-50">
 
-        <input
-          type="text"
-          placeholder="Pesquisar partidas, notícias..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-1/2 px-5 py-2 rounded-lg bg-white text-black focus:outline-none animate-duration-700 animate-fade-down"
-        />
+      <input
+        type="text"
+        placeholder="Pesquisar partidas, notícias..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="w-1/2 px-5 py-2 rounded-lg bg-white text-black focus:outline-none animate-duration-700 animate-fade-down"
+      />
 
-        {/* Menu hamburguer */}
-        <div className="relative ">
-          <button onClick={() => setMenuOpen(!menuOpen)}>
-            {menuOpen ? <X size={28} /> : <Menu size={28} />}
-          </button>
+      {/* Menu hamburguer */}
+      <div className="relative">
+        <button onClick={() => setMenuOpen(!menuOpen)}>
+          {menuOpen ? <X size={28} /> : <Menu size={28} />}
+        </button>
 
-          {menuOpen && (
-            <div className="fixed inset-0 flex bg-[var(--black-opacity)] h-screen  animate-duration-400 animate-fade-down">
-            
-              {/* Menu lateral */}
-              <div
-                id="desktop-menu"
-                className="relative ml-auto w-64 bg-white h-screen shadow-lg flex flex-col p-6 space-y-4"
-              >
-                {items.map((item, index) => (
-                  <button
-                    key={index}
-                    className="flex items-center gap-3 w-full px-4 py-3 hover:bg-gray-100 rounded-lg index-10 text-black"
-                    onClick={() => {
-                      router.push(item.href);
-                      setMenuOpen(false);
-                    }}
-                  >
-                    {item.icon}
-                    <span>{item.label}</span>
-                  </button>
-                ))}
-              </div>
+        {menuOpen && (
+          <div className="fixed inset-0 flex bg-[var(--black-opacity)] h-screen animate-duration-400 animate-fade-down">
+          
+            {/* Menu lateral */}
+            <div
+              id="desktop-menu"
+              className="relative ml-auto w-64 bg-white h-screen shadow-lg flex flex-col p-6 space-y-4"
+            >
+              {items.map((item, index) => (
+                <button
+                  key={index}
+                  className="flex items-center gap-3 w-full px-4 py-3 hover:bg-gray-100 rounded-lg index-10 text-black"
+                  onClick={() => {
+                    router.push(item.href);
+                    setMenuOpen(false);
+                  }}
+                >
+                  {item.icon}
+                  <span>{item.label}</span>
+                </button>
+              ))}
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
+    </div>
     </header>
   );
 }

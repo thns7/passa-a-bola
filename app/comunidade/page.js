@@ -144,7 +144,7 @@ export default function HomePage() {
         </div>
       ) : (
         <>
-          <header className="flex justify-between mt-[5vh] ml-[6vw] mr-[4vh] md:hidden">
+          <header className="md:hidden flex justify-between mt-10 md:mt-[5vh] ml-[6vw] mr-[4vh]">
             <h1 className="flex text-[6vw]">Comunidade</h1>
             <img
               src="/svgs/tabler_plus.svg"
@@ -153,12 +153,11 @@ export default function HomePage() {
               onClick={() => setShowPostModal(true)}
             />
           </header>
-
           <div className="hidden md:block">
             <Header name={user.name || "Usuário"} />
 
             {/* Barra abaixo do Header */}
-            <div className="flex justify-between items-center mt-4 mx-8">
+            <div className="md:hidden flex justify-between items-center  mx-8">
               <h1 className="text-2xl font-bold">Comunidade</h1>
               <img
                 src="/svgs/tabler_plus.svg"
@@ -169,7 +168,8 @@ export default function HomePage() {
             </div>
           </div>
 
-          <section className="flex bg-[#E5E5E5] rounded-[3vh] h-9.5 mt-4 mr-8 ml-9 items-center">
+
+          <section className="flex md:hidden bg-[#E5E5E5] rounded-[3vh] h-9.5 mt-4 md:mt-30 mr-8 ml-9 items-center">
             <input
               type="text"
               placeholder="Pesquise por usuários, ou clubes"
@@ -177,7 +177,21 @@ export default function HomePage() {
             />
           </section>
 
-          <section className="mt-3 p-4 w-full">
+          <section className="hidden md:flex  rounded-[3vh] h-9.5 mt-30 mr-8 ml-9 items-center">
+            <img
+                src="/svgs/tabler_plus.svg"
+                alt="+"
+                className="h-6 cursor-pointer"
+                onClick={() => setShowPostModal(true)}
+              />
+            <input
+              type="text"
+              placeholder="Pesquise por usuários, ou clubes"
+              className="flex bh ml-5 w-[150%] pl-10 bg-[#E5E5E5]  rounded-[3vh] h-[4vh] border-0 bg-no-repeat bg-[left_1vh_center] bg-[url('/svgs/Pesquisa.svg')] focus:outline-none"
+            />
+          </section>
+
+          <section className="mt-0 p-4 w-full">
             <div className="flex mb-4">
               <button
                 onClick={() => setActiveSection("feed")}
@@ -197,7 +211,7 @@ export default function HomePage() {
               </button>
             </div>
 
-            <div className="rounded p-5 pb-25 animate-duration-400 animate-fade-down">
+            <div className="max-w-md m-auto rounded p-5 pb-25 animate-duration-400 animate-fade-down">
               {activeSection === "feed" && (
                 <div>
                   {posts.length === 0 && <p>Nenhuma publicação ainda...</p>}
@@ -218,7 +232,7 @@ export default function HomePage() {
                         <img
                           src={post.image}
                           alt="Post"
-                          className="rounded-lg max-h-60 object-cover mb-2 "
+                          className="max-w-md m-auto rounded-lg max-h-60 object-cover mb-2 "
                         />
                       )}
 

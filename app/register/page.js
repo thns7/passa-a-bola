@@ -72,7 +72,9 @@ export default function RegisterPage() {
       <div className="hidden md:grid grid-cols-2 h-full">
         {/* Esquerda*/}
         <div className="bg-[var(--primary-color)] flex items-center justify-center">
-          <HeroImage />
+          <div className=" w-[50vh] ">
+            <HeroImage />
+          </div>
         </div>
 
         {/* Direita */}

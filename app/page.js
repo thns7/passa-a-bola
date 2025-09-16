@@ -16,9 +16,11 @@ export default function Home() {
 
       {/* Desktop*/}
       <div className="hidden md:grid grid-cols-2 h-full">
-        {/* Lado esquerdo */}
-        <div className="flex items-center justify-center bg-[var(--primary-color)]">
-          <HeroImage />
+        {/* Esquerda*/}
+        <div className="bg-[var(--primary-color)] flex items-center justify-center">
+          <div className=" w-[50vh] ">
+            <HeroImage />
+          </div>
         </div>
 
         {/* Lado direito:  */}
