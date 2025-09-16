@@ -9,7 +9,7 @@ export default function EditarPerfil() {
   const [form, setForm] = useState({
     name: "",
     username: "",
-    location: "", // <-- adicionamos aqui
+    location: "", 
     bio: "",
     email: "",
     password: "",
@@ -24,7 +24,7 @@ export default function EditarPerfil() {
       setForm({
         name: parsed.name || "",
         username: parsed.username || "",
-        location: parsed.location || "", // <-- puxando do user
+        location: parsed.location || "", 
         bio: parsed.bio || "",
         email: parsed.email || "",
         password: parsed.password || "",
@@ -106,7 +106,7 @@ export default function EditarPerfil() {
           <input
             type="text"
             value={form.location}
-            onChange={(e) => handleChange("location", e.target.value)} // <-- agora salva no location
+            onChange={(e) => handleChange("location", e.target.value)} 
             className="w-full border-b border-gray-300 bg-transparent focus:outline-none py-2"
           />
         </div>
@@ -199,7 +199,7 @@ export default function EditarPerfil() {
           <input
             type="text"
             value={form.location}
-            onChange={(e) => handleChange("location", e.target.value)} // <-- agora salva no location
+            onChange={(e) => handleChange("location", e.target.value)} 
             className="w-full border-b border-gray-300 bg-transparent focus:outline-none py-2"
           />
         </div>

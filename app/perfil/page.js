@@ -37,7 +37,7 @@ export default function PerfilPage() {
     <div className="h-screen w-full">
       {/* Mobile */}
       <div className="flex md:hidden">
-        <div className="max-w-md mx-auto bg-[#F0F0F0] min-h-screen">
+        <div className="w-full mx-auto bg-[#F0F0F0] min-h-screen">
           
           <header className="relative h-[140px] animate-duration-400 animate-fade-down">
             <img
