@@ -4,6 +4,16 @@ Web app feito com **Next.js**, **React** e **Tailwind CSS** para acompanhar o **
 
 ---
 
+## Participantes - 1ESPZ
+
+- Thiago Do Nascimento
+- Enzo Ozzioli 
+- Gabriel Santos
+- Vinicius Herreira
+- Gustavo Rocha
+
+---
+  
 ## Tecnologias
 
 - Next.js  
