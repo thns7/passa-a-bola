@@ -16,7 +16,7 @@ Web app feito com **Next.js**, **React** e **Tailwind CSS** para acompanhar o **
 ## Instalação
 
 ```bash
-git clone https://github.com/seu-usuario/seu-projeto.git
+git clone https://github.com/thns7/passa-a-bola.git
 cd seu-projeto
 npm install
 npm run dev
