@@ -97,16 +97,6 @@ export default function HomePage() {
 
         <TituloAlt titulo="Principais Notícias" />
 
-        <button
-          onClick={() => {
-            localStorage.removeItem("currentUser");
-            router.push("/login");
-          }}
-          className="mt-4 w-full bg-red-500 text-white py-2 rounded-lg"
-        >
-          Sair
-        </button>
-
         
         <div className="fixed bottom-0 left-0 right-0 md:hidden">
           <BottomNav activeIndex={active} onChange={setActive} />
@@ -115,7 +105,7 @@ export default function HomePage() {
 
       {/* Desktop */}
       <div className="hidden md:grid md:grid-cols-3 gap-6 p-12">
-        {/* Coluna 1: Ao vivo + Partidas */}
+        
         <div className="space-y-6">
           <TituloAlt titulo="Ao vivo" />
           <Link href="/match/1">
@@ -158,7 +148,7 @@ export default function HomePage() {
           />
         </div>
 
-        {/* Coluna 2 & 3: Notícias / Destaques */}
+        
         <div className="col-span-2 bg-white p-8 rounded-2xl shadow-lg space-y-6">
           <h1 className="text-3xl font-bold">Bem-vindo, {user.name}</h1>
           <p className="text-gray-600">
