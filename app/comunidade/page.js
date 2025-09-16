@@ -197,20 +197,20 @@ export default function HomePage() {
               </button>
             </div>
 
-            <div className="rounded p-5 pb-25">
+            <div className="rounded p-5 pb-25 animate-duration-400 animate-fade-down">
               {activeSection === "feed" && (
                 <div>
                   {posts.length === 0 && <p>Nenhuma publicação ainda...</p>}
                   {posts.map((post) => (
                     <div
                       key={post.id}
-                      className="mb-4 p-4 bg-white rounded-xl shadow cursor-pointer"
+                      className="mb-4 p-4 bg-white rounded-xl shadow cursor-pointer "
                       onClick={() => router.push(`/comments?id=${post.id}`)}
                     >
-                      <p className="text-sm text-gray-500 font-semibold">
+                      <p className="text-sm text-gray-500 font-semibold ">
                         {post.author}
                       </p>
-                      <p className="mb-2 break-words break-all overflow-hidden">
+                      <p className="mb-2 break-words break-all overflow-hidden ">
                         {post.text}
                       </p>
 
@@ -218,11 +218,11 @@ export default function HomePage() {
                         <img
                           src={post.image}
                           alt="Post"
-                          className="rounded-lg max-h-60 object-cover mb-2"
+                          className="rounded-lg max-h-60 object-cover mb-2 "
                         />
                       )}
 
-                      <div className="flex gap-4 items-center text-sm">
+                      <div className="flex gap-4 items-center text-sm ">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();

@@ -62,11 +62,11 @@ export default function CommentsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
+    <div className="min-h-screen bg-gray-100 p-4 ">
       <button onClick={() => router.back()} className="text-[var(--primary-color)] mb-4">← Voltar</button>
 
       {post ? (
-        <div className="bg-white p-4 rounded-lg shadow mb-4">
+        <div className="bg-white p-4 rounded-lg shadow mb-4  ">
           <p className="text-sm text-gray-500 font-semibold">{post.author}</p>
           <p className="mb-2 break-words break-all overflow-hidden">{post.text}</p>
           {post.image && <img src={post.image} alt="Post" className="rounded-lg max-h-60 object-cover" />}
@@ -75,13 +75,13 @@ export default function CommentsPage() {
         <p className="mb-4 text-gray-600">Publicação não encontrada (ou foi removida).</p>
       )}
 
-      <h2 className="text-xl font-bold mb-4">Comentários</h2>
+      <h2 className="text-xl font-bold mb-4 ">Comentários</h2>
 
       {comments.length === 0 && <p>Seja o primeiro a comentar!</p>}
 
       {comments.map((c) => (
-        <div key={c.id} className="bg-white p-3 rounded mb-2 shadow">
-          <p className="text-sm text-gray-500">{c.author}</p>
+        <div key={c.id} className="bg-white p-3 rounded mb-2 shadow animate-duration-400 animate-fade-down">
+          <p className="text-sm text-gray-500 ">{c.author}</p>
           <p>{c.text}</p>
         </div>
       ))}

@@ -52,7 +52,7 @@ export default function HomePage() {
 
       <main className="flex-1 w-full max-w-[24rem] md:max-w-5xl mx-auto px-4 md:px-8 py-6 space-y-10 pb-28 divide-y divide-gray-300">
           {/* Eventos */}
-          <section className="pb-6">
+          <section className="pb-6 ">
             <h2 className="text-xl font-bold mb-2">Eventos</h2>
             <div className="flex gap-4 overflow-x-auto md:overflow-visible md:flex-wrap pb-2">
               {eventos.map((ev) => (

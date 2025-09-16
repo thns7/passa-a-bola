@@ -4,7 +4,7 @@ import HeroImage from "./components/HeroImage";
 export default function Home() {
   return (
     <div className="h-screen w-full">
-      {/* Mobile: Hero em cima + card embaixo */}
+      {/* Mobile*/}
       <div className="md:hidden relative h-full">
         <HeroImage />
         <CardSection
@@ -14,14 +14,14 @@ export default function Home() {
         />
       </div>
 
-      {/* Desktop: layout em duas colunas */}
+      {/* Desktop*/}
       <div className="hidden md:grid grid-cols-2 h-full">
-        {/* Lado esquerdo: Hero */}
+        {/* Lado esquerdo */}
         <div className="flex items-center justify-center bg-[var(--primary-color)]">
           <HeroImage />
         </div>
 
-        {/* Lado direito: Card com título e descrição */}
+        {/* Lado direito:  */}
         <div className="flex items-center justify-center  bg-white p-12">
           <div className="max-w-md">
             <h1 className="text-5xl font-bold mb-6">Bem vindo</h1>
