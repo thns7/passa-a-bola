@@ -6,11 +6,11 @@ Web app feito com **Next.js**, **React** e **Tailwind CSS** para acompanhar o **
 
 ## Participantes - 1ESPZ
 
-- Thiago Do Nascimento
-- Enzo Ozzioli 
-- Gabriel Santos
-- Vinicius Herreira
-- Gustavo Rocha
+- Thiago Do Nascimento RM 561967  
+- Enzo Ozzioli RM 564812  
+- Gabriel Santos RM 562419
+- Vinicius Herreira RM 565662
+- Gustavo Rocha RM 564152
 
 ---
   
