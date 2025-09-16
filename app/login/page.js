@@ -34,7 +34,7 @@ export default function LoginPage() {
 
   return (
     <div className="h-screen w-full">
-      {/* Mobile: Hero em cima + Card embaixo */}
+      {/* Mobile*/}
       <div className="md:hidden relative h-full bg-[var(--primary-color)]">
         <HeroImage />
         <CardSection title="Login" size="base">
@@ -58,14 +58,16 @@ export default function LoginPage() {
         </CardSection>
       </div>
 
-      {/* Desktop: duas colunas */}
+      {/* Desktop */}
       <div className="hidden md:grid grid-cols-2 h-full">
-        {/* Esquerda: Hero */}
+        {/* Esquerda */}
         <div className="bg-[var(--primary-color)] flex items-center justify-center">
-          <HeroImage />
+          <div className=" w-[50vh] ">
+            <HeroImage />
+          </div>
         </div>
 
-        {/* Direita: Formulário alinhado à esquerda */}
+        {/* Direita*/}
         <div className="flex items-center bg-white p-12">
           <div className="max-w-md w-full text-left">
             <h1 className="text-4xl font-bold mb-6">Login</h1>

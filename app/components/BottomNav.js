@@ -1,6 +1,6 @@
-"use client"   // <<== IMPORTANTE PARA USAR useRouter
+"use client"  
 
-import { useRouter } from "next/navigation"  // note que no App Router é navigation, não router
+import { useRouter } from "next/navigation"  
 import { Home, Trophy, Users, User } from "lucide-react"
 
 const BottomNav = ({ activeIndex, onChange }) => {
