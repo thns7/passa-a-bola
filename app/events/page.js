@@ -76,7 +76,7 @@ export default function HomePage() {
                   {index < 2 && (
                     <button
                       onClick={() => router.push(`/events/${ev.id}/inscricao`)}
-                      className="mt-2 w-full bg-purple-600 text-white py-1 rounded text-sm hover:bg-purple-700 transition"
+                      className="mt-2 w-full bg-purple-800 text-white py-1 rounded text-sm hover:bg-purple-700 transition"
                     >
                       Inscreva-se
                     </button>
@@ -112,7 +112,7 @@ export default function HomePage() {
                   {index < 2 && (
                     <button
                       onClick={() => router.push(`/events/${c.id}/inscricao`)}
-                      className="mt-2 w-full bg-purple-600 text-white py-1 rounded text-sm hover:bg-purple-700 transition"
+                      className="mt-2 w-full bg-purple-800 text-white py-1 rounded text-sm hover:bg-purple-700 transition"
                     >
                       Inscreva-se
                     </button>
