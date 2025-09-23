@@ -12,29 +12,41 @@ export default function LoginPage() {
   const router = useRouter();
   const [error, setError] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const form = new FormData(e.target);
-    const email = form.get("email");
-    const password = form.get("password");
+    setError("");
 
-    const users = JSON.parse(localStorage.getItem("users")) || [];
-    const user = users.find(
-      (u) => u.email === email && u.password === password
-    );
+    const form = e.target;
+    const email = form[0].value;
+    const password = form[1].value;
 
-    if (user) {
+    try {
+      const res = await fetch("https://passa-a-bola.onrender.com/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.detail || "Erro ao logar.");
+        return;
+      }
+
+      const data = await res.json();
+      // Salva info do usuário logado (opcional)
       localStorage.setItem("loggedIn", "true");
-      localStorage.setItem("currentUser", JSON.stringify(user));
+      localStorage.setItem("currentUser", JSON.stringify(data.user));
       router.push("/home");
-    } else {
-      setError("Email ou senha inválidos");
+    } catch (err) {
+      console.error(err);
+      setError("Erro de conexão com o servidor.");
     }
   };
 
   return (
     <div className="h-screen w-full">
-      {/* Mobile*/}
+      {/* Mobile */}
       <div className="md:hidden relative h-full bg-[var(--primary-color)]">
         <HeroImage />
         <CardSection title="Login" size="base">
@@ -60,14 +72,12 @@ export default function LoginPage() {
 
       {/* Desktop */}
       <div className="hidden md:grid grid-cols-2 h-full">
-        {/* Esquerda */}
         <div className="bg-[var(--primary-color)] flex items-center justify-center">
           <div className=" w-[50vh] ">
             <HeroImage />
           </div>
         </div>
 
-        {/* Direita*/}
         <div className="flex items-center bg-white p-12">
           <div className="max-w-md w-full text-left">
             <h1 className="text-4xl font-bold mb-6">Login</h1>

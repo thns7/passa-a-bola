@@ -12,7 +12,7 @@ export default function RegisterPage() {
   const router = useRouter();
   const [error, setError] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
@@ -27,17 +27,24 @@ export default function RegisterPage() {
       return;
     }
 
-    const users = JSON.parse(localStorage.getItem("users") || "[]");
+    try {
+      const res = await fetch("https://passa-a-bola.onrender.com/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+      });
 
-    if (users.find((u) => u.email === email)) {
-      setError("Esse email já está registrado.");
-      return;
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.detail || "Erro ao registrar.");
+        return;
+      }
+
+      router.push("/login");
+    } catch (err) {
+      console.error(err);
+      setError("Erro de conexão com o servidor.");
     }
-
-    users.push({ name, email, password });
-    localStorage.setItem("users", JSON.stringify(users));
-
-    router.push("/login");
   };
 
   return (
@@ -70,9 +77,9 @@ export default function RegisterPage() {
 
       {/* Desktop */}
       <div className="hidden md:grid grid-cols-2 h-full">
-        {/* Esquerda*/}
+        {/* Esquerda */}
         <div className="bg-[var(--primary-color)] flex items-center justify-center">
-          <div className=" w-[50vh] ">
+          <div className="w-[50vh]">
             <HeroImage />
           </div>
         </div>
