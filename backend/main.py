@@ -23,7 +23,7 @@ app = FastAPI()
 
 origins = [
     "https://passa-a-bola.onrender.com",
-    "https://passa-a-bola-vz9v.vercel.app/",
+    "https://passa-a-bola-vz9v.vercel.app",
     "http://localhost:3000"
 ]
 
