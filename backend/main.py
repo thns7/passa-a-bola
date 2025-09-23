@@ -20,17 +20,19 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 # FastAPI
 app = FastAPI()
 
-from fastapi.middleware.cors import CORSMiddleware
 
-
+origins = [
+    "https://passa-a-bola.onrender.com",
+    "http://localhost:3000"
+]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://passa-a-bola.onrender.com"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-)
+) 
 
 # Hash de senha
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
