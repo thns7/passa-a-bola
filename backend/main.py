@@ -23,6 +23,7 @@ app = FastAPI()
 from fastapi.middleware.cors import CORSMiddleware
 
 origins = [
+    "https://passa-a-bola-vz9v.vercel.app/",
     "https://passa-a-bola.onrender.com",
     "http://localhost:3000"
 ]
