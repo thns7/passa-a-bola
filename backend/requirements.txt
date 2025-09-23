@@ -3,7 +3,6 @@ anyio==4.10.0
 auto-py-to-exe==2.45.1
 bottle==0.13.2
 bottle-websocket==0.2.9
-cefpython3==66.1
 certifi==2024.12.14
 cffi==1.17.1
 charset-normalizer==3.4.0
@@ -61,4 +60,5 @@ python-dotenv
 supabase
 passlib[bcrypt]
 pydantic[email]
+
 
