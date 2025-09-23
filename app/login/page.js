@@ -21,7 +21,7 @@ export default function LoginPage() {
     const password = form[1].value;
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/login", {
+      const res = await fetch("https://passa-a-bola.onrender.com/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

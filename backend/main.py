@@ -4,6 +4,7 @@ from supabase import create_client, Client
 import os
 from dotenv import load_dotenv
 from passlib.context import CryptContext
+from fastapi.middleware.cors import CORSMiddleware
 
 # Carrega variáveis do .env
 load_dotenv()
@@ -21,17 +22,14 @@ app = FastAPI()
 
 from fastapi.middleware.cors import CORSMiddleware
 
-origins = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000"
-]
+
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,       # quem pode acessar
+    allow_origins=["https://passa-a-bola.onrender.com"],
     allow_credentials=True,
-    allow_methods=["*"],         # permite GET, POST, OPTIONS etc
-    allow_headers=["*"],         # permite todos os headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Hash de senha

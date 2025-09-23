@@ -28,7 +28,7 @@ export default function RegisterPage() {
     }
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/register", {
+      const res = await fetch("https://passa-a-bola.onrender.com/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password }),
