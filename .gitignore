@@ -36,7 +36,7 @@ yarn-error.log*
 .env.development.local
 .env.test.local
 .env.production.local
-backend/.env   # 🔑 garante que o .env do backend não vai pro GitHub
+backend/.env 
 
 # vercel
 .vercel
