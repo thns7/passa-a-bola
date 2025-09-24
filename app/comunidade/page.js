@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import Script from "next/script";
 import BottomNav from "../components/BottomNav";
 import Header from "../components/Header";
 
@@ -106,16 +107,11 @@ export default function HomePage() {
     const newPosts = posts.map((post) => {
       if (post.id === postId) {
         const alreadyLiked = post.likedBy?.includes(currentUser.name);
-
         const updatedLikedBy = alreadyLiked
           ? post.likedBy.filter((u) => u !== currentUser.name)
           : [...(post.likedBy || []), currentUser.name];
 
-        return {
-          ...post,
-          likedBy: updatedLikedBy,
-          likes: updatedLikedBy.length,
-        };
+        return { ...post, likedBy: updatedLikedBy, likes: updatedLikedBy.length };
       }
       return post;
     });
@@ -137,7 +133,15 @@ export default function HomePage() {
 
   return (
     <div className="bg-[#F0F0F0] min-h-screen flex flex-col">
-      
+
+      {/* Script global do AdSense */}
+      <Script
+        async
+        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6447246104244403"
+        crossOrigin="anonymous"
+        strategy="afterInteractive"
+      />
+
       {!user ? (
         <div className="flex items-center justify-center h-screen">
           Carregando...
@@ -153,43 +157,10 @@ export default function HomePage() {
               onClick={() => setShowPostModal(true)}
             />
           </header>
+
           <div className="hidden md:block">
             <Header name={user.name || "Usuário"} />
-
-            {/* Barra abaixo do Header */}
-            <div className="md:hidden flex justify-between items-center  mx-8">
-              <h1 className="text-2xl font-bold">Comunidade</h1>
-              <img
-                src="/svgs/tabler_plus.svg"
-                alt="Novo Post"
-                className="h-6 cursor-pointer"
-                onClick={() => setShowPostModal(true)}
-              />
-            </div>
           </div>
-
-
-          <section className="flex md:hidden bg-[#E5E5E5] rounded-[3vh] h-9.5 mt-4 md:mt-30 mr-8 ml-9 items-center">
-            <input
-              type="text"
-              placeholder="Pesquise por usuários, ou clubes"
-              className="flex ml-3 w-[150%] pl-7 border-0 bg-no-repeat bg-left bg-[url('/svgs/Pesquisa.svg')] focus:outline-none"
-            />
-          </section>
-
-          <section className="hidden md:flex  rounded-[3vh] h-9.5 mt-30 mr-8 ml-9 items-center">
-            <img
-                src="/svgs/tabler_plus.svg"
-                alt="+"
-                className="h-6 cursor-pointer"
-                onClick={() => setShowPostModal(true)}
-              />
-            <input
-              type="text"
-              placeholder="Pesquise por usuários, ou clubes"
-              className="flex bh ml-5 w-[150%] pl-10 bg-[#E5E5E5]  rounded-[3vh] h-[4vh] border-0 bg-no-repeat bg-[left_1vh_center] bg-[url('/svgs/Pesquisa.svg')] focus:outline-none"
-            />
-          </section>
 
           <section className="mt-0 p-4 w-full">
             <div className="flex mb-4">
@@ -215,48 +186,60 @@ export default function HomePage() {
               {activeSection === "feed" && (
                 <div>
                   {posts.length === 0 && <p>Nenhuma publicação ainda...</p>}
-                  {posts.map((post) => (
-                    <div
-                      key={post.id}
-                      className="mb-4 p-4 bg-white rounded-xl shadow cursor-pointer "
-                      onClick={() => router.push(`/comments?id=${post.id}`)}
-                    >
-                      <p className="text-sm text-gray-500 font-semibold ">
-                        {post.author}
-                      </p>
-                      <p className="mb-2 break-words break-all overflow-hidden ">
-                        {post.text}
-                      </p>
+                  {posts.map((post, index) => (
+                    <div key={post.id}>
+                      <div
+                        className="mb-4 p-4 bg-white rounded-xl shadow cursor-pointer"
+                        onClick={() => router.push(`/comments?id=${post.id}`)}
+                      >
+                        <p className="text-sm text-gray-500 font-semibold">{post.author}</p>
+                        <p className="mb-2 break-words break-all overflow-hidden">{post.text}</p>
 
-                      {post.image && (
-                        <img
-                          src={post.image}
-                          alt="Post"
-                          className="max-w-md m-auto rounded-lg max-h-60 object-cover mb-2 "
-                        />
-                      )}
+                        {post.image && (
+                          <img
+                            src={post.image}
+                            alt="Post"
+                            className="max-w-md m-auto rounded-lg max-h-60 object-cover mb-2"
+                          />
+                        )}
 
-                      <div className="flex gap-4 items-center text-sm ">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleLike(post.id);
-                          }}
-                          className="flex items-center gap-1 focus:outline-none"
-                        >
-                          {post.likedBy?.includes(
-                            JSON.parse(localStorage.getItem("currentUser"))?.name
-                          ) ? (
-                            <span className="text-red-600 text-xl">❤️</span>
-                          ) : (
-                            <span className="text-gray-400 text-xl">🤍</span>
-                          )}
-                          <span>{post.likes || 0}</span>
-                        </button>
-                        <span className="text-gray-500">
-                          💬 {getCommentsCount(post.id)} comentários
-                        </span>
+                        <div className="flex gap-4 items-center text-sm">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleLike(post.id);
+                            }}
+                            className="flex items-center gap-1 focus:outline-none"
+                          >
+                            {post.likedBy?.includes(user.name) ? (
+                              <span className="text-red-600 text-xl">❤️</span>
+                            ) : (
+                              <span className="text-gray-400 text-xl">🤍</span>
+                            )}
+                            <span>{post.likes || 0}</span>
+                          </button>
+                          <span className="text-gray-500">
+                            💬 {getCommentsCount(post.id)} comentários
+                          </span>
+                        </div>
                       </div>
+
+                      {/* Inserir AdSense a cada 3 posts */}
+                      {index % 3 === 2 && (
+                        <div className="my-4">
+                          <ins
+                            className="adsbygoogle"
+                            style={{ display: "block" }}
+                            data-ad-client="ca-pub-6447246104244403"
+                            data-ad-slot="1234567890" // substitua pelo seu bloco
+                            data-ad-format="auto"
+                            data-full-width-responsive="true"
+                          ></ins>
+                          <Script id={`adsense-${post.id}`} strategy="afterInteractive">
+                            {`(adsbygoogle = window.adsbygoogle || []).push({});`}
+                          </Script>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
