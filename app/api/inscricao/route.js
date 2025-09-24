@@ -1,4 +1,3 @@
-// app/api/inscricao/route.js
 import nodemailer from "nodemailer";
 
 export async function POST(req) {
