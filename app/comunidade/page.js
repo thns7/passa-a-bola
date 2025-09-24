@@ -6,6 +6,7 @@ import Script from "next/script";
 import BottomNav from "../components/BottomNav";
 import Header from "../components/Header";
 
+
 export default function HomePage() {
   const [active, setActive] = useState(2);
   const [activeSection, setActiveSection] = useState("feed");
@@ -134,13 +135,7 @@ export default function HomePage() {
   return (
     <div className="bg-[#F0F0F0] min-h-screen flex flex-col">
 
-      {/* Script global do AdSense */}
-      <Script
-        async
-        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6447246104244403"
-        crossOrigin="anonymous"
-        strategy="afterInteractive"
-      />
+      
 
       {!user ? (
         <div className="flex items-center justify-center h-screen">
