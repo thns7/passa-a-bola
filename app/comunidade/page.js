@@ -494,7 +494,7 @@ export default function CommunityPage() {
 
       {/* Modal de criar post */}
       {showPostModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
+        <div className="fixed inset-0 bg-[var(--black-opacity)] flex justify-center items-center z-50 p-4">
           <div className="bg-white p-6 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
             <h2 className="text-lg font-bold mb-3">Nova Publicação</h2>
             <textarea

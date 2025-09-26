@@ -272,5 +272,5 @@ class FootballServiceHybrid:
         
         return matches
 
-# ✅ Instância global
+
 football_service = FootballServiceHybrid()
