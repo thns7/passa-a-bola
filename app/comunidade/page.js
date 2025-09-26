@@ -358,7 +358,7 @@ export default function CommunityPage() {
               </div>
               {searchTerm && (
                 <p className="text-gray-600 mb-4 text-center">
-                  {filteredPosts.length} resultado(s) para "{searchTerm}"
+                  {filteredPosts.length} resultado(s) para &quot;{searchTerm}&quot;
                 </p>
               )}
               
