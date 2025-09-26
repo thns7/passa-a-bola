@@ -6,7 +6,7 @@ import Header from "../components/Header";
 import BottomNav from "../components/BottomNav";
 import Script from "next/script";
 
-const API_BASE_URL = "http://localhost:8000"; // Trocar para o URL real da API
+const API_BASE_URL = "https://passa-a-bola.onrender.com"; // Trocar para o URL real da API
 const MAX_POST_LENGTH = 500;
 
 export default function CommunityPage() {
@@ -274,48 +274,17 @@ export default function CommunityPage() {
       </header>
 
       {/* Desktop Header */}
-      <div className="hidden md:block">
+      <div className="hidden md:block mt-17">
         <Header name={user.name || "Usuário"} />
         
-        {/* Barra de pesquisa e botão de criar post - DESKTOP */}
-        <div className="block md:mt-22 bg-white p-4 shadow-sm">
-          <div className="max-w-4xl mx-auto flex gap-4 items-center">
-            {/* Barra de pesquisa */}
-            <div className="flex-1 relative">
-              <input
-                type="text"
-                placeholder="Pesquisar publicações..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]"
-              />
-              {searchTerm && (
-                <button
-                  onClick={() => setSearchTerm("")}
-                  className="absolute right-3 top-3 text-gray-500 hover:text-gray-700"
-                >
-                  ✕
-                </button>
-              )}
-            </div>
-            
-            {/* Botão de criar post - DESKTOP */}
-            <button
-              onClick={() => setShowPostModal(true)}
-              className="bg-[var(--primary-color)] text-white px-6 py-3 rounded-lg flex items-center gap-2 hover:bg-opacity-90"
-            >
-              <span>+</span>
-              <span>Nova Publicação</span>
-            </button>
-          </div>
-        </div>
+    
       </div>
 
-      <section className="mt-0 p-4 w-full flex-1">
-        <div className="flex mb-4">
+      <section className=" mt-0 p-4 w-full flex-1">
+        <div className="flex justify-center md:gap-130 mb-4">
           <button
             onClick={() => setActiveSection("feed")}
-            className={`m-auto w-40 h-10 ${
+            className={` w-40 h-10 ${
               activeSection === "feed" ? "border-b-2 border-[var(--primary-color)] text-[var(--primary-color)] font-semibold" : "text-gray-600"
             }`}
           >
@@ -323,7 +292,7 @@ export default function CommunityPage() {
           </button>
           <button
             onClick={() => setActiveSection("amigos")}
-            className={`m-auto w-40 h-10 ${
+            className={` w-40 h-10 ${
               activeSection === "amigos" ? "border-b-2 border-[var(--primary-color)] text-[var(--primary-color)] font-semibold" : "text-gray-600"
             }`}
           >
@@ -355,6 +324,38 @@ export default function CommunityPage() {
         <div className="max-w-4xl mx-auto">
           {activeSection === "feed" && (
             <div>
+              {/* Barra de pesquisa e botão de criar post - DESKTOP */}
+              <div className="hidden md:block  p-4">
+                <div className="max-w-4xl mx-auto flex gap-4 items-center">
+                  {/* Botão de criar post - DESKTOP */}
+                  <button
+                    onClick={() => setShowPostModal(true)}
+                    className="bg-[var(--primary-color)] text-white px-3 py-3 rounded-lg flex items-center gap-2 hover:bg-opacity-90"
+                  >
+                    <span>+</span>
+                    <span>Nova Publicação</span>
+                  </button>
+                  {/* Barra de pesquisa */}
+                  <div className="flex-1 relative">
+                    <input
+                      type="text"
+                      placeholder="Pesquisar publicações..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]"
+                    />
+                    {searchTerm && (
+                      <button
+                        onClick={() => setSearchTerm("")}
+                        className="absolute right-3 top-3 text-gray-500 hover:text-gray-700"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                
+                </div>
+              </div>
               {searchTerm && (
                 <p className="text-gray-600 mb-4 text-center">
                   {filteredPosts.length} resultado(s) para "{searchTerm}"
