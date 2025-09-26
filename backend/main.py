@@ -5,9 +5,15 @@ import os
 from dotenv import load_dotenv
 from passlib.context import CryptContext
 from fastapi.middleware.cors import CORSMiddleware
+import sys
+
+
+backend_path = os.path.join(os.path.dirname(__file__))
+if backend_path not in sys.path:
+    sys.path.insert(0, backend_path)
+
+
 from services.football_service_hybrid import football_service
-
-
 
 load_dotenv()
 SUPABASE_URL = os.getenv("SUPABASE_URL")
@@ -19,7 +25,6 @@ if not SUPABASE_URL or not SUPABASE_KEY:
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 app = FastAPI()
-
 
 @app.get("/")
 def read_root():
@@ -50,20 +55,8 @@ class LoginData(BaseModel):
     email: EmailStr
     password: str
 
-@app.options("/login")
-async def login_options():
-    return {"message": "OK"}
-
-@app.options("/register")
-async def register_options():
-    return {"message": "OK"}
-
-@app.options("/api/matches/live")
-async def live_options():
-    return {"message": "OK"}
-
-@app.options("/api/matches/upcoming")
-async def upcoming_options():
+@app.options("/{path:path}")
+async def options_handler(path: str):
     return {"message": "OK"}
 
 @app.post("/register")
@@ -94,7 +87,6 @@ def login(data: LoginData):
 
     user.pop("password", None)
     return {"message": "Login OK", "user": user}
-
 
 @app.get("/api/matches/live")
 async def get_live_matches():
