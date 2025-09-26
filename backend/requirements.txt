@@ -1,4 +1,4 @@
-# remove pywin32 (não funciona no 3.13)
+﻿# remove pywin32 (não funciona no 3.13)
 # remove pacotes antigos do numpy se der conflito
 # deixa fastapi, uvicorn, python-dotenv, supabase, passlib[bcrypt] atualizados
 fastapi[all]
@@ -8,4 +8,5 @@ supabase
 bcrypt==3.2.0
 pydantic[email]
 passlib==1.7.4
+python-multipart==0.0.6
 python-multipart==0.0.6

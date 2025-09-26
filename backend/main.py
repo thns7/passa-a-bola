@@ -7,6 +7,8 @@ from passlib.context import CryptContext
 from fastapi.middleware.cors import CORSMiddleware
 from services.football_service_hybrid import football_service
 
+
+
 load_dotenv()
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
@@ -18,6 +20,7 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 app = FastAPI()
 
+
 @app.get("/")
 def read_root():
     return {"message": "API do Passa a Bola funcionando!"}
@@ -25,6 +28,11 @@ def read_root():
 origins = [
     "https://passa-a-bola-vz9v.vercel.app/",
     "https://passa-a-bola.onrender.com",
+=======
+
+origins = [
+    "https://passa-a-bola.onrender.com",
+    "https://passa-a-bola-vz9v.vercel.app",
     "http://localhost:3000"
 ]
 
@@ -35,6 +43,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class User(BaseModel):
@@ -90,6 +99,7 @@ def login(data: LoginData):
 
     user.pop("password", None)
     return {"message": "Login OK", "user": user}
+
 
 @app.get("/api/matches/live")
 async def get_live_matches():
