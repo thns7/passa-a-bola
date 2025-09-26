@@ -1,19 +1,26 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { Menu, Home, Trophy, Users, User, X } from "lucide-react";
 
 export default function Header({ name }) {
   const [search, setSearch] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [activePage, setActivePage] = useState("");
   const router = useRouter();
+  const pathname = usePathname(); // Hook para pegar a rota atual
 
   const items = [
-    { icon: <Home size={24} />, label: "Home", href: "/home" },
-    { icon: <Trophy size={24} />, label: "Torneios", href: "/events" },
-    { icon: <Users size={24} />, label: "Comunidade", href: "/comunidade" },
-    { icon: <User size={24} />, label: "Perfil", href: "/perfil" },
+    { icon: <Home size={24} />, label: "", href: "/home" },
+    { icon: <Trophy size={24} />, label: "", href: "/events" },
+    { icon: <Users size={24} />, label: "", href: "/comunidade" },
+    { icon: <User size={24} />, label: "", href: "/perfil" },
   ];
+
+  // Detecta qual página está ativa baseado na rota atual
+  useEffect(() => {
+    setActivePage(pathname);
+  }, [pathname]);
 
   const handleClickOutside = (event) => {
     if (menuOpen && !event.target.closest("#desktop-menu")) {
@@ -52,48 +59,55 @@ export default function Header({ name }) {
       </div>
 
       {/* Desktop */}
-      <div className="hidden md:flex fixed top-0 left-0 right-0 animate-duration-500 animate-fade-down items-center justify-between bg-[var(--primary-color)] text-white p-6 z-50">
+      <div className="hidden md:flex fixed top-0 left-0 right-0 animate-duration-500 animate-fade-down justify-between items-center bg-white shadow text-white p-2.5 z-50">
 
-      <input
-        type="text"
-        placeholder="Pesquisar partidas, notícias..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="w-1/2 px-5 py-2 rounded-lg bg-white text-black focus:outline-none animate-duration-700 animate-fade-down"
-      />
+        {/* Barra de pesquisa na esquerda */}
+        <div className="w-80 px-2 py-3 rounded-[10vh] bg-[#F0F0F0] flex items-center">
+          <img
+            src="/search_logo_black.png"
+            alt="Lupa de Pesquisa"
+            className="opacity-40 h-3.5 ml-2"
+          />
+          <input
+            type="text"
+            placeholder="Pesquisar partidas, notícias..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full bg-transparent text-black focus:outline-none animate-duration-700 animate-fade-down ml-2 truncate overflow-ellipsis whitespace-nowrap"
+          />
+        </div>
 
-      {/* Menu hamburguer */}
-      <div className="relative">
-        <button onClick={() => setMenuOpen(!menuOpen)}>
-          {menuOpen ? <X size={28} /> : <Menu size={28} />}
-        </button>
-
-        {menuOpen && (
-          <div className="fixed inset-0 flex bg-[var(--black-opacity)] h-screen animate-duration-400 animate-fade-down">
-          
-            {/* Menu lateral */}
-            <div
-              id="desktop-menu"
-              className="relative ml-auto w-64 bg-white h-screen shadow-lg flex flex-col p-6 space-y-4"
-            >
-              {items.map((item, index) => (
+        {/* Menu absolutamente centralizado */}
+        <div className="absolute left-1/2 transform -translate-x-1/2">
+          <div className="flex items-center gap-15">
+            {items.map((item, index) => {
+              const isActive = activePage === item.href;
+              return (
                 <button
                   key={index}
-                  className="flex items-center gap-3 w-full px-4 py-3 hover:bg-gray-100 rounded-lg index-10 text-black"
-                  onClick={() => {
-                    router.push(item.href);
-                    setMenuOpen(false);
-                  }}
+                  className={`flex flex-col items-center gap-1 px-7 py-2 rounded-lg transition-all duration-200 relative ${
+                    isActive 
+                      ? 'text-[var(--primary-color)] cursor-default' 
+                      : 'text-black hover:bg-gray-100 cursor-pointer'
+                  }`}
+                  onClick={() => !isActive && router.push(item.href)}
                 >
                   {item.icon}
                   <span>{item.label}</span>
+                  
+                  {/* Linha roxa embaixo da página ativa */}
+                  {isActive && (
+                    <div className="absolute -bottom-3 left-0 right-0 h-1 bg-[var(--primary-color)] rounded-full"></div>
+                  )}
                 </button>
-              ))}
-            </div>
+              );
+            })}
           </div>
-        )}
+        </div>
+
+        {/* Espaço vazio na direita para balancear */}
+        <div className="w-1/6"></div>
       </div>
-    </div>
     </header>
   );
 }

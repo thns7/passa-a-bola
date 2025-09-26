@@ -6,8 +6,9 @@ import os
 from dotenv import load_dotenv
 from passlib.context import CryptContext
 from fastapi.middleware.cors import CORSMiddleware
+from typing import List, Optional
+import base64
 import sys
-
 
 backend_path = os.path.join(os.path.dirname(__file__))
 if backend_path not in sys.path:
@@ -56,6 +57,18 @@ class LoginData(BaseModel):
     email: EmailStr
     password: str
 
+class PostCreate(BaseModel):
+    content: str
+    user_id: str
+    user_email: str
+    user_name: str
+    image: Optional[str] = None
+
+class LikeRequest(BaseModel):
+    user_id: str
+    post_id: str
+
+
 @app.options("/{path:path}")
 async def options_handler(path: str):
     return {"message": "OK"}
@@ -73,21 +86,141 @@ def register(user: User):
         "password": hashed_password
     }).execute()
 
-    return {"message": "Usuário registrado com sucesso", "user": res.data}
+class PostUpdate(BaseModel):
+    content: str
 
+
+    
 @app.post("/login")
 def login(data: LoginData):
-    result = supabase.table("users").select("*").eq("email", data.email).execute()
-    user = result.data[0] if result.data else None
+    try:
+        result = supabase.table("users").select("*").eq("email", data.email).execute()
+        user = result.data[0] if result.data else None
 
-    if not user:
-        raise HTTPException(status_code=400, detail="Email ou senha inválidos.")
+        if not user:
+            raise HTTPException(status_code=400, detail="Email ou senha inválidos.")
 
-    if not pwd_context.verify(data.password, user["password"]):
-        raise HTTPException(status_code=400, detail="Email ou senha inválidos.")
+        if not pwd_context.verify(data.password, user["password"]):
+            raise HTTPException(status_code=400, detail="Email ou senha inválidos.")
 
-    user.pop("password", None)
-    return {"message": "Login OK", "user": user}
+        user.pop("password", None)
+        return {"message": "Login OK", "user": user}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro interno: {str(e)}")
+
+# Rotas para posts
+@app.post("/posts")
+def create_post(post: PostCreate):
+    try:
+        result = supabase.table("posts").insert({
+            "content": post.content,
+            "user_id": post.user_id,
+            "user_email": post.user_email,
+            "user_name": post.user_name,
+            "likes_count": 0,
+            "image": post.image
+        }).execute()
+        
+        if not result.data:
+            raise HTTPException(status_code=400, detail="Erro ao criar post")
+            
+        return result.data[0]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro interno: {str(e)}")
+
+@app.get("/posts")
+def get_posts():
+    try:
+        result = supabase.table("posts").select("*").order("created_at", desc=True).execute()
+        return result.data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao buscar posts: {str(e)}")
+
+@app.get("/posts/{post_id}/likes")
+def get_post_likes(post_id: str):
+    try:
+        result = supabase.table("post_likes").select("user_id").eq("post_id", post_id).execute()
+        return {"likes": [like["user_id"] for like in result.data]}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao buscar likes: {str(e)}")
+
+@app.post("/posts/like")
+def toggle_like(like: LikeRequest):
+    try:
+        # Verificar se o like já existe
+        existing_like = supabase.table("post_likes").select("*").eq("post_id", like.post_id).eq("user_id", like.user_id).execute()
+        
+        if existing_like.data:
+            # Remover like
+            supabase.table("post_likes").delete().eq("post_id", like.post_id).eq("user_id", like.user_id).execute()
+            # Atualizar contador
+            current_post = supabase.table("posts").select("likes_count").eq("id", like.post_id).execute()
+            if current_post.data:
+                new_count = current_post.data[0]["likes_count"] - 1
+                supabase.table("posts").update({"likes_count": new_count}).eq("id", like.post_id).execute()
+            action = "removed"
+        else:
+            # Adicionar like
+            supabase.table("post_likes").insert({
+                "post_id": like.post_id,
+                "user_id": like.user_id
+            }).execute()
+            # Atualizar contador
+            current_post = supabase.table("posts").select("likes_count").eq("id", like.post_id).execute()
+            if current_post.data:
+                new_count = current_post.data[0]["likes_count"] + 1
+                supabase.table("posts").update({"likes_count": new_count}).eq("id", like.post_id).execute()
+            action = "added"
+        
+        # Buscar likes atualizados para este post
+        likes_result = supabase.table("post_likes").select("user_id").eq("post_id", like.post_id).execute()
+        liked_users = [like["user_id"] for like in likes_result.data] if likes_result.data else []
+        
+        # Retornar post atualizado
+        updated_post = supabase.table("posts").select("*").eq("id", like.post_id).execute()
+        return {
+            "action": action, 
+            "post": updated_post.data[0] if updated_post.data else None,
+            "liked_users": liked_users
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao processar like: {str(e)}")
+
+@app.put("/posts/{post_id}")
+def update_post(post_id: str, post_update: PostUpdate):
+    try:
+        result = supabase.table("posts").update({
+            "content": post_update.content
+        }).eq("id", post_id).execute()
+        
+        if not result.data:
+            raise HTTPException(status_code=404, detail="Post não encontrado")
+            
+        return result.data[0]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao atualizar post: {str(e)}")
+
+@app.delete("/posts/{post_id}")
+def delete_post(post_id: str):
+    try:
+        # Primeiro deletar os likes associados
+        supabase.table("post_likes").delete().eq("post_id", post_id).execute()
+        
+        # Depois deletar o post
+        result = supabase.table("posts").delete().eq("id", post_id).execute()
+        
+        if not result.data:
+            raise HTTPException(status_code=404, detail="Post não encontrado")
+            
+        return {"message": "Post deletado com sucesso"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao deletar post: {str(e)}")
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
+
 
 @app.get("/api/matches/live")
 async def get_live_matches():
@@ -134,4 +267,3 @@ async def get_api_status():
         "mode": "premium" if football_service.has_premium_access else "free",
         "message": "API Premium ativa" if football_service.has_premium_access else "Usando dados mockados"
     }
-
