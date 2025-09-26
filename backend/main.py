@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+import httpx
 from pydantic import BaseModel, EmailStr
 from supabase import create_client, Client
 import os
@@ -7,6 +8,14 @@ from passlib.context import CryptContext
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
 import base64
+import sys
+
+backend_path = os.path.join(os.path.dirname(__file__))
+if backend_path not in sys.path:
+    sys.path.insert(0, backend_path)
+
+
+from services.football_service_hybrid import football_service
 
 load_dotenv()
 SUPABASE_URL = os.getenv("SUPABASE_URL")
@@ -16,7 +25,12 @@ if not SUPABASE_URL or not SUPABASE_KEY:
     raise RuntimeError("SUPABASE_URL e SUPABASE_KEY não estão definidos no .env")
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
 app = FastAPI()
+
+@app.get("/")
+def read_root():
+    return {"message": "API do Passa a Bola funcionando!"}
 
 origins = [
     "https://passa-a-bola.onrender.com",
@@ -30,11 +44,10 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-) 
+)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# Models
 class User(BaseModel):
     name: str
     email: EmailStr
@@ -55,29 +68,29 @@ class LikeRequest(BaseModel):
     user_id: str
     post_id: str
 
+
+@app.options("/{path:path}")
+async def options_handler(path: str):
+    return {"message": "OK"}
+
+@app.post("/register")
+def register(user: User):
+    existing = supabase.table("users").select("*").eq("email", user.email).execute()
+    if existing.data:
+        raise HTTPException(status_code=400, detail="Email já registrado.")
+
+    hashed_password = pwd_context.hash(user.password)
+    res = supabase.table("users").insert({
+        "name": user.name,
+        "email": user.email,
+        "password": hashed_password
+    }).execute()
+
 class PostUpdate(BaseModel):
     content: str
 
-# Rotas existentes de autenticação
-@app.post("/register")
-def register(user: User):
-    try:
-        existing = supabase.table("users").select("*").eq("email", user.email).execute()
-        if existing.data:
-            raise HTTPException(status_code=400, detail="Email já registrado.")
 
-        hashed_password = pwd_context.hash(user.password)
-
-        res = supabase.table("users").insert({
-            "name": user.name,
-            "email": user.email,
-            "password": hashed_password
-        }).execute()
-
-        return {"message": "Usuário registrado com sucesso", "user": res.data[0] if res.data else None}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erro interno: {str(e)}")
-
+    
 @app.post("/login")
 def login(data: LoginData):
     try:
@@ -204,10 +217,53 @@ def delete_post(post_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao deletar post: {str(e)}")
 
-@app.get("/")
-def read_root():
-    return {"message": "API está funcionando!", "status": "online"}
-
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
+
+
+@app.get("/api/matches/live")
+async def get_live_matches():
+    try:
+        result = await football_service.get_live_matches()
+        return {
+            "success": True,
+            "data": result["data"],
+            "count": len(result["data"]),
+            "source": result["source"],
+            "mode": "premium" if football_service.has_premium_access else "free"
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "data": [],
+            "source": "error"
+        }
+
+@app.get("/api/matches/upcoming")
+async def get_upcoming_matches():
+    try:
+        result = await football_service.get_upcoming_matches()
+        return {
+            "success": True,
+            "data": result["data"],
+            "count": len(result["data"]),
+            "source": result["source"],
+            "mode": "premium" if football_service.has_premium_access else "free"
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "data": [],
+            "source": "error"
+        }
+
+@app.get("/api/status")
+async def get_api_status():
+    return {
+        "has_premium_access": football_service.has_premium_access,
+        "mode": "premium" if football_service.has_premium_access else "free",
+        "message": "API Premium ativa" if football_service.has_premium_access else "Usando dados mockados"
+    }
