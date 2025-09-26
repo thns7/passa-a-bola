@@ -8,57 +8,110 @@ export default function MatchDetails() {
   const router = useRouter();
   const [match, setMatch] = useState(undefined);
   const [tab, setTab] = useState("status");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const stored = localStorage.getItem("matches");
-    if (!stored) {
-      setMatch(null);
-      return;
-    }
+    const fetchMatchDetails = async () => {
+      try {
+        setLoading(true);
+        
+        // ✅ Busca da API (sistema híbrido)
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        const response = await fetch(`${API_URL}/api/matches/${id}`);
+        const data = await response.json();
+        
+        if (data.success && data.data) {
+          // Se encontrou na API, usa esses dados
+          setMatch(formatMatchData(data.data));
+        } else {
+          // Se não encontrou, tenta o localStorage como fallback
+          const stored = localStorage.getItem("matches");
+          if (stored) {
+            const matches = JSON.parse(stored);
+            const localMatch = matches.find((x) => String(x.id) === String(id));
+            setMatch(localMatch || null);
+          } else {
+            setMatch(null);
+          }
+        }
+      } catch (error) {
+        console.error("Erro ao buscar detalhes da partida:", error);
+        // Fallback para localStorage
+        try {
+          const stored = localStorage.getItem("matches");
+          if (stored) {
+            const matches = JSON.parse(stored);
+            const localMatch = matches.find((x) => String(x.id) === String(id));
+            setMatch(localMatch || null);
+          } else {
+            setMatch(null);
+          }
+        } catch (err) {
+          setMatch(null);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    try {
-      const matches = JSON.parse(stored);
-      const m = matches.find((x) => String(x.id) === String(id));
-      setMatch(m ?? null);
-    } catch (err) {
-      console.error("Erro ao parsear matches do localStorage:", err);
-      setMatch(null);
-    }
+    fetchMatchDetails();
   }, [id]);
 
+  // Função para formatar dados da API para o formato do componente
+  const formatMatchData = (apiMatch) => {
+    return {
+      id: apiMatch.fixture.id,
+      campeonato: apiMatch.league.name,
+      timeCasa: apiMatch.teams.home.name,
+      timeVisitante: apiMatch.teams.away.name,
+      logoCasa: apiMatch.teams.home.logo,
+      logoVisitante: apiMatch.teams.away.logo,
+      placarCasa: apiMatch.goals.home ?? 0,
+      placarVisitante: apiMatch.goals.away ?? 0,
+      tempo: apiMatch.fixture.status.elapsed ? `${apiMatch.fixture.status.elapsed}′` : "0′",
+      data: new Date(apiMatch.fixture.date).toLocaleDateString('pt-BR'),
+      hora: new Date(apiMatch.fixture.date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+      // ✅ Dados mockados para estatísticas (já que a API free não tem)
+      stats: {
+        chutes: [Math.floor(Math.random() * 10) + 5, Math.floor(Math.random() * 10) + 3],
+        chutesAoGol: [Math.floor(Math.random() * 5) + 2, Math.floor(Math.random() * 5) + 1],
+        posse: [`${Math.floor(Math.random() * 30) + 35}%`, `${Math.floor(Math.random() * 30) + 35}%`],
+        passes: [Math.floor(Math.random() * 200) + 300, Math.floor(Math.random() * 200) + 250],
+        precisao: [`${Math.floor(Math.random() * 20) + 75}%`, `${Math.floor(Math.random() * 20) + 70}%`],
+        faltas: [Math.floor(Math.random() * 10) + 5, Math.floor(Math.random() * 10) + 5],
+        amarelos: [Math.floor(Math.random() * 3), Math.floor(Math.random() * 3)],
+        vermelhos: [Math.floor(Math.random() * 1), Math.floor(Math.random() * 1)],
+        impedimentos: [Math.floor(Math.random() * 4), Math.floor(Math.random() * 4)],
+        escanteios: [Math.floor(Math.random() * 6) + 2, Math.floor(Math.random() * 6) + 1],
+      }
+    };
+  };
 
-  if (match === undefined) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <p>Carregando...</p>
+        <p>Carregando detalhes da partida...</p>
       </div>
     );
   }
-
 
   if (match === null) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <p>Partida não encontrada</p>
+        <div className="text-center">
+          <p className="text-xl mb-4">Partida não encontrada</p>
+          <button 
+            onClick={() => router.push("/home")}
+            className="bg-[var(--primary-color)] text-white px-4 py-2 rounded"
+          >
+            Voltar para a Home
+          </button>
+        </div>
       </div>
     );
   }
 
-
-  const defaultStats = {
-    chutes: [0, 0],
-    chutesAoGol: [0, 0],
-    posse: ["0%", "0%"],
-    passes: [0, 0],
-    precisao: ["0%", "0%"],
-    faltas: [0, 0],
-    amarelos: [0, 0],
-    vermelhos: [0, 0],
-    impedimentos: [0, 0],
-    escanteios: [0, 0],
-  };
-
-  const stats = { ...defaultStats, ...(match.stats || {}) };
+  const stats = match.stats || {};
 
   return (
     <div className="bg-gray-100 min-h-screen">
@@ -86,6 +139,7 @@ export default function MatchDetails() {
             <span className="mt-1 text-xs bg-gray-200 px-2 py-0.5 rounded md:text-sm">
               {match.tempo}
             </span>
+            <span className="text-xs text-gray-500 mt-1">{match.data} - {match.hora}</span>
           </div>
 
           <div className="flex flex-col items-center md:items-end md:gap-2">
@@ -158,11 +212,21 @@ export default function MatchDetails() {
             </div>
           )}
 
-          {tab === "escalacao" && <p className="text-sm md:text-base text-gray-500">Aqui entraria a escalação dos times.</p>}
-          {tab === "sumario" && <p className="text-sm md:text-base text-gray-500">Aqui entraria o resumo da partida (gols, cartões, eventos).</p>}
+          {tab === "escalacao" && (
+            <div className="text-center text-gray-500">
+              <p>Escalação disponível apenas para assinantes</p>
+              <p className="text-sm mt-2">Com a API premium, você terá acesso à escalação completa dos times.</p>
+            </div>
+          )}
+          
+          {tab === "sumario" && (
+            <div className="text-center text-gray-500">
+              <p>Sumário do jogo disponível apenas para assinantes</p>
+              <p className="text-sm mt-2">Com a API premium, você terá acesso aos eventos detalhados da partida.</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
-
   );
 }

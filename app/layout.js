@@ -14,6 +14,10 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+      <head>
+        {/* Meta do Google AdSense */}
+        <meta name="google-adsense-account" content="ca-pub-6447246104244403" />
+      </head>
       <body className={poppins.className}>
         {children}
       </body>
