@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+import httpx
 from pydantic import BaseModel, EmailStr
 from supabase import create_client, Client
 import os
@@ -133,3 +134,4 @@ async def get_api_status():
         "mode": "premium" if football_service.has_premium_access else "free",
         "message": "API Premium ativa" if football_service.has_premium_access else "Usando dados mockados"
     }
+
