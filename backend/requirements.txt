@@ -7,5 +7,5 @@ python-dotenv
 supabase
 bcrypt==3.2.0
 pydantic[email]
-
-requests
+passlib==1.7.4
+python-multipart==0.0.6
