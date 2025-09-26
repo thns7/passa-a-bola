@@ -25,11 +25,7 @@ app = FastAPI()
 def read_root():
     return {"message": "API do Passa a Bola funcionando!"}
 
-origins = [
-    "https://passa-a-bola-vz9v.vercel.app/",
-    "https://passa-a-bola.onrender.com",
-=======
-
+.
 origins = [
     "https://passa-a-bola.onrender.com",
     "https://passa-a-bola-vz9v.vercel.app",
