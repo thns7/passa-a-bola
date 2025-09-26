@@ -6,7 +6,7 @@ import Header from "../components/Header";
 import BottomNav from "../components/BottomNav";
 import Script from "next/script";
 
-const API_BASE_URL = "http://localhost:8000";
+const API_BASE_URL = "http://localhost:8000"; // Trocar para o URL real da API
 const MAX_POST_LENGTH = 500;
 
 export default function CommunityPage() {
@@ -233,7 +233,7 @@ export default function CommunityPage() {
               }}
               className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
             >
-              ✏️ Editar
+              Editar
             </button>
             <button
               onClick={(e) => {
@@ -243,7 +243,7 @@ export default function CommunityPage() {
               }}
               className="block w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100 text-sm"
             >
-              🗑️ Excluir
+              Excluir
             </button>
           </div>
         )}
@@ -284,7 +284,7 @@ export default function CommunityPage() {
             <div className="flex-1 relative">
               <input
                 type="text"
-                placeholder="🔍 Pesquisar publicações..."
+                placeholder="Pesquisar publicações..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]"
@@ -336,7 +336,7 @@ export default function CommunityPage() {
           <div className="relative max-w-md mx-auto">
             <input
               type="text"
-              placeholder="🔍 Pesquisar publicações..."
+              placeholder="Pesquisar publicações..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]"
@@ -439,7 +439,7 @@ export default function CommunityPage() {
                           </>
                         )}
 
-                        <div className="flex gap-6 items-center text-sm pt-2 border-t">
+                        <div className="flex gap-6 items-center text-sm">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -547,7 +547,7 @@ export default function CommunityPage() {
         </div>
       )}
 
-      <div className="fixed bottom-0 left-0 w-full z-50 md:hidden">
+      <div className="mb-25 bottom-0 left-0 w-full z-50 md:hidden">
         <BottomNav activeIndex={active} onChange={setActive} />
       </div>
     </div>

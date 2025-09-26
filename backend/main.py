@@ -19,18 +19,18 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 app = FastAPI()
 
 origins = [
-    # "https://passa-a-bola-vz9v.vercel.app/",
-    # "https://passa-a-bola.onrender.com/",
-    "http://localhost:3000/"
+    "https://passa-a-bola.onrender.com",
+    "https://passa-a-bola-vz9v.vercel.app",
+    "http://localhost:3000"
 ]
 
 app.add_middleware(
     CORSMiddleware,
-     allow_origins=["http://localhost:3000", "https://passa-a-bola-vz9v.vercel.app", "https://passa-a-bola.onrender.com/"],  # múltiplas origins
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-)
+) 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
