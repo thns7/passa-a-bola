@@ -14,7 +14,6 @@ backend_path = os.path.join(os.path.dirname(__file__))
 if backend_path not in sys.path:
     sys.path.insert(0, backend_path)
 
-
 from services.football_service_hybrid import football_service
 
 load_dotenv()
@@ -68,6 +67,8 @@ class LikeRequest(BaseModel):
     user_id: str
     post_id: str
 
+class PostUpdate(BaseModel):
+    content: str
 
 @app.options("/{path:path}")
 async def options_handler(path: str):
@@ -85,11 +86,6 @@ def register(user: User):
         "email": user.email,
         "password": hashed_password
     }).execute()
-
-class PostUpdate(BaseModel):
-    content: str
-
-
     
 @app.post("/login")
 def login(data: LoginData):
@@ -217,11 +213,7 @@ def delete_post(post_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao deletar post: {str(e)}")
 
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
-
-
+# Rotas da API de futebol
 @app.get("/api/matches/live")
 async def get_live_matches():
     try:
@@ -267,3 +259,7 @@ async def get_api_status():
         "mode": "premium" if football_service.has_premium_access else "free",
         "message": "API Premium ativa" if football_service.has_premium_access else "Usando dados mockados"
     }
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
