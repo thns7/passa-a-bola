@@ -15,6 +15,7 @@ if backend_path not in sys.path:
     sys.path.insert(0, backend_path)
 
 from services.football_service_hybrid import football_service
+from services.new_service import news_service
 
 load_dotenv()
 SUPABASE_URL = os.getenv("SUPABASE_URL")
@@ -103,6 +104,26 @@ def login(data: LoginData):
         return {"message": "Login OK", "user": user}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro interno: {str(e)}")
+
+
+@app.get("/api/noticias")
+async def get_noticias(limit: int = 6):
+    """Endpoint para obter notícias de futebol feminino"""
+    try:
+        noticias = news_service.get_news(limit)
+        return {
+            "success": True,
+            "noticias": noticias,
+            "total": len(noticias),
+            "source": "api" if len(noticias) > 0 and noticias[0].get("id", 0) > 3 else "fallback"
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "noticias": [],
+            "source": "error"
+        }
 
 # Rotas para posts
 @app.post("/posts")
