@@ -1,42 +1,31 @@
 import "./globals.css";
 
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
-
 export const metadata = {
   title: "Passa a Bola - Futebol Feminino",
   description: "Tudo sobre futebol feminino: partidas ao vivo, notícias e comunidade",
   manifest: "/manifest.json",
-  themeColor: "#4F46E5",
+  themeColor: "#5E2E8C",
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="pt-BR"> 
+    <html lang="pt-BR">
       <head>
-        {/* Configuração do Google AdSense */}
         <meta name="google-adsense-account" content="ca-pub-6447246104244403" />
-        <script 
-          async 
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6447246104244403"
-          crossOrigin="anonymous"
-        ></script>
-        
-        {/* PWA */}
         <link rel="manifest" href="/manifest.json" />
         <link rel="apple-touch-icon" href="/icon-192x192.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Passa a Bola" />
         <meta name="theme-color" content="#4F46E5" />
-        
-        {/* Viewport */}
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="mobile-web-app-capable" content="yes" />
+        
+        {/* Fontes via Google Fonts tradicional */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
       </head>
-      <body className={poppins.className}>
+      <body className="font-poppins">
         {children}
       </body>
     </html>
