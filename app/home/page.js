@@ -20,6 +20,19 @@ export default function HomePage() {
   const [dataSource, setDataSource] = useState({ live: 'mock', upcoming: 'mock' });
   const router = useRouter();
 
+
+  const getApiBaseUrl = () => {
+    
+    if (typeof window !== 'undefined') {
+      const isProduction = window.location.hostname !== 'localhost';
+      return isProduction 
+        ? 'https://passa-a-bola.onrender.com' 
+        : 'http://localhost:8000';
+    }
+    
+    return process.env.NEXT_PUBLIC_API_URL || 'https://passa-a-bola.onrender.com';
+  };
+
   // Busca usuário
   useEffect(() => {
     const currentUser = localStorage.getItem("currentUser");
@@ -27,65 +40,61 @@ export default function HomePage() {
     else router.push("/login");
   }, [router]);
 
-useEffect(() => {
-  const fetchMatches = async () => {
-    if (!user) return;
-    
-    try {
-      setLoading(true);
-  
-      const getApiBaseUrl = () => {
-        // No browser
-        if (typeof window !== 'undefined') {
-          const isProduction = window.location.hostname !== 'localhost';
-          return isProduction 
-            ? 'https://passa-a-bola.onrender.com' 
-            : 'http://localhost:8000';
-        }
-        // No server-side (SSR)
-        return process.env.NEXT_PUBLIC_API_URL || 'https://passa-a-bola.onrender.com';
-      };
-      
-      const API_BASE_URL = getApiBaseUrl();
-      
-      
-      const [liveResponse, upcomingResponse] = await Promise.all([
-        fetch(`${API_BASE_URL}/api/matches/live`),
-        fetch(`${API_BASE_URL}/api/matches/upcoming`)
-      ]);
-      
-      const [liveData, upcomingData] = await Promise.all([
-        liveResponse.json(),
-        upcomingResponse.json()
-      ]);
-      
-      // Atualiza os estados
-      if (liveData.success) {
-        setLiveMatches(liveData.data || []);
-        setDataSource(prev => ({...prev, live: liveData.source || 'mock'}));
-      }
-      
-      if (upcomingData.success) {
-        setUpcomingMatches(upcomingData.data || []);
-        setDataSource(prev => ({...prev, upcoming: upcomingData.source || 'mock'}));
-      }
-      
-    } catch (error) {
-      console.error('Erro ao buscar partidas:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchMatches();
-}, [user]);
-
-  // Busca notícias da API local
   useEffect(() => {
-    fetch("/api/noticias")
-      .then(res => res.json())
-      .then(setNoticias)
-      .catch(err => console.error(err));
+    const fetchMatches = async () => {
+      if (!user) return;
+      
+      try {
+        setLoading(true);
+        const API_BASE_URL = getApiBaseUrl(); 
+        
+        const [liveResponse, upcomingResponse] = await Promise.all([
+          fetch(`${API_BASE_URL}/api/matches/live`),
+          fetch(`${API_BASE_URL}/api/matches/upcoming`)
+        ]);
+        
+        const [liveData, upcomingData] = await Promise.all([
+          liveResponse.json(),
+          upcomingResponse.json()
+        ]);
+        
+        if (liveData.success) {
+          setLiveMatches(liveData.data || []);
+          setDataSource(prev => ({...prev, live: liveData.source || 'mock'}));
+        }
+        
+        if (upcomingData.success) {
+          setUpcomingMatches(upcomingData.data || []);
+          setDataSource(prev => ({...prev, upcoming: upcomingData.source || 'mock'}));
+        }
+        
+      } catch (error) {
+        console.error('Erro ao buscar partidas:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMatches();
+  }, [user]);
+
+  useEffect(() => {
+    const fetchNoticias = async () => {
+      try {
+        const API_BASE_URL = getApiBaseUrl();
+        console.log("Buscando notícias de:", `${API_BASE_URL}/api/noticias`);
+        
+        const response = await fetch(`${API_BASE_URL}/api/noticias`);
+        const data = await response.json();
+        
+        console.log("Notícias recebidas:", data);
+        setNoticias(data.noticias || []);
+      } catch (err) {
+        console.error("Erro ao buscar notícias:", err);
+      }
+    };
+
+    fetchNoticias();
   }, []);
 
   
