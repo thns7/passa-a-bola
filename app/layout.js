@@ -17,7 +17,7 @@ export default function RootLayout({ children }) {
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Passa a Bola" />
-        <meta name="theme-color" content="#4F46E5" />
+        <meta name="theme-color" content="#5E2E8C" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         
         
