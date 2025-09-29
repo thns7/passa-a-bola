@@ -31,7 +31,11 @@ origins = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "https://passa-a-bola.onrender.com",
-    "https://passa-a-bola.vercel.app"
+    "https://passa-a-bola.vercel.app",
+    "https://passa-a-bola-vz9v.vercel.app",  # ADICIONE ESTA LINHA
+    "https://passa-a-bola-*.vercel.app",     # ADICIONE ESTA LINHA PARA TODOS OS SUBDOMÍNIOS
+    "https://*.vercel.app",                  # ADICIONE ESTA LINHA PARA TODOS OS APPS VERCEL
+    "https://passa-a-bola-vz9v.vercel.app",
 ]
 
 app.add_middleware(
