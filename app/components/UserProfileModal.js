@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { X, MapPin, Calendar, Heart, UserCheck, UserPlus, Users, User } from "lucide-react";
 
-const API_BASE_URL = "http://127.0.0.1:8000";
+const API_BASE_URL = "https://passa-a-bola.onrender.com";
 
 export default function UserProfileModal({ userId, currentUser, onClose, onFollowUpdate }) {
   const [user, setUser] = useState(null);

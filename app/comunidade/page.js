@@ -7,7 +7,7 @@ import BottomNav from "../components/BottomNav";
 import Script from "next/script";
 import UserProfileModal from "../components/UserProfileModal";
 
-const API_BASE_URL = "http://127.0.0.1:8000";
+const API_BASE_URL = "https://passa-a-bola.onrender.com";
 const MAX_POST_LENGTH = 500;
 
 export default function CommunityPage() {
