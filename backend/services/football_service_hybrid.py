@@ -155,14 +155,14 @@ class FootballServiceHybrid:
             {"id": 128, "name": "Santos", "logo": "https://media.api-sports.io/football/teams/128.png"},
             {"id": 121, "name": "Palmeiras", "logo": "https://media.api-sports.io/football/teams/121.png"},
             {"id": 130, "name": "Grêmio", "logo": "https://media.api-sports.io/football/teams/130.png"},
-            {"id": 123, "name": "Internacional", "logo": "https://media.api-sports.io/football/teams/123.png"},
+            {"id": 123, "name": "Internacional", "logo": "https://media.api-sports.io/football/teams/119.png"},
             {"id": 118, "name": "Bahia", "logo": "https://media.api-sports.io/football/teams/118.png"},
             {"id": 124, "name": "Fluminense", "logo": "https://media.api-sports.io/football/teams/124.png"},
             {"id": 120, "name": "Botafogo", "logo": "https://media.api-sports.io/football/teams/120.png"},
             {"id": 125, "name": "América", "logo": "https://media.api-sports.io/football/teams/125.png"},
             {"id": 122, "name": "Paraná", "logo": "https://media.api-sports.io/football/teams/122.png"},
             {"id": 133, "name": "Vasco", "logo": "https://media.api-sports.io/football/teams/133.png"},
-            {"id": 119, "name": "Sport Recife", "logo": "https://media.api-sports.io/football/teams/119.png"}
+            {"id": 119, "name": "Sport Recife", "logo": "https://media.api-sports.io/football/teams/123.png"}
         ]
         
         jogos_realistas = [
@@ -222,7 +222,7 @@ class FootballServiceHybrid:
             {"id": 128, "name": "Santos", "logo": "https://media.api-sports.io/football/teams/128.png"},
             {"id": 121, "name": "Palmeiras", "logo": "https://media.api-sports.io/football/teams/121.png"},
             {"id": 130, "name": "Grêmio", "logo": "https://media.api-sports.io/football/teams/130.png"},
-            {"id": 123, "name": "Internacional", "logo": "https://media.api-sports.io/football/teams/123.png"},
+            {"id": 123, "name": "Internacional", "logo": "https://media.api-sports.io/football/teams/119.png"},
             {"id": 118, "name": "Bahia", "logo": "https://media.api-sports.io/football/teams/118.png"},
             {"id": 124, "name": "Fluminense", "logo": "https://media.api-sports.io/football/teams/124.png"},
             {"id": 120, "name": "Botafogo", "logo": "https://media.api-sports.io/football/teams/120.png"}

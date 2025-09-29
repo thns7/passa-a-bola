@@ -531,3 +531,79 @@ def search_users(q: str = ""):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
+
+@app.get("/api/matches/live")
+async def get_live_matches():
+    try:
+        result = await football_service.get_live_matches()
+        return {
+            "success": True,
+            "data": result["data"],
+            "count": len(result["data"]),
+            "source": result["source"],
+            "mode": "premium" if football_service.has_premium_access else "free"
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "data": [],
+            "source": "error"
+        }
+
+@app.get("/api/matches/upcoming")
+async def get_upcoming_matches():
+    try:
+        result = await football_service.get_upcoming_matches()
+        return {
+            "success": True,
+            "data": result["data"],
+            "count": len(result["data"]),
+            "source": result["source"],
+            "mode": "premium" if football_service.has_premium_access else "free"
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "data": [],
+            "source": "error"
+        }
+
+@app.get("/api/matches/{match_id}")
+async def get_match_details(match_id: str):
+    try:
+        result = await football_service.get_match_details(match_id)
+        return {
+            "success": True,
+            "data": result["data"],
+            "source": result["source"]
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "data": None,
+            "source": "error"
+        }
+
+@app.get("/api/status")
+async def get_api_status():
+    return {
+        "has_premium_access": football_service.has_premium_access,
+        "mode": "premium" if football_service.has_premium_access else "free",
+        "message": "API Premium ativa" if football_service.has_premium_access else "Usando dados mockados"
+    }
+
+
+@app.get("/health")
+async def health_check():
+    return {
+        "status": "healthy",
+        "timestamp": datetime.now().isoformat(),
+        "services": {
+            "football_api": "active",
+            "news_service": "active",
+            "database": "active"
+        }
+    }
