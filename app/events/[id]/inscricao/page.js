@@ -20,40 +20,33 @@ export default function InscricaoPage() {
   });
   const [enviando, setEnviando] = useState(false);
 
-  // Carregar dados do evento - MÉTODO CORRIGIDO
+  // Carregar dados do evento - VERSÃO SIMPLIFICADA
   useEffect(() => {
     async function carregarEvento() {
       try {
         const res = await fetch("/data/db.json");
         const db = await res.json();
         
-        console.log("🔄 Buscando evento com ID:", id);
-        console.log("📊 Eventos disponíveis:", db.eventos);
-        console.log("🏆 Copas disponíveis:", db.copas);
-        
         // Buscar em eventos
-        let eventoEncontrado = db.eventos?.find(ev => ev.id == id);
+        let eventoEncontrado = null;
         
-        // Se não encontrou, buscar em copas
-        if (!eventoEncontrado) {
-          eventoEncontrado = db.copas?.find(copa => copa.id == id);
+        if (db.eventos) {
+          eventoEncontrado = db.eventos.find(ev => ev.id == id);
         }
         
-        // Se ainda não encontrou, buscar em peneiras
-        if (!eventoEncontrado) {
-          eventoEncontrado = db.peneiras?.find(peneira => peneira.id == id);
+        if (!eventoEncontrado && db.copas) {
+          eventoEncontrado = db.copas.find(copa => copa.id == id);
         }
         
-        console.log("✅ Evento encontrado:", eventoEncontrado);
-        
-        if (eventoEncontrado) {
-          setEvento(eventoEncontrado);
-        } else {
-          console.log("❌ Nenhum evento encontrado com ID:", id);
+        if (!eventoEncontrado && db.peneiras) {
+          eventoEncontrado = db.peneiras.find(peneira => peneira.id == id);
         }
+        
+        setEvento(eventoEncontrado || null);
         
       } catch (err) {
-        console.error("❌ Erro ao carregar evento:", err);
+        console.error("Erro ao carregar evento:", err);
+        setEvento(null);
       } finally {
         setLoading(false);
       }
@@ -63,12 +56,12 @@ export default function InscricaoPage() {
   }, [id]);
 
   // Função para enviar email
-  const enviarEmail = async (email, nome, evento) => {
+  const enviarEmail = async (email, nome, eventoNome) => {
     try {
       const res = await fetch("/api/sendEmail", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, nome, evento }),
+        body: JSON.stringify({ email, nome, evento: eventoNome }),
       });
       
       const data = await res.json();
@@ -84,6 +77,11 @@ export default function InscricaoPage() {
     setEnviando(true);
 
     try {
+      if (!evento || !evento.titulo) {
+        alert("Erro: Evento não carregado corretamente");
+        return;
+      }
+
       // Enviar email de confirmação
       const dataEmail = await enviarEmail(form.email, form.nome, evento.titulo);
       
@@ -107,7 +105,6 @@ export default function InscricaoPage() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
           <p>Carregando evento...</p>
-          <p className="text-sm text-gray-500 mt-2">ID: {id}</p>
         </div>
       </div>
     );
@@ -128,9 +125,6 @@ export default function InscricaoPage() {
         <div className="bg-white p-6 rounded shadow max-w-md mx-auto text-center">
           <h1 className="text-xl font-bold text-red-600 mb-4">Evento não encontrado</h1>
           <p className="text-gray-600 mb-4">ID: {id}</p>
-          <p className="text-sm text-gray-500 mb-4">
-            Verifique se o evento existe no db.json
-          </p>
           <button 
             onClick={() => router.push("/events")}
             className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition"
