@@ -16,7 +16,7 @@ export default function MatchDetails() {
         setLoading(true);
         
         // ✅ Busca da API (sistema híbrido)
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://passa-a-bola.onrender.com';
         const response = await fetch(`${API_URL}/api/matches/${id}`);
         const data = await response.json();
         
