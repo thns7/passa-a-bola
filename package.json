@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "server": "json-server --watch db.json --port 4000"
+    "server": "json-server --watch db.json --port 4000",
+    "postinstall": "npm rebuild lightningcss"
   },
   "dependencies": {
     "@stripe/react-stripe-js": "^4.0.2",
