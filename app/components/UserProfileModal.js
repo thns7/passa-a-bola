@@ -209,7 +209,7 @@ export default function UserProfileModal({ userId, currentUser, onClose, onFollo
     <>
       <div className="fixed inset-0 bg-[#0000006d] flex items-center justify-center z-50 p-4">
         <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
-          <div className="relative bg-gradient-to-r from-purple-600 to-blue-600 p-6">
+          <div className="relative bg-[var(--primary-color)] p-6">
             <button
               onClick={onClose}
               className="absolute top-4 right-4 text-white p-2 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30"
