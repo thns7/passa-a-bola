@@ -409,14 +409,14 @@ const fetchCommentsCount = async (postsArray = posts) => {
 
   if (!user) {
     return (
-      <div className="bg-[#F0F0F0] min-h-screen flex items-center justify-center">
+      <div className="bg-[#f5f6f8] min-h-screen flex items-center justify-center">
         <div>Carregando...</div>
       </div>
     );
   }
 
   return (
-    <div className="bg-[#F0F0F0] min-h-screen flex flex-col">
+    <div className="bg-[#f5f6f8] min-h-screen flex flex-col">
       <header className="md:hidden flex justify-between mt-10 md:mt-[5vh] ml-[6vw] mr-[4vh]">
         <h1 className="flex text-[6vw]">Comunidade</h1>
         <img

@@ -46,7 +46,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="bg-[#F0F0F0] min-h-screen flex flex-col ">
+    <div className="bg-[#f5f6f8] min-h-screen flex flex-col ">
       {/* Header */}
       <Header name={user.name || "Usuário"} />
 

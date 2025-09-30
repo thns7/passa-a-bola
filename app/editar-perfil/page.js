@@ -106,7 +106,7 @@ export default function EditarPerfilPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F0F0F0]">
+    <div className="min-h-screen bg-[#f5f6f8]">
       <div className="md:hidden">
         <div className="w-full mx-auto min-h-screen">
           <div className="bg-[var(--primary-color)] pt-6 pb-8 px-4">

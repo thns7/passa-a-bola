@@ -196,7 +196,7 @@ export default function PerfilPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F0F0F0]">
+    <div className="min-h-screen bg-[#f5f6f8]">
       {/* Mobile */}
       <div className="md:hidden">
         <div className="w-full mx-auto min-h-screen"> 

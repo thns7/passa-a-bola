@@ -641,9 +641,7 @@ def delete_user(user_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao deletar usuário: {str(e)}")
 
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
+
 
 @app.get("/api/matches/live")
 async def get_live_matches():
@@ -720,3 +718,7 @@ async def health_check():
             "database": "active"
         }
     }
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
