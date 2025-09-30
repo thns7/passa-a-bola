@@ -562,7 +562,7 @@ const fetchEngagementData = async () => {
         {/* Gestão de Usuários COM PESQUISA */}
         {activeTab === 'users' && (
           <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg border border-gray-100">
-            {/* Header com cor personalizada */}
+            
             <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 border-b border-gray-100 bg-gradient-to-r from-[#5E2E8C] to-[#7E3EB4] rounded-t-xl sm:rounded-t-2xl">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0">
                 <div>
@@ -594,7 +594,7 @@ const fetchEngagementData = async () => {
                       placeholder="Pesquisar usuários..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-10 pr-8 py-2 sm:py-3 border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-[#5E2E8C] focus:border-transparent transition-all duration-200 bg-white shadow-sm text-sm sm:text-base"
+                      className="w-full pl-10 pr-8 py-2 sm:py-3 border border-gray-300 rounded-lg sm:rounded-xl  focus:ring-[#5E2E8C] focus:border-transparent transition-all duration-200 bg-white shadow-sm text-sm sm:text-base"
                     />
                     {searchTerm && (
                       <button
@@ -920,10 +920,10 @@ const fetchEngagementData = async () => {
                           </span>
                         </div>
                       </div>
-                      <div className="flex sm:flex-col space-x-2 sm:space-x-0 sm:space-y-2 ml-0 sm:ml-4 flex-shrink-0">
+                      <div className="flex sm:flex-col sm:space-x-0 sm:space-y-2 ml-0 sm:ml-4 flex-shrink-0">
                         <button
                           onClick={() => deletePost(post.id)}
-                          className="bg-gradient-to-r from-red-600 to-red-700 text-white px-3 sm:px-4 py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm hover:from-red-700 hover:to-red-800 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center space-x-1 sm:space-x-2 flex-1 sm:flex-none justify-center"
+                          className="bg-gradient-to-r from-red-600 to-red-700 text-white px-2 sm:px-4 py-2 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm hover:from-red-700 hover:to-red-800 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center space-x-1 sm:w-auto justify-center"
                         >
                           <Trash2 size={14} />
                           <span>Deletar</span>
