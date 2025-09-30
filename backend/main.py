@@ -530,26 +530,29 @@ def search_users(q: str = ""):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao buscar usuários: {str(e)}")
 
+@app.get("/comments")
+def get_all_comments():
+    
+    try:
+        result = supabase.table("comments").select("*").order("created_at", desc=True).execute()
+        return result.data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao buscar comentários: {str(e)}")
+
 @app.get("/admin/stats")
 def get_admin_stats():
-    """Estatísticas gerais do app"""
+    
     try:
-        # Verificar se usuário é admin
-        # (você vai implementar a verificação depois)
         
-        # Estatísticas de usuários
         users_result = supabase.table("users").select("id", count="exact").execute()
         users_count = len(users_result.data) if users_result.data else 0
-        
-        # Estatísticas de posts
+       
         posts_result = supabase.table("posts").select("id", count="exact").execute()
         posts_count = len(posts_result.data) if posts_result.data else 0
         
-        # Estatísticas de comentários
         comments_result = supabase.table("comments").select("id", count="exact").execute()
         comments_count = len(comments_result.data) if users_result.data else 0
         
-        # Usuários ativos (que fizeram posts)
         active_users_result = supabase.table("posts").select("user_id").execute()
         active_users = len(set(post["user_id"] for post in active_users_result.data)) if active_users_result.data else 0
         
@@ -571,12 +574,26 @@ def get_admin_stats():
 
 @app.get("/admin/users")
 def get_all_users_admin():
-    """Lista todos os usuários (apenas admin)"""
+    
     try:
-        result = supabase.table("users").select("id, name, email, username, role, created_at").execute()
+        
+        result = supabase.table("users").select("id, name, email, username, role, updated_at").execute()
+        
+        
+        users = []
+        for user in result.data:
+            users.append({
+                "id": user["id"],
+                "name": user["name"],
+                "email": user["email"],
+                "username": user["username"],
+                "role": user["role"],
+                "created_at": user.get("updated_at") 
+            })
+        
         return {
             "success": True,
-            "users": result.data
+            "users": users
         }
     except Exception as e:
         return {

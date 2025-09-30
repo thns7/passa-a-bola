@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { Menu, Home, Trophy, Users, User, X, Settings } from "lucide-react";
+import { Menu, Home, Trophy, Users, User, X, Shield } from "lucide-react";
 
 export default function Header({ name }) {
   const [search, setSearch] = useState("");
@@ -15,7 +15,7 @@ export default function Header({ name }) {
     { icon: <Trophy size={24} />, label: "", href: "/events" },
     { icon: <Users size={24} />, label: "", href: "/comunidade" },
     { icon: <User size={24} />, label: "", href: "/perfil" },
-    { icon: <Settings size={24} />, label: "", href: "/admin/dashboard" },
+    { icon: <Shield size={24} />, label: "", href: "/admin/dashboard" },
   ];
 
   
