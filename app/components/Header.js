@@ -1,23 +1,24 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { Menu, Home, Trophy, Users, User, X } from "lucide-react";
+import { Menu, Home, Trophy, Users, User, X, Settings } from "lucide-react";
 
 export default function Header({ name }) {
   const [search, setSearch] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const [activePage, setActivePage] = useState("");
   const router = useRouter();
-  const pathname = usePathname(); // Hook para pegar a rota atual
+  const pathname = usePathname(); 
 
   const items = [
     { icon: <Home size={24} />, label: "", href: "/home" },
     { icon: <Trophy size={24} />, label: "", href: "/events" },
     { icon: <Users size={24} />, label: "", href: "/comunidade" },
     { icon: <User size={24} />, label: "", href: "/perfil" },
+    { icon: <Settings size={24} />, label: "", href: "/admin/dashboard" },
   ];
 
-  // Detecta qual página está ativa baseado na rota atual
+  
   useEffect(() => {
     setActivePage(pathname);
   }, [pathname]);
@@ -77,11 +78,20 @@ export default function Header({ name }) {
           />
         </div>
 
-        {/* Menu absolutamente centralizado */}
+       {/* Menu absolutamente centralizado */}
         <div className="absolute left-1/2 transform -translate-x-1/2">
           <div className="flex items-center gap-15">
             {items.map((item, index) => {
               const isActive = activePage === item.href;
+              
+              
+              if (item.href === "/admin/dashboard") {
+                const user = JSON.parse(localStorage.getItem("currentUser") || "{}");
+                if (user.role !== "admin") {
+                  return null; 
+                }
+              }
+              
               return (
                 <button
                   key={index}

@@ -54,6 +54,7 @@ class User(BaseModel):
     email: EmailStr
     password: str
     username: str
+    role: str = "user"
 
 class LoginData(BaseModel):
     email: EmailStr
@@ -121,7 +122,8 @@ def register(user: User):
             "name": user.name,
             "email": user.email,
             "username": user.username,
-            "password": hashed_password
+            "password": hashed_password,
+            "role": user.role
         }).execute()
 
         return {"message": "Usuário registrado com sucesso", "user": res.data[0] if res.data else None}
@@ -527,6 +529,100 @@ def search_users(q: str = ""):
         return result.data
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao buscar usuários: {str(e)}")
+
+@app.get("/admin/stats")
+def get_admin_stats():
+    """Estatísticas gerais do app"""
+    try:
+        # Verificar se usuário é admin
+        # (você vai implementar a verificação depois)
+        
+        # Estatísticas de usuários
+        users_result = supabase.table("users").select("id", count="exact").execute()
+        users_count = len(users_result.data) if users_result.data else 0
+        
+        # Estatísticas de posts
+        posts_result = supabase.table("posts").select("id", count="exact").execute()
+        posts_count = len(posts_result.data) if posts_result.data else 0
+        
+        # Estatísticas de comentários
+        comments_result = supabase.table("comments").select("id", count="exact").execute()
+        comments_count = len(comments_result.data) if users_result.data else 0
+        
+        # Usuários ativos (que fizeram posts)
+        active_users_result = supabase.table("posts").select("user_id").execute()
+        active_users = len(set(post["user_id"] for post in active_users_result.data)) if active_users_result.data else 0
+        
+        return {
+            "success": True,
+            "stats": {
+                "total_users": users_count,
+                "total_posts": posts_count,
+                "total_comments": comments_count,
+                "active_users": active_users,
+                "timestamp": datetime.now().isoformat()
+            }
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+@app.get("/admin/users")
+def get_all_users_admin():
+    """Lista todos os usuários (apenas admin)"""
+    try:
+        result = supabase.table("users").select("id, name, email, username, role, created_at").execute()
+        return {
+            "success": True,
+            "users": result.data
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+@app.put("/admin/users/{user_id}/role")
+def update_user_role(user_id: str, role: str):
+    """Altera role do usuário (apenas admin)"""
+    try:
+        result = supabase.table("users").update({
+            "role": role,
+            "updated_at": datetime.now().isoformat()
+        }).eq("id", user_id).execute()
+        
+        return {
+            "success": True,
+            "message": f"Role atualizada para {role}",
+            "user": result.data[0] if result.data else None
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e)
+        }
+    
+@app.delete("/admin/users/{user_id}")
+def delete_user(user_id: str):
+    """Deletar usuário (apenas admin)"""
+    try:
+        # Primeiro deletar todos os dados relacionados ao usuário
+        supabase.table("comments").delete().eq("user_id", user_id).execute()
+        supabase.table("post_likes").delete().eq("user_id", user_id).execute()
+        supabase.table("posts").delete().eq("user_id", user_id).execute()
+        supabase.table("user_follows").delete().or_(f"follower_id.eq.{user_id},following_id.eq.{user_id}").execute()
+        
+        # Depois deletar o usuário
+        result = supabase.table("users").delete().eq("id", user_id).execute()
+        
+        if not result.data:
+            raise HTTPException(status_code=404, detail="Usuário não encontrado")
+            
+        return {"success": True, "message": "Usuário deletado com sucesso"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao deletar usuário: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn
