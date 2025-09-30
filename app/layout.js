@@ -4,7 +4,6 @@ export const metadata = {
   title: "Passa a Bola - Futebol Feminino",
   description: "Tudo sobre futebol feminino: partidas ao vivo, notícias e comunidade",
   manifest: "/manifest.json",
-  themeColor: "#5E2E8C",
 };
 
 export default function RootLayout({ children }) {

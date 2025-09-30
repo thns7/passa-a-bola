@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { MoreHorizontal, MapPin, Calendar, LogOut, Users } from "lucide-react";
+import { MoreHorizontal, MapPin, Calendar, LogOut, Users, X } from "lucide-react";
 import BottomNav from "../components/BottomNav";
 import Header from "../components/Header";
 import UserProfileModal from "../components/UserProfileModal";
@@ -109,7 +109,7 @@ export default function PerfilPage() {
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-semibold">Seguidores</h3>
             <button onClick={() => setShowFollowers(false)} className="text-gray-500 hover:text-gray-700">
-              <MoreHorizontal className="h-5 w-5" />
+              <X className="h-5 w-5" />
             </button>
           </div>
         </div>
@@ -151,7 +151,7 @@ export default function PerfilPage() {
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-semibold">Seguindo</h3>
             <button onClick={() => setShowFollowing(false)} className="text-gray-500 hover:text-gray-700">
-              <MoreHorizontal className="h-5 w-5" />
+              <X className="h-5 w-5" />
             </button>
           </div>
         </div>

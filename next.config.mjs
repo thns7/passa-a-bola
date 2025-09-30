@@ -2,10 +2,14 @@
 
 import withPWA from 'next-pwa'
 
+const isDevelopment = process.env.NODE_ENV === 'development'
+
+// Configuração do PWA apenas para produção
 const pwaConfig = withPWA({
   dest: 'public',
-  register: true,
-  skipWaiting: true,
+  register: !isDevelopment,      // Não registrar em dev
+  skipWaiting: !isDevelopment,
+  disable: isDevelopment,        // Desabilita completamente em dev
 })
 
 const nextConfig = {
@@ -20,4 +24,5 @@ const nextConfig = {
   },
 }
 
-export default pwaConfig(nextConfig)
+// Aplica PWA apenas em produção
+export default isDevelopment ? nextConfig : pwaConfig(nextConfig)
