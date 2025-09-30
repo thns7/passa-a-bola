@@ -1,9 +1,9 @@
 "use client"  
 
 import { useRouter } from "next/navigation"  
-import { Home, Trophy, Users, User } from "lucide-react"
+import { Home, Trophy, Users, User, Shield } from "lucide-react"
 
-const BottomNav = ({ activeIndex, onChange }) => {
+const BottomNav = ({ activeIndex, onChange, userRole }) => { 
   const router = useRouter()
 
   const items = [
@@ -12,6 +12,11 @@ const BottomNav = ({ activeIndex, onChange }) => {
       { icon: <Users size={24} />, label: "Comunidade", href: "/comunidade" },
       { icon: <User size={24} />, label: "Perfil", href: "/perfil" },
   ]
+
+  
+  if (userRole === 'admin') {
+    items.push({ icon: <Shield size={24} />, label: 'Admin', href: '/admin/dashboard' })
+  }
 
   return (
     <div className="fixed bottom-5 left-0 w-full bg-white shadow-lg flex justify-around items-center h-16 rounded-[3rem]">

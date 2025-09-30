@@ -209,7 +209,7 @@ export default function HomePage() {
         </div>
         
         <div className="fixed bottom-0 left-0 right-0 md:hidden">
-          <BottomNav activeIndex={active} onChange={setActive} />
+          <BottomNav activeIndex={active} onChange={setActive} userRole={user?.role}/>
         </div>
       </div>
 
