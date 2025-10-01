@@ -9,6 +9,7 @@ from typing import List, Optional
 from datetime import datetime
 import base64
 import sys
+import google.generativeai as genai  # ✅ ADICIONAR ESTA LINHA
 
 backend_path = os.path.join(os.path.dirname(__file__))
 if backend_path not in sys.path:
@@ -20,9 +21,16 @@ from services.new_service import news_service
 load_dotenv()
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")  # ✅ ADICIONAR ESTA LINHA
 
 if not SUPABASE_URL or not SUPABASE_KEY:
     raise RuntimeError("SUPABASE_URL e SUPABASE_KEY não estão definidos no .env")
+
+# ✅ CONFIGURAR GEMINI API
+if GEMINI_API_KEY:
+    genai.configure(api_key=GEMINI_API_KEY)
+else:
+    print("⚠️  GEMINI_API_KEY não encontrada - Chatbot não funcionará")
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 app = FastAPI()
@@ -32,9 +40,9 @@ origins = [
     "http://127.0.0.1:3000",
     "https://passa-a-bola.onrender.com",
     "https://passa-a-bola.vercel.app",
-    "https://passa-a-bola-vz9v.vercel.app",  # ADICIONE ESTA LINHA
-    "https://passa-a-bola-*.vercel.app",     # ADICIONE ESTA LINHA PARA TODOS OS SUBDOMÍNIOS
-    "https://*.vercel.app",                  # ADICIONE ESTA LINHA PARA TODOS OS APPS VERCEL
+    "https://passa-a-bola-vz9v.vercel.app",
+    "https://passa-a-bola-*.vercel.app",
+    "https://*.vercel.app",
     "https://passa-a-bola-vz9v.vercel.app",
 ]
 
@@ -48,7 +56,7 @@ app.add_middleware(
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# Models
+# Models (ADICIONAR OS NOVOS MODELS PARA CHAT)
 class User(BaseModel):
     name: str
     email: EmailStr
@@ -85,7 +93,6 @@ class FollowRequest(BaseModel):
     follower_id: str
     following_id: str
 
-# NOVO: Model para comentários
 class CommentCreate(BaseModel):
     post_id: str
     user_id: str
@@ -93,6 +100,233 @@ class CommentCreate(BaseModel):
 
 class CommentUpdate(BaseModel):
     content: str
+
+# ✅ NOVO: Model para Chat com IA
+class ChatRequest(BaseModel):
+    message: str
+    history: List[dict] = []
+
+class ChatResponse(BaseModel):
+    response: str
+    success: bool
+
+# ✅ SYSTEM PROMPT DA PASSINHA
+PASSINHA_SYSTEM_PROMPT = """
+Você é a "Passinha", uma assistente de IA especialista em futebol feminino da plataforma "Passa Bola".
+
+Sua personalidade é:
+Motivadora e Encorajadora: Use uma linguagem positiva e de apoio.
+Treinadora Exigente (Tough Love): SE E SOMENTE SE a jogadora admitir que não seguiu o plano (ex: "furei a dieta", "não treinei"), use uma frase de apoio mas que a puxe de volta para o foco. Nunca a julgue. Use exemplos como: "Opa, acontece! O importante não é o erro, mas a rapidez com que a gente volta para o plano. Vamos focar no amanhã?"; ou "Entendo, a rotina é corrida. Mas a gente sabe que o resultado em campo vem da disciplina. Que tal a gente reajustar a meta para essa semana?".
+Especialista e Acessível: Forneça informações precisas e, ao sugerir refeições, sempre ofereça alternativas mais econômicas.
+Prestativa: Aja como um guia para a plataforma e ensine o passo a passo das receitas.
+
+Suas capacidades são:
+Criar Planos de Performance: Use os cálculos e as receitas da minha base de conhecimento para montar planos de nutrição e treino.
+Ser uma Guia da Plataforma: Responda a dúvidas sobre o app usando o FAQ.
+Ensinar Receitas: Se uma jogadora perguntar "como faz [nome da receita]?", consulte a seção "Meu Livro de Receitas".
+
+Regras estritas:
+NUNCA dê conselhos médicos sobre lesões. Apenas recomende procurar um médico.
+NUNCA responda a perguntas que não sejam sobre futebol, treino, nutrição ou sobre a plataforma.
+Ao apresentar um plano, sempre finalize com uma mensagem de responsabilidade como esta: "Lembre-se que este é um plano inicial excelente, baseado em artigos e boas práticas para atletas. Dito isso, para um acompanhamento totalmente personalizado e que leve em conta todos os detalhes do seu corpo, é sempre muito importante consultar um profissional da área de nutrição ou educação física."
+
+BASE DE CONHECIMENTO:
+
+⭐ Guia da Plataforma (FAQ)
+SOBRE A PÁGINA PRINCIPAL (Ícone da Casinha 🏠)
+Pergunta: O que eu encontro na tela principal?
+Resposta: A tela principal (ícone de 🏠) é sua central de informações! Lá você vê os jogos ao vivo, as próximas partidas e as últimas notícias do universo do futebol feminino. Você pode clicar em qualquer jogo para ver todos os detalhes e estatísticas.
+
+SOBRE EVENTOS E COMPETIÇÕES (Ícone do Troféu 🏆)
+Pergunta: Como encontro peneiras?
+Resposta: É super simples! Clique no ícone de troféu (🏆). Lá você encontra um calendário com todos os eventos, e pode filtrar por cidade e data para achar o que procura.
+
+Pergunta: Como funciona a inscrição em um evento?
+Resposta: Ao clicar em um evento do calendário, você verá todos os detalhes como local, regras e vagas. Se quiser participar, é só clicar no botão "Inscrever-se". A confirmação vai direto para o seu perfil!
+
+SOBRE A COMUNIDADE (Ícone das Pessoas 🧑‍🤝‍🧑)
+Pergunta: Como eu faço um post para compartilhar meus lances?
+Resposta: Vá para a Comunidade, no ícone das pessoas (🧑‍🤝‍🧑), e clique no ícone de "+" no topo da tela. Aí é só escrever seu texto e adicionar suas fotos ou vídeos. É lá que você mostra seu talento para todo mundo!
+
+SOBRE O SEU PERFIL (Ícone de Pessoa 👤)
+Pergunta: O que é o meu Perfil e como eu edito ele?
+Resposta: O seu perfil é o seu portfólio de atleta digital! Para acessá-lo, clique no ícone de pessoa (👤) no menu. Lá dentro, procure a opção "Editar Perfil" para atualizar suas informações básicas, como nome, posição em campo e biografia.
+
+Pergunta: Como eu adiciono meus melhores lances no perfil?
+Resposta: Essa é a parte mais legal! Você não adiciona os lances diretamente no perfil. Você os posta na Comunidade (ícone 🧑‍🤝‍🧑). Todos os posts que você fizer lá, com seus vídeos e fotos, aparecerão automaticamente no feed do seu perfil, criando um histórico completo da sua jornada!
+
+⭐ Performance Esportiva
+[SEU CONTEÚDO COMPLETO SOBRE CÁLCULOS, RECEITAS E TREINOS AQUI]
+"""
+
+
+@app.post("/api/chat", response_model=ChatResponse)
+async def chat_with_passinha(request: ChatRequest):
+    """
+    Endpoint para o chatbot Passinha - COM MODELO CORRETO
+    """
+    print(f"🔵 /api/chat CHAMADA - Mensagem: {request.message}")
+    
+    if not GEMINI_API_KEY:
+        print("🔴 ERRO: GEMINI_API_KEY não configurada")
+        return ChatResponse(
+            response="Configuração de IA não encontrada",
+            success=False
+        )
+    
+    try:
+        print("🟡 Iniciando Gemini...")
+        
+        # ✅ USE ESTE MODELO - ele está na sua lista!
+        model = genai.GenerativeModel('models/gemini-2.0-flash-001')
+        
+        # Prompt otimizado
+        final_prompt = f"""Você é a "Passinha", assistente virtual especialista em futebol feminino da plataforma "Passa Bola".
+
+PERSONALIDADE:
+- Motivadora, positiva e encorajadora
+- Especialista em futebol feminino  
+- Acessível e prática
+- Guia da plataforma Passa Bola
+
+FUNÇÕES:
+1. Tirar dúvidas sobre a plataforma Passa Bola
+2. Dar informações sobre futebol feminino
+3. Compartilhar dicas gerais de treino e nutrição
+4. Orientar sobre uso do app
+
+REGRAS IMPORTANTES:
+🚫 NUNCA dê conselhos médicos ou prescreva tratamentos
+🚫 NUNCA crie planos de treino ou dieta específicos
+🚫 SEMPRE recomende profissionais especializados para assuntos técnicos
+✅ Mantenha o foco em futebol feminino e na plataforma
+
+PLATAFORMA PASSA BOLA:
+🏠 Página Principal: Jogos ao vivo, próximas partidas, notícias
+🏆 Eventos: Calendário com peneiras e competições  
+👥 Comunidade: Faça posts para compartilhar lances
+👤 Perfil: Seu portfólio digital de atleta
+
+PERGUNTA DO USUÁRIO: {request.message}
+
+PASSINHA (responda de forma útil, motivadora e direta, focando em futebol feminino):
+"""
+        
+        print("🟡 Enviando para Gemini...")
+        response = model.generate_content(final_prompt)
+        print(f"🟢 Resposta recebida: {response.text[:100]}...")
+        
+        return ChatResponse(
+            response=response.text,
+            success=True
+        )
+        
+    except Exception as e:
+        print(f"🔴 ERRO: {str(e)}")
+        
+        # Fallback inteligente
+        user_message = request.message.lower()
+        
+        if any(word in user_message for word in ['treino', 'exercício', 'treinar']):
+            fallback = """💪 **DICAS DE TREINO - FUTEBOL FEMININO**
+
+Aqui estão algumas diretrizes gerais para seu treinamento:
+
+🏃‍♀️ **COMPONENTES ESSENCIAIS:**
+• **Resistência**: Corridas de média/longa distância
+• **Força**: Exercícios com peso corporal ou pesos leves
+• **Agilidade**: Mudanças de direção, dribles, cones
+• **Técnica**: Prática de passes, chutes, controles
+
+📅 **EXEMPLO DE ROTINA SEMANAL:**
+• Segunda: Força e condicionamento
+• Terça: Treino técnico (passes, chutes)
+• Quarta: Descanso ou recuperação ativa
+• Quinta: Treino tático e posicional
+• Sexta: Velocidade e agilidade
+• Sábado: Jogo ou simulação
+• Domingo: Descanso
+
+⚡ **DICAS IMPORTANTES:**
+• Sempre aqueça por 10-15min antes
+• Alongue após os treinos
+• Hidrate-se constantemente
+• Descanse adequadamente
+
+⚠️ **LEMBRE-SE**: Para um plano personalizado, consulte um preparador físico qualificado!"""
+
+        elif any(word in user_message for word in ['receita', 'comida', 'alimentação']):
+            fallback = """🍳 **ALIMENTAÇÃO PARA ATLETAS**
+
+A nutrição adequada é fundamental para o rendimento:
+
+⏰ **PRÉ-TREINO/JOGO (1-2h antes):**
+• Carboidratos complexos: batata doce, aveia, pão integral
+• Proteínas leves: iogurte, queijo cottage
+• Frutas: banana, maçã, uvas
+
+🔄 **PÓS-TREINO/JOGO (até 1h após):**
+• Proteínas: frango, peixe, ovos, whey protein
+• Carboidratos: arroz, batata, macarrão integral
+• Hidratação: água, água de coco
+
+🍎 **ALIMENTAÇÃO DIÁRIA:**
+• Frutas e vegetais variados
+• Proteínas magras
+• Carboidratos integrais
+• Gorduras saudáveis (abacate, castanhas, azeite)
+
+💧 **HIDRATAÇÃO:**
+• 2-3 litros de água por dia
+• Mais em dias de treino intenso
+• Observe a cor da urina (deve ser clara)
+
+👩‍⚕️ **CONSULTE** um nutricionista esportivo para um plano alimentar personalizado!"""
+
+        else:
+            fallback = "Olá! Sou a Passinha 🎯\n\nPosso te ajudar com:\n• Dúvidas sobre o app Passa Bola\n• Informações sobre futebol feminino\n• Dicas gerais de treino e nutrição\n\nO que você gostaria de saber?"
+
+        return ChatResponse(
+            response=fallback,
+            success=False
+        )
+
+
+# ✅ ROTA DE TESTE - ADICIONE ESTA ROTA TEMPORARIAMENTE
+@app.get("/api/test-chat")
+async def test_chat():
+    """Rota de teste para verificar se o chatbot está funcionando"""
+    return {
+        "success": True,
+        "message": "Chatbot endpoint está funcionando!",
+        "timestamp": datetime.now().isoformat()
+    }
+
+@app.get("/api/debug-models")
+async def debug_models():
+    """Endpoint para listar modelos disponíveis"""
+    try:
+        models = genai.list_models()
+        available_models = []
+        
+        for model in models:
+            if 'generateContent' in model.supported_generation_methods:
+                available_models.append({
+                    'name': model.name,
+                    'display_name': model.display_name,
+                    'description': model.description
+                })
+        
+        return {
+            "success": True,
+            "available_models": available_models,
+            "total": len(available_models)
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e)
+        }
 
 # Rotas de autenticação
 @app.post("/register")
