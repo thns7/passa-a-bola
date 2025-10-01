@@ -1,4 +1,3 @@
-// app/components/ChatbotWrapper.jsx
 "use client";
 
 import { usePathname } from 'next/navigation';
@@ -7,7 +6,7 @@ import Chatbot from './Chatbot';
 export default function ChatbotWrapper() {
     const pathname = usePathname();
     
-    // Páginas onde o chatbot NÃO deve aparecer
+    
     const hideChatbotPages = [
         '/login',
         '/registro', 

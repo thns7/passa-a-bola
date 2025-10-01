@@ -1,4 +1,3 @@
-// app/components/Chatbot.jsx
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -11,12 +10,12 @@ export default function Chatbot() {
     const [currentImage, setCurrentImage] = useState('/passinhaPronto.png'); // Imagem padrão
     const messagesEndRef = useRef(null);
 
-    // Efeito para rolar para a última mensagem
+    
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
-    // Efeito para mudar imagem baseado no estado
+    
     useEffect(() => {
         if (isLoading) {
             setCurrentImage('/passinhaPensando.png');
@@ -25,7 +24,7 @@ export default function Chatbot() {
         }
     }, [isLoading]);
 
-    // Saudação automática quando abre
+    
     useEffect(() => {
         if (isOpen && messages.length === 0) {
             setTimeout(() => {
@@ -46,7 +45,7 @@ export default function Chatbot() {
         }, 1000);
     };
 
-    // Função para enviar uma mensagem
+    
     const handleSendMessage = async () => {
         if (inputValue.trim() === '' || isLoading) return;
 
@@ -58,13 +57,13 @@ export default function Chatbot() {
         try {
             const botResponse = await callGeminiAPI(inputValue, messages);
             
-            // Muda para imagem "falando" quando recebe resposta
+            
             setCurrentImage('/passinhaFalando.png');
             
             setTimeout(() => {
                 setMessages(prev => [...prev, { sender: 'bot', text: botResponse }]);
                 setIsLoading(false);
-                // Volta para imagem padrão após mostrar resposta
+                
                 setTimeout(() => setCurrentImage('/passinhaPronto.png'), 1000);
             }, 500);
         } catch (error) {
@@ -79,7 +78,7 @@ export default function Chatbot() {
     };
 
     const callGeminiAPI = async (userInput, currentHistory = []) => {
-        const BACKEND_URL = 'http://localhost:8000';
+        const BACKEND_URL = 'https://passa-a-bola.onrender.com';
         
         try {
             const response = await fetch(`${BACKEND_URL}/api/chat`, {
@@ -108,7 +107,7 @@ export default function Chatbot() {
                 return "Olá! Sou a Passinha 😊 Como posso te ajudar com o Passa Bola hoje?";
             }
         } catch (error) {
-            console.error("💥 Erro:", error);
+            console.error("Erro:", error);
             return getFallbackResponse(userInput);
         }
     };
@@ -146,7 +145,7 @@ export default function Chatbot() {
                 isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
             }`}>
                 
-                {/* MASCOTE GRANDE - SAINDO DO CHAT */}
+                {/* MASCOTE */}
                 <div className="relative z-20 flex justify-start ml-50 -mb-15">
                     <div className="w-40 h-40 transform transition-transform duration-300 hover:scale-110">
                         <img 

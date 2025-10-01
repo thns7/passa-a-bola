@@ -9,7 +9,7 @@ from typing import List, Optional
 from datetime import datetime
 import base64
 import sys
-import google.generativeai as genai  # ✅ ADICIONAR ESTA LINHA
+import google.generativeai as genai  
 
 backend_path = os.path.join(os.path.dirname(__file__))
 if backend_path not in sys.path:
@@ -21,7 +21,7 @@ from services.new_service import news_service
 load_dotenv()
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")  # ✅ ADICIONAR ESTA LINHA
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") 
 
 if not SUPABASE_URL or not SUPABASE_KEY:
     raise RuntimeError("SUPABASE_URL e SUPABASE_KEY não estão definidos no .env")
@@ -42,6 +42,7 @@ origins = [
     "https://passa-a-bola.vercel.app",
     "https://passa-a-bola-vz9v.vercel.app",
     "https://passa-a-bola-*.vercel.app",
+    "https://passa-a-bola-smoky.vercel.app",
     "https://*.vercel.app",
     "https://passa-a-bola-vz9v.vercel.app",
     "http://0.0.0.0:8000",
@@ -102,7 +103,7 @@ class CommentCreate(BaseModel):
 class CommentUpdate(BaseModel):
     content: str
 
-# ✅ NOVO: Model para Chat com IA
+
 class ChatRequest(BaseModel):
     message: str
     history: List[dict] = []
@@ -111,7 +112,7 @@ class ChatResponse(BaseModel):
     response: str
     success: bool
 
-# ✅ SYSTEM PROMPT DA PASSINHA
+
 PASSINHA_SYSTEM_PROMPT = """
 Você é a "Passinha", uma assistente de IA especialista em futebol feminino da plataforma "Passa Bola".
 
@@ -166,22 +167,22 @@ async def chat_with_passinha(request: ChatRequest):
     """
     Endpoint para o chatbot Passinha - COM MODELO CORRETO
     """
-    print(f"🔵 /api/chat CHAMADA - Mensagem: {request.message}")
+    print(f"/api/chat CHAMADA - Mensagem: {request.message}")
     
     if not GEMINI_API_KEY:
-        print("🔴 ERRO: GEMINI_API_KEY não configurada")
+        print("ERRO: GEMINI_API_KEY não configurada")
         return ChatResponse(
             response="Configuração de IA não encontrada",
             success=False
         )
     
     try:
-        print("🟡 Iniciando Gemini...")
+        print("Iniciando Gemini...")
         
-        # ✅ USE ESTE MODELO - ele está na sua lista!
+        
         model = genai.GenerativeModel('models/gemini-2.0-flash-001')
         
-        # Prompt otimizado
+        
         final_prompt = f"""Você é a "Passinha", assistente virtual especialista em futebol feminino da plataforma "Passa Bola".
 
 PERSONALIDADE:
@@ -213,9 +214,9 @@ PERGUNTA DO USUÁRIO: {request.message}
 PASSINHA (responda de forma útil, motivadora e direta, focando em futebol feminino):
 """
         
-        print("🟡 Enviando para Gemini...")
+        print("Enviando para Gemini...")
         response = model.generate_content(final_prompt)
-        print(f"🟢 Resposta recebida: {response.text[:100]}...")
+        print(f"Resposta recebida: {response.text[:100]}...")
         
         return ChatResponse(
             response=response.text,
@@ -223,7 +224,7 @@ PASSINHA (responda de forma útil, motivadora e direta, focando em futebol femin
         )
         
     except Exception as e:
-        print(f"🔴 ERRO: {str(e)}")
+        print(f"ERRO: {str(e)}")
         
         # Fallback inteligente
         user_message = request.message.lower()
@@ -626,7 +627,7 @@ def update_user(user_id: str, user_update: UserUpdate):
                     detail="Username inválido. Use apenas letras minúsculas, números e _ (3-20 caracteres)"
                 )
             
-            # Verificar se o novo username já existe (excluindo o usuário atual)
+            
             existing_username = supabase.table("users").select("*").eq("username", user_update.username).neq("id", user_id).execute()
             if existing_username.data:
                 raise HTTPException(status_code=400, detail="Username já está em uso por outro usuário.")
@@ -642,7 +643,7 @@ def update_user(user_id: str, user_update: UserUpdate):
         if user_update.avatar is not None:
             update_data["avatar"] = user_update.avatar
         
-        # Só atualiza se houver dados para atualizar
+        
         if not update_data:
             raise HTTPException(status_code=400, detail="Nenhum dado fornecido para atualização")
         
@@ -658,7 +659,7 @@ def update_user(user_id: str, user_update: UserUpdate):
         return {"message": "Perfil atualizado com sucesso", "user": updated_user}
         
     except HTTPException:
-        # Re-lançar exceções HTTP que já tratamos
+        
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao atualizar usuário: {str(e)}")
@@ -738,7 +739,7 @@ def read_root():
 def get_all_users():
     try:
         result = supabase.table("users").select("id, name, username, avatar, email").execute()
-        # Remover informações sensíveis e o usuário atual da lista
+        
         users = []
         for user in result.data:
             user_data = {
@@ -860,13 +861,13 @@ def update_user_role(user_id: str, role: str):
 def delete_user(user_id: str):
     """Deletar usuário (apenas admin)"""
     try:
-        # Primeiro deletar todos os dados relacionados ao usuário
+        
         supabase.table("comments").delete().eq("user_id", user_id).execute()
         supabase.table("post_likes").delete().eq("user_id", user_id).execute()
         supabase.table("posts").delete().eq("user_id", user_id).execute()
         supabase.table("user_follows").delete().or_(f"follower_id.eq.{user_id},following_id.eq.{user_id}").execute()
         
-        # Depois deletar o usuário
+        
         result = supabase.table("users").delete().eq("id", user_id).execute()
         
         if not result.data:
