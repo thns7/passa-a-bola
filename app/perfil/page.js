@@ -270,7 +270,7 @@ export default function PerfilPage() {
           <div className="px-4 mt-6">
             <div className="bg-white rounded-2xl shadow-sm p-6">
               <p className="text-gray-700 leading-relaxed mb-4">
-                {user.bio || "🎯 Adicione uma bio criativa para que outros usuários possam te conhecer melhor!"}
+                {user.bio || "Adicione uma bio criativa para que outros usuários possam te conhecer melhor!"}
               </p>
               
               <div className="space-y-3">
@@ -306,7 +306,7 @@ export default function PerfilPage() {
                       <img
                         src={post.image}
                         alt="Imagem do post"
-                        className="rounded-lg w-full max-h-60 object-cover mt-2"
+                        className="rounded-lg max-h-80 mx-auto items-center  mb-3"
                       />
                     )}
                     <div className="flex gap-4 items-center text-sm mt-3 pt-2 border-t border-gray-100">
@@ -410,7 +410,7 @@ export default function PerfilPage() {
               <div className="bg-white rounded-2xl shadow-lg p-6">
                 <h3 className="font-semibold text-gray-900 mb-4">Sobre</h3>
                 <p className="text-gray-700 leading-relaxed mb-4">
-                  {user.bio || "🎯 Adicione uma bio criativa para que outros usuários possam te conhecer melhor!"}
+                  {user.bio || "Adicione uma bio criativa para que outros usuários possam te conhecer melhor!"}
                 </p>
                 
                 <div className="space-y-3">
@@ -446,7 +446,7 @@ export default function PerfilPage() {
                           <img
                             src={post.image}
                             alt="Imagem do post"
-                            className="rounded-lg w-full h-48 object-cover mb-3"
+                            className="rounded-lg max-h-80 mx-auto items-center  mb-3"
                           />
                         )}
                         <div className="flex gap-4 items-center text-sm text-gray-500">

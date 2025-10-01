@@ -36,6 +36,7 @@ origins = [
     "https://passa-a-bola-*.vercel.app",     # ADICIONE ESTA LINHA PARA TODOS OS SUBDOMÍNIOS
     "https://*.vercel.app",                  # ADICIONE ESTA LINHA PARA TODOS OS APPS VERCEL
     "https://passa-a-bola-vz9v.vercel.app",
+    "http://0.0.0.0:8000",
 ]
 
 app.add_middleware(
