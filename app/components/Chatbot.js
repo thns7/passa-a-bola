@@ -37,10 +37,10 @@ export default function Chatbot() {
         setIsLoading(true);
         
         setTimeout(() => {
-            setMessages([{ 
-                sender: 'bot', 
-                text: "Olá! Sou a Passinha, sua assistente de performance aqui no Passa Bola! 🎯\n\nComo posso te ajudar hoje?\n\n1. Tirar dúvidas sobre a plataforma\n2. Montar um plano de nutrição e treinos\n3. Aprender uma receita prática" 
-            }]);
+                setMessages([{ 
+                    sender: 'bot', 
+                    text: "Olá! Sou a Passinha, sua guia de performance aqui no Passa Bola! 🎯\n\nPosso te ajudar com:\n\n💪 Exemplos de rotinas de treino\n🍳 Receitas práticas para atletas  \n📊 Dicas de nutrição esportiva\n📱 Como usar a plataforma\n\nO que você precisa hoje?" 
+                }]);
             setIsLoading(false);
         }, 1000);
     };
@@ -93,50 +93,25 @@ export default function Chatbot() {
             });
             
             if (!response.ok) {
-                if (response.status === 404) {
-                    return "🔧 O chatbot está em manutenção. Volte em alguns minutos! 😊";
-                }
-                throw new Error(`Erro HTTP: ${response.status}`);
+                throw new Error(`Erro: ${response.status}`);
             }
             
             const data = await response.json();
             
-            if (data.success && data.response) {
+            // ✅ ACEITA QUALQUER RESPOSTA DA API
+            if (data.response) {
                 return data.response;
             } else {
-                return "Olá! Sou a Passinha 😊 Como posso te ajudar com o Passa Bola hoje?";
+                return "Olá! Sou a Passinha 🎯 Como posso te ajudar com performance no futebol feminino?";
             }
         } catch (error) {
-            console.error("Erro:", error);
-            return getFallbackResponse(userInput);
+            console.error("Erro de conexão:", error);
+            // 🔥 FALLBACK NEUTRO - não bloqueia planos
+            return "🔧 Estou ajustando meus sistemas! Normalmente crio planos de treino e nutrição completos. Tente novamente em instantes! 💪";
         }
-    };
+};
 
-    const getFallbackResponse = (userInput) => {
-        const input = userInput.toLowerCase();
-        
-        if (input.includes('post') || input.includes('comunidade') || input.includes('postar')) {
-            return "💬 Para fazer um post na comunidade:\n\n1. Vá na aba 'Comunidade' (ícone das pessoas)\n2. Clique no '+' no topo da tela\n3. Escreva seu texto e adicione fotos/vídeos\n4. Clique em 'Publicar'\n\nSeus posts aparecem automaticamente no seu perfil! 🎯";
-        }
-        else if (input.includes('plano') || input.includes('nutri') || input.includes('treino')) {
-            return "💪 Posso te dar dicas gerais! Para planos personalizados, recomendo consultar:\n\n• Nutricionista esportivo\n• Educador físico\n• Preparador físico\n\nPosso te ajudar com informações sobre a plataforma!";
-        }
-        else if (input.includes('receita') || input.includes('comida') || input.includes('alimentação')) {
-            return "🍳 Posso compartilhar que uma alimentação balanceada é essencial para atletas! Para receitas específicas, um nutricionista pode criar um plano ideal para suas necessidades. 😊";
-        }
-        else if (input.includes('evento') || input.includes('peneira') || input.includes('competição')) {
-            return "🏆 Para encontrar eventos e peneiras:\n\n1. Clique no ícone do troféu\n2. Veja o calendário de eventos\n3. Filtre por cidade e data\n4. Clique no evento para detalhes e inscrição\n\nBoa luck! ⚽";
-        }
-        else if (input.includes('perfil') || input.includes('editar') || input.includes('bio')) {
-            return "👤 Seu perfil é seu portfólio digital!\n\nPara editar:\n1. Clique no ícone de pessoa\n2. Toque em 'Editar Perfil'\n3. Atualize suas informações\n4. Salve as alterações\n\nSeus posts da comunidade aparecem automaticamente no feed do perfil!";
-        }
-        else if (input.includes('oi') || input.includes('olá') || input.includes('ola')) {
-            return "Olá! Sou a Passinha, sua assistente do Passa Bola! 🎯\n\nPosso te ajudar com:\n• Dúvidas sobre o app\n• Informações sobre futebol feminino\n• Navegação na plataforma\n\nEm que posso te ajudar?";
-        }
-        else {
-            return "🤔 Interessante! Posso te ajudar com:\n\n• Funcionalidades do app Passa Bola\n• Informações sobre futebol feminino\n• Dúvidas sobre a plataforma\n\nPode me contar mais sobre o que precisa?";
-        }
-    };
+
 
     return (
         <div className="fixed bottom-25 right-4 z-50 md:bottom-6 md:right-6">

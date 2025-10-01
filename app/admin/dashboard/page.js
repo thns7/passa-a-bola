@@ -21,6 +21,7 @@ import {
   Menu,
   X
 } from "lucide-react"
+import ExportMenu from "@/app/components/ExportButton"
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState(null)
@@ -523,10 +524,14 @@ const fetchEngagementData = async () => {
                     <FileText className="h-4 w-4 sm:h-5 sm:w-5" />
                     <span>Moderar Conteúdo</span>
                   </button>
-                  <button className="w-full text-left p-3 sm:p-4 rounded-lg sm:rounded-xl bg-gradient-to-r from-orange-50 to-amber-50 text-orange-700 hover:from-orange-100 hover:to-amber-100 transition-all duration-200 border border-orange-100 flex items-center space-x-2 sm:space-x-3 text-sm sm:text-base">
-                    <Download className="h-4 w-4 sm:h-5 sm:w-5" />
-                    <span>Exportar Dados</span>
-                  </button>
+                  <div className="w-full">
+                    <ExportMenu
+                      users={users}
+                      posts={posts}
+                      stats={stats}
+                      engagementData={engagementData}
+                    />
+                  </div>
                 </div>
               </div>
 
