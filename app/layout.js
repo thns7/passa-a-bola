@@ -1,4 +1,5 @@
 import "./globals.css";
+import ChatbotWrapper from "./components/ChatbotWrapper";
 
 export const metadata = {
   title: "Passa a Bola - Futebol Feminino",
@@ -30,6 +31,31 @@ export default function RootLayout({ children }) {
       </head>
       <body className="font-poppins" style={{ margin: 0, padding: 0, fontFamily: "'Poppins', sans-serif" }}>
         {children}
+        
+        <ChatbotWrapper />
+        
+        {/* Script para limpar service workers antigos */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                  for(let registration of registrations) {
+                    registration.unregister();
+                  }
+                });
+                
+                if ('caches' in window) {
+                  caches.keys().then(function(names) {
+                    for (let name of names) {
+                      caches.delete(name);
+                    }
+                  });
+                }
+              }
+            `,
+          }}
+        />
       </body>
     </html>
   );
