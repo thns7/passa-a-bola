@@ -1,5 +1,5 @@
 import "./globals.css";
-import Chatbot from "./components/Chatbot"; 
+import ChatbotWrapper from "./components/ChatbotWrapper";
 
 export const metadata = {
   title: "Passa a Bola - Futebol Feminino",
@@ -31,8 +31,8 @@ export default function RootLayout({ children }) {
       </head>
       <body className="font-poppins" style={{ margin: 0, padding: 0, fontFamily: "'Poppins', sans-serif" }}>
         {children}
-        {/* CHATBOT ADICIONADO AQUI */}
-        <Chatbot />
+        
+        <ChatbotWrapper />
         
         {/* Script para limpar service workers antigos */}
         <script
