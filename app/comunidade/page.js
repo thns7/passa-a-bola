@@ -446,7 +446,7 @@ export default function CommunityPage() {
               className="h-10 w-10 rounded-full object-cover"
             />
             <div>
-              <p className="text-sm font-semibold text-gray-900 hover:text-purple-600">
+              <p className="text-sm font-semibold text-gray-900 hover:text-[var(--primary-color)]">
                 {post.author}
               </p>
               <p className="text-xs text-gray-500">
@@ -690,7 +690,7 @@ export default function CommunityPage() {
                                 <span>{post.likes || 0}</span>
                               </button>
                               <span 
-                                className="text-gray-500 flex items-center gap-2 cursor-pointer hover:text-purple-600 transition-colors"
+                                className="text-gray-500 flex items-center gap-2 cursor-pointer hover:text-[var(--primary-color)] transition-colors"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   router.push(`/comments?id=${post.id}`);
@@ -738,7 +738,7 @@ export default function CommunityPage() {
                       setUserSearchTerm(e.target.value);
                       searchUsers(e.target.value);
                     }}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]"
                   />
                   {userSearchTerm && (
                     <button
@@ -783,7 +783,7 @@ export default function CommunityPage() {
                             <p className="font-semibold text-gray-900">{user.name}</p>
                             <p className="text-sm text-gray-500">@{user.username || "usuário"}</p>
                           </div>
-                          <button className="text-purple-600 text-sm font-medium hover:text-purple-700">
+                          <button className="text-[var(--primary-color)] text-sm font-medium hover:text-[var(--primary-color)]">
                             Ver perfil
                           </button>
                         </div>
@@ -817,7 +817,7 @@ export default function CommunityPage() {
                             <p className="font-semibold text-gray-900">{user.name}</p>
                             <p className="text-sm text-gray-500">@{user.username}</p>
                           </div>
-                          <span className="text-purple-600 text-sm">Seguindo</span>
+                          <span className="text-[var(--primary-color)] text-sm">Seguindo</span>
                         </div>
                       ))}
                     </div>

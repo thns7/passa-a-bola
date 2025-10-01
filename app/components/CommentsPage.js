@@ -29,6 +29,11 @@ export default function CommentsPage() {
   // Estado para o modal de perfil
   const [selectedUser, setSelectedUser] = useState(null);
 
+  // Estados para likes
+  const [isLiked, setIsLiked] = useState(false);
+  const [likesCount, setLikesCount] = useState(0);
+  const [likesLoading, setLikesLoading] = useState(false);
+
   useEffect(() => {
     const userData = localStorage.getItem("currentUser");
     if (userData) {
@@ -42,6 +47,7 @@ export default function CommentsPage() {
     if (postId) {
       fetchPost();
       fetchComments();
+      fetchLikes();
     } else {
       setPostError("ID do post não encontrado");
       setPostLoading(false);
@@ -141,6 +147,53 @@ export default function CommentsPage() {
       setCommentsError(error.message);
     } finally {
       setCommentsLoading(false);
+    }
+  };
+
+  // Função para buscar likes do post
+  const fetchLikes = async () => {
+    if (!user || !postId) return;
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/posts/${postId}/likes`);
+      if (res.ok) {
+        const likesData = await res.json();
+        const userLiked = likesData.likes && likesData.likes.includes(user.id);
+        setIsLiked(userLiked);
+        setLikesCount(likesData.likes_count || 0);
+      }
+    } catch (error) {
+      console.error("Erro ao buscar likes:", error);
+    }
+  };
+
+  // Função para curtir/descurtir o post
+  const handleLike = async () => {
+    if (!user || !postId || likesLoading) return;
+
+    setLikesLoading(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/posts/like`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          post_id: postId,
+          user_id: user.id
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setIsLiked(data.action === "added");
+        setLikesCount(data.post.likes_count);
+      } else {
+        throw new Error("Erro ao curtir post");
+      }
+    } catch (error) {
+      console.error("Erro ao curtir:", error);
+      alert("Erro ao curtir publicação. Tente novamente.");
+    } finally {
+      setLikesLoading(false);
     }
   };
 
@@ -386,19 +439,27 @@ export default function CommentsPage() {
                   <img
                     src={post.image}
                     alt="Post"
-                    className="rounded-lg max-h-80 mx-auto items-center  mb-3"
+                    className="rounded-xl w-full max-h-96 object-cover shadow-sm"
                   />
                 </div>
               )}
 
               {/* Stats do Post */}
               <div className="flex items-center gap-6 pt-4 border-t border-gray-100">
-                <div className="flex items-center gap-2 text-gray-500">
-                  <Heart className="h-4 w-4" />
-                  <span className="text-sm">{post.likes_count || 0} curtidas</span>
-                </div>
+                <button
+                  onClick={handleLike}
+                  disabled={likesLoading}
+                  className="flex items-center gap-2 text-gray-500 hover:text-red-600 transition-colors disabled:opacity-50"
+                >
+                  {isLiked ? (
+                    <Heart className="h-5 w-5 fill-red-600 text-red-600" />
+                  ) : (
+                    <Heart className="h-5 w-5" />
+                  )}
+                  <span className="text-sm">{likesCount} curtidas</span>
+                </button>
                 <div className="flex items-center gap-2 text-[var(--primary-color)]">
-                  <MessageCircle className="h-4 w-4" />
+                  <MessageCircle className="h-5 w-5" />
                   <span className="text-sm">{comments.length} comentários</span>
                 </div>
               </div>

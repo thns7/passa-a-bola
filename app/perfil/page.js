@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { MoreHorizontal, MapPin, Calendar, LogOut, Users } from "lucide-react";
+import { MoreHorizontal, MapPin, Calendar, LogOut, Users, X, MessageCircle } from "lucide-react";
 import BottomNav from "../components/BottomNav";
 import Header from "../components/Header";
 import UserProfileModal from "../components/UserProfileModal";
@@ -56,7 +56,9 @@ export default function PerfilPage() {
               image: post.image,
               likes: post.likes_count || 0,
               likedBy: likedByUser ? [user?.name] : [],
-              created_at: post.created_at
+              created_at: post.created_at,
+              user_name: post.user_name,
+              user_id: post.user_id
             };
           })
         );
@@ -102,6 +104,17 @@ export default function PerfilPage() {
     router.push("/login");
   };
 
+  const handlePostClick = (postId) => {
+    router.push(`/comments?id=${postId}`);
+  };
+
+  const handleUserClick = (userId) => {
+    // Fecha o modal de seguidores/seguindo e abre o modal do perfil
+    setShowFollowers(false);
+    setShowFollowing(false);
+    setSelectedUser(userId);
+  };
+
   const FollowersModal = () => (
     <div className="fixed inset-0 bg-[#0000006d] flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-xl max-w-md w-full max-h-[70vh] overflow-hidden">
@@ -109,7 +122,7 @@ export default function PerfilPage() {
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-semibold">Seguidores</h3>
             <button onClick={() => setShowFollowers(false)} className="text-gray-500 hover:text-gray-700">
-              <MoreHorizontal className="h-5 w-5" />
+              <X className="h-5 w-5" />
             </button>
           </div>
         </div>
@@ -123,8 +136,8 @@ export default function PerfilPage() {
               {followers.map((follower) => (
                 <div 
                   key={follower.id} 
-                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer"
-                  onClick={() => setSelectedUser(follower.id)}
+                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                  onClick={() => handleUserClick(follower.id)}
                 >
                   <img
                     src={follower.avatar || "/perfilPadrao.jpg"}
@@ -151,7 +164,7 @@ export default function PerfilPage() {
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-semibold">Seguindo</h3>
             <button onClick={() => setShowFollowing(false)} className="text-gray-500 hover:text-gray-700">
-              <MoreHorizontal className="h-5 w-5" />
+              <X className="h-5 w-5" />
             </button>
           </div>
         </div>
@@ -165,8 +178,8 @@ export default function PerfilPage() {
               {following.map((followed) => (
                 <div 
                   key={followed.id} 
-                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer"
-                  onClick={() => setSelectedUser(followed.id)}
+                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                  onClick={() => handleUserClick(followed.id)}
                 >
                   <img
                     src={followed.avatar || "/perfilPadrao.jpg"}
@@ -177,7 +190,7 @@ export default function PerfilPage() {
                     <p className="font-semibold text-gray-900">{followed.name}</p>
                     <p className="text-sm text-gray-500">@{followed.username}</p>
                   </div>
-                  <span className="text-purple-600 text-sm">Seguindo</span>
+                  <span className="text-[var(--primary-color)] text-sm">Seguindo</span>
                 </div>
               ))}
             </div>
@@ -276,13 +289,13 @@ export default function PerfilPage() {
               <div className="space-y-3">
                 {user.location && (
                   <div className="flex items-center gap-3 text-gray-600">
-                    <MapPin className="h-4 w-4 text-purple-500" />
+                    <MapPin className="h-4 w-4 text-[var(--primary-color)]" />
                     <span className="text-sm">{user.location}</span>
                   </div>
                 )}
                 
                 <div className="flex items-center gap-3 text-gray-600">
-                  <Calendar className="h-4 w-4 text-purple-500" />
+                  <Calendar className="h-4 w-4 text-[var(--primary-color)]" />
                   <span className="text-sm">Membro desde 2024</span>
                 </div>
               </div>
@@ -300,7 +313,11 @@ export default function PerfilPage() {
             ) : posts.length > 0 ? (
               <div className="space-y-4">
                 {posts.map((post) => (
-                  <div key={post.id} className="bg-white rounded-xl shadow p-4">
+                  <div 
+                    key={post.id} 
+                    className="bg-white rounded-xl shadow p-4 cursor-pointer hover:shadow-md transition-shadow"
+                    onClick={() => handlePostClick(post.id)}
+                  >
                     <p className="mb-3 break-words whitespace-pre-wrap">{post.text}</p>
                     {post.image && (
                       <img
@@ -311,7 +328,11 @@ export default function PerfilPage() {
                     )}
                     <div className="flex gap-4 items-center text-sm mt-3 pt-2 border-t border-gray-100">
                       <span className="flex items-center gap-1 text-gray-500">
-                        ❤️ {post.likes || 0} curtidas
+                       {post.likes || 0} curtidas
+                      </span>
+                      <span className="flex items-center gap-1 text-gray-500 hover:text-[var(--primary-color)]">
+                        <MessageCircle className="h-4 w-4" />
+                        Comentar
                       </span>
                       <span className="text-gray-500 text-xs">
                         {new Date(post.created_at).toLocaleDateString('pt-BR')}
@@ -388,21 +409,21 @@ export default function PerfilPage() {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600">Publicações</span>
-                    <span className="font-semibold text-purple-600">{posts.length}</span>
+                    <span className="font-semibold text-[var(--primary-color)]">{posts.length}</span>
                   </div>
                   <div 
                     className="flex justify-between items-center cursor-pointer hover:opacity-80 transition-opacity"
                     onClick={() => setShowFollowers(true)}
                   >
                     <span className="text-gray-600">Seguidores</span>
-                    <span className="font-semibold text-purple-600">{followersCount}</span>
+                    <span className="font-semibold text-[var(--primary-color)]">{followersCount}</span>
                   </div>
                   <div 
                     className="flex justify-between items-center cursor-pointer hover:opacity-80 transition-opacity"
                     onClick={() => setShowFollowing(true)}
                   >
                     <span className="text-gray-600">Seguindo</span>
-                    <span className="font-semibold text-purple-600">{followingCount}</span>
+                    <span className="font-semibold text-[var(--primary-color)]">{followingCount}</span>
                   </div>
                 </div>
               </div>
@@ -416,13 +437,13 @@ export default function PerfilPage() {
                 <div className="space-y-3">
                   {user.location && (
                     <div className="flex items-center gap-3 text-gray-600">
-                      <MapPin className="h-4 w-4 text-purple-500" />
+                      <MapPin className="h-4 w-4 text-[var(--primary-color)]" />
                       <span className="text-sm">{user.location}</span>
                     </div>
                   )}
                   
                   <div className="flex items-center gap-3 text-gray-600">
-                    <Calendar className="h-4 w-4 text-purple-500" />
+                    <Calendar className="h-4 w-4 text-[var(--primary-color)]" />
                     <span className="text-sm">Membro desde 2024</span>
                   </div>
                 </div>
@@ -435,12 +456,16 @@ export default function PerfilPage() {
                 
                 {loading ? (
                   <div className="flex justify-center py-12">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--primary-color)]"></div>
                   </div>
                 ) : posts.length > 0 ? (
                   <div className="grid grid-cols-1 gap-4">
                     {posts.map((post) => (
-                      <div key={post.id} className="bg-gray-50 rounded-xl p-4">
+                      <div 
+                        key={post.id} 
+                        className="bg-gray-50 rounded-xl p-4 cursor-pointer hover:bg-gray-100 transition-colors"
+                        onClick={() => handlePostClick(post.id)}
+                      >
                         <p className="mb-3 break-words whitespace-pre-wrap">{post.text}</p>
                         {post.image && (
                           <img
@@ -451,7 +476,11 @@ export default function PerfilPage() {
                         )}
                         <div className="flex gap-4 items-center text-sm text-gray-500">
                           <span className="flex items-center gap-1">
-                            ❤️ {post.likes || 0} curtidas
+                           {post.likes || 0} curtidas
+                          </span>
+                          <span className="flex items-center gap-1 text-gray-500 hover:text-[var(--primary-color)]">
+                            <MessageCircle className="h-4 w-4" />
+                            Comentar
                           </span>
                           <span>{new Date(post.created_at).toLocaleDateString('pt-BR')}</span>
                         </div>

@@ -323,7 +323,7 @@ export default function UserProfileModal({ userId, currentUser, onClose, onFollo
             <div className="flex justify-between items-center">
               <button 
                 onClick={handleBackFromComments}
-                className="text-[var(--primary-color)] hover:text-purple-700 flex items-center gap-2"
+                className="text-[var(--primary-color)] hover:text-[var(--primary-color)] flex items-center gap-2"
               >
                 ← Voltar
               </button>
@@ -477,7 +477,7 @@ export default function UserProfileModal({ userId, currentUser, onClose, onFollo
               <button 
                 onClick={handleAddComment} 
                 disabled={loading || !newComment.trim()}
-                className="bg-purple-600 text-white px-4 py-2 rounded text-sm disabled:opacity-50 hover:bg-purple-700 transition-colors"
+                className="bg-[var(--primary-color)] text-white px-4 py-2 rounded text-sm disabled:opacity-50 hover:bg-purple-700 transition-colors"
               >
                 {loading ? "..." : "Enviar"}
               </button>
@@ -502,7 +502,7 @@ export default function UserProfileModal({ userId, currentUser, onClose, onFollo
     return (
       <div className="fixed inset-0 bg-[#0000006d] flex items-center justify-center z-50 p-4">
         <div className="bg-white rounded-2xl p-8">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--primary-color)] mx-auto"></div>
         </div>
       </div>
     );
@@ -533,10 +533,10 @@ export default function UserProfileModal({ userId, currentUser, onClose, onFollo
     <>
       <div className="fixed inset-0 bg-[#0000006d] flex items-center justify-center z-50 p-4">
         <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
-          <div className="relative bg-[var(--primary-color)] p-6">
+          <div className="relative bg-[var(--primary-color)] p-7">
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 text-white p-2 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30"
+              className="absolute top-2 right-4 text-white p-2 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30"
             >
               <X className="h-5 w-5" />
             </button>
@@ -549,7 +549,7 @@ export default function UserProfileModal({ userId, currentUser, onClose, onFollo
               />
               <div className="flex-1">
                 <h2 className="text-2xl font-bold text-white">{user.name}</h2>
-                <p className="text-purple-200">@{user.username || user.name?.toLowerCase().replace(/\s+/g, '')}</p>
+                <p className="text-[var(--primary-color)]">@{user.username || user.name?.toLowerCase().replace(/\s+/g, '')}</p>
               </div>
               
               {currentUser && currentUser.id !== userId && (
@@ -558,7 +558,7 @@ export default function UserProfileModal({ userId, currentUser, onClose, onFollo
                   className={`px-6 py-2 rounded-full font-medium transition-colors ${
                     isFollowing 
                       ? "bg-white text-[var(--primary-color)] hover:bg-gray-100" 
-                      : "bg-purple-500 text-white hover-[var(--primary-color)]"
+                      : "bg-[var(--primary-color)] text-white hover-[var(--primary-color)]"
                   }`}
                 >
                   {isFollowing ? (
@@ -648,7 +648,7 @@ export default function UserProfileModal({ userId, currentUser, onClose, onFollo
                           <Heart className="h-4 w-4" />
                           {post.likes}
                         </span>
-                        <span className="flex items-center gap-1 text-[var(--primary-color)]">
+                        <span className="flex items-center gap-1 text-gray-500 hover:text-[var(--primary-color)]">
                           <MessageCircle className="h-4 w-4" />
                           Comentar
                         </span>
