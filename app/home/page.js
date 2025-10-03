@@ -214,7 +214,7 @@ export default function HomePage() {
       </div>
 
       {/* Desktop */}
-      <div className="hidden md:flex md:top-24 md:gap-6 md:p-12 relative">
+      <div className="hidden md:flex md:pt-35 md:gap-6 md:p-12 relative">
         {/* Coluna esquerda fixa */}
         <div className="fixed top-20 left-12 w-[25%] space-y-6">
           <TituloAlt titulo="Ao vivo" />

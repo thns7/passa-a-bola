@@ -549,16 +549,16 @@ export default function UserProfileModal({ userId, currentUser, onClose, onFollo
               />
               <div className="flex-1">
                 <h2 className="text-2xl font-bold text-white">{user.name}</h2>
-                <p className="text-[var(--primary-color)]">@{user.username || user.name?.toLowerCase().replace(/\s+/g, '')}</p>
+                <p className="text-purple-200">@{user.username || user.name?.toLowerCase().replace(/\s+/g, '')}</p>
               </div>
               
               {currentUser && currentUser.id !== userId && (
                 <button
                   onClick={handleFollow}
-                  className={`px-6 py-2 rounded-full font-medium transition-colors ${
+                  className={`cursor-pointer px-6 py-2 rounded-full font-medium transition-colors ${
                     isFollowing 
                       ? "bg-white text-[var(--primary-color)] hover:bg-gray-100" 
-                      : "bg-[var(--primary-color)] text-white hover-[var(--primary-color)]"
+                      : "bg-purple-700 text-white hover-[var(--primary-color)]"
                   }`}
                 >
                   {isFollowing ? (
@@ -610,10 +610,6 @@ export default function UserProfileModal({ userId, currentUser, onClose, onFollo
                   <span>{user.location}</span>
                 </div>
               )}
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                <span>Membro desde 2024</span>
-              </div>
             </div>
           </div>
 
@@ -650,7 +646,7 @@ export default function UserProfileModal({ userId, currentUser, onClose, onFollo
                         </span>
                         <span className="flex items-center gap-1 text-gray-500 hover:text-[var(--primary-color)]">
                           <MessageCircle className="h-4 w-4" />
-                          Comentar
+                          Comentarios
                         </span>
                         <span>{new Date(post.created_at).toLocaleDateString('pt-BR')}</span>
                       </div>

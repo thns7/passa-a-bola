@@ -223,7 +223,7 @@ export default function EditarPerfilPage() {
                 </div>
               </div>
 
-              <div className="flex gap-3 pt-4">
+              <div className="flex mb-35 gap-3 pt-4">
                 <button
                   type="button"
                   onClick={() => router.back()}

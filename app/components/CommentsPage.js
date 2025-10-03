@@ -29,28 +29,39 @@ export default function CommentsPage() {
   // Estado para o modal de perfil
   const [selectedUser, setSelectedUser] = useState(null);
 
-  // Estados para likes
+  // Estados para likes - atualizados conforme CommunityPage
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
   const [likesLoading, setLikesLoading] = useState(false);
+  const [likesInitialLoading, setLikesInitialLoading] = useState(true);
 
   useEffect(() => {
     const userData = localStorage.getItem("currentUser");
     if (userData) {
       try { 
-        setUser(JSON.parse(userData)); 
+        const userObj = JSON.parse(userData);
+        setUser(userObj);
+        
+        if (postId) {
+          // Carregar likes primeiro, pois não depende do post
+          fetchLikes(userObj.id);
+          fetchPost();
+          fetchComments();
+        } else {
+          setPostError("ID do post não encontrado");
+          setPostLoading(false);
+          setLikesInitialLoading(false);
+        }
       } catch { 
         setUser(null); 
+        setLikesInitialLoading(false);
       }
-    }
-
-    if (postId) {
-      fetchPost();
-      fetchComments();
-      fetchLikes();
     } else {
-      setPostError("ID do post não encontrado");
-      setPostLoading(false);
+      setLikesInitialLoading(false);
+      if (postId) {
+        fetchPost();
+        fetchComments();
+      }
     }
   }, [postId]);
 
@@ -150,24 +161,52 @@ export default function CommentsPage() {
     }
   };
 
-  // Função para buscar likes do post
-  const fetchLikes = async () => {
-    if (!user || !postId) return;
-
+  // Função para buscar likes do post - ATUALIZADA para carregar primeiro
+  const fetchLikes = async (userId) => {
+    setLikesInitialLoading(true);
     try {
       const res = await fetch(`${API_BASE_URL}/posts/${postId}/likes`);
       if (res.ok) {
         const likesData = await res.json();
-        const userLiked = likesData.likes && likesData.likes.includes(user.id);
+        console.log("Likes data:", likesData); // Para debug
+        
+        // Verificar se o usuário atual curtiu o post
+        const userLiked = likesData.likes && Array.isArray(likesData.likes) 
+          ? likesData.likes.includes(userId)
+          : false;
+        
         setIsLiked(userLiked);
-        setLikesCount(likesData.likes_count || 0);
+        setLikesCount(likesData.likes_count || likesData.likes?.length || 0);
+      } else {
+        // Se der erro, tentar buscar do próprio post como fallback
+        await fetchLikesFromPost();
       }
     } catch (error) {
       console.error("Erro ao buscar likes:", error);
+      // Fallback: buscar likes do próprio post
+      await fetchLikesFromPost();
+    } finally {
+      setLikesInitialLoading(false);
     }
   };
 
-  // Função para curtir/descurtir o post
+  // Fallback: buscar informações de likes do próprio post
+  const fetchLikesFromPost = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/posts/${postId}`);
+      if (res.ok) {
+        const postData = await res.json();
+        setLikesCount(postData.likes_count || 0);
+        setIsLiked(false); // Não podemos determinar se o usuário curtiu sem userId
+      }
+    } catch (error) {
+      console.error("Erro ao buscar likes do post:", error);
+      setLikesCount(0);
+      setIsLiked(false);
+    }
+  };
+
+  // Função para curtir/descurtir o post - ATUALIZADA conforme CommunityPage
   const handleLike = async () => {
     if (!user || !postId || likesLoading) return;
 
@@ -349,8 +388,52 @@ export default function CommentsPage() {
       <div className="h-4 bg-gray-200 rounded mb-3"></div>
       <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
       <div className="h-48 bg-gray-200 rounded-lg"></div>
+      {/* Skeleton para os botões de like e comentário */}
+      <div className="flex items-center gap-6 pt-4 border-t border-gray-100">
+        <div className="flex items-center gap-2">
+          <div className="h-5 w-5 bg-gray-300 rounded"></div>
+          <div className="h-4 bg-gray-200 rounded w-12"></div>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="h-5 w-5 bg-gray-300 rounded"></div>
+          <div className="h-4 bg-gray-200 rounded w-16"></div>
+        </div>
+      </div>
     </div>
   );
+
+  // Componente para o botão de like com loading
+  const LikeButton = () => {
+    if (likesInitialLoading) {
+      return (
+        <div className="flex items-center gap-2 text-gray-400">
+          <div className="h-5 w-5 bg-gray-300 rounded-full animate-pulse"></div>
+          <div className="h-4 bg-gray-200 rounded w-12 animate-pulse"></div>
+        </div>
+      );
+    }
+
+    return (
+      <button
+        onClick={handleLike}
+        disabled={likesLoading}
+        className={`flex items-center gap-2 transition-colors disabled:opacity-50 ${
+          isLiked 
+            ? "text-red-600 hover:text-red-700" 
+            : "text-gray-500 hover:text-red-600"
+        }`}
+      >
+        {likesLoading ? (
+          <div className="h-5 w-5 bg-gray-300 rounded-full animate-pulse"></div>
+        ) : isLiked ? (
+          <Heart className="h-5 w-5 fill-red-600 text-red-600" />
+        ) : (
+          <Heart className="h-5 w-5" />
+        )}
+        <span className="text-sm">{likesCount} curtidas</span>
+      </button>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -446,18 +529,7 @@ export default function CommentsPage() {
 
               {/* Stats do Post */}
               <div className="flex items-center gap-6 pt-4 border-t border-gray-100">
-                <button
-                  onClick={handleLike}
-                  disabled={likesLoading}
-                  className="flex items-center gap-2 text-gray-500 hover:text-red-600 transition-colors disabled:opacity-50"
-                >
-                  {isLiked ? (
-                    <Heart className="h-5 w-5 fill-red-600 text-red-600" />
-                  ) : (
-                    <Heart className="h-5 w-5" />
-                  )}
-                  <span className="text-sm">{likesCount} curtidas</span>
-                </button>
+                <LikeButton />
                 <div className="flex items-center gap-2 text-[var(--primary-color)]">
                   <MessageCircle className="h-5 w-5" />
                   <span className="text-sm">{comments.length} comentários</span>

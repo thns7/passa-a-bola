@@ -293,11 +293,6 @@ export default function PerfilPage() {
                     <span className="text-sm">{user.location}</span>
                   </div>
                 )}
-                
-                <div className="flex items-center gap-3 text-gray-600">
-                  <Calendar className="h-4 w-4 text-[var(--primary-color)]" />
-                  <span className="text-sm">Membro desde 2024</span>
-                </div>
               </div>
             </div>
           </div>
@@ -441,11 +436,6 @@ export default function PerfilPage() {
                       <span className="text-sm">{user.location}</span>
                     </div>
                   )}
-                  
-                  <div className="flex items-center gap-3 text-gray-600">
-                    <Calendar className="h-4 w-4 text-[var(--primary-color)]" />
-                    <span className="text-sm">Membro desde 2024</span>
-                  </div>
                 </div>
               </div>
             </div>
@@ -480,7 +470,7 @@ export default function PerfilPage() {
                           </span>
                           <span className="flex items-center gap-1 text-gray-500 hover:text-[var(--primary-color)]">
                             <MessageCircle className="h-4 w-4" />
-                            Comentar
+                            Comentarios
                           </span>
                           <span>{new Date(post.created_at).toLocaleDateString('pt-BR')}</span>
                         </div>

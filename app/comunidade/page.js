@@ -6,6 +6,7 @@ import Header from "../components/Header";
 import BottomNav from "../components/BottomNav";
 import Script from "next/script";
 import UserProfileModal from "../components/UserProfileModal";
+import {MessageCircle , Heart } from "lucide-react";
 
 const API_BASE_URL = "https://passa-a-bola.onrender.com";
 const MAX_POST_LENGTH = 500;
@@ -674,7 +675,7 @@ export default function CommunityPage() {
                               </>
                             )}
 
-                            <div className="flex gap-6 items-center text-sm">
+                            <div className="flex gap-6 items-center text-sm text-gray-500">
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -683,11 +684,11 @@ export default function CommunityPage() {
                                 className="flex items-center gap-2 focus:outline-none hover:text-red-600"
                               >
                                 {post.likedBy?.includes(user.name) ? (
-                                  <span className="text-red-600 text-xl">❤️</span>
+                                  <Heart className="h-5 w-5 fill-red-600 text-red-600" />
                                 ) : (
-                                  <span className="text-gray-400 text-xl">🤍</span>
+                                  <Heart className="h-5 w-5" />
                                 )}
-                                <span>{post.likes || 0}</span>
+                                <span>{post.likes || 0} Curtidas</span>
                               </button>
                               <span 
                                 className="text-gray-500 flex items-center gap-2 cursor-pointer hover:text-[var(--primary-color)] transition-colors"
@@ -696,9 +697,11 @@ export default function CommunityPage() {
                                   router.push(`/comments?id=${post.id}`);
                                 }}
                               >
-                                💬 {commentsCount[post.id] || 0} comentários
+                                <MessageCircle className="h-4 w-4" />
+                                {commentsCount[post.id] || 0} comentários
                               </span>
                             </div>
+                            
                           </div>
                         </div>
 
@@ -831,7 +834,7 @@ export default function CommunityPage() {
 
       {/* Modal de Nova Publicação (mantido igual) */}
       {showPostModal && (
-        <div className="fixed inset-0 bg-[#0000006d] flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-[#0000006d] flex items-center justify-center z-100 p-4">
           <div className="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex justify-between items-center mb-4">
