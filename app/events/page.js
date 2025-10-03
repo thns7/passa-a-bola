@@ -72,7 +72,7 @@ export default function HomePage() {
                     {ev.data} • {ev.hora}
                   </p>
 
-                  {/* Botão Inscreva-se */}
+                  {/* Botão Inscreva-se - IDs 1, 2, 3... */}
                   {index < 2 && (
                     <button
                       onClick={() => router.push(`/events/${ev.id}/inscricao`)}
@@ -108,10 +108,10 @@ export default function HomePage() {
                   </p>
                   <p className="text-xs text-gray-500">{c.data}</p>
 
-                  {/* Botão Inscreva-se */}
+                  {/* Botão Inscreva-se - IDs 101, 102, 103... */}
                   {index < 2 && (
                     <button
-                      onClick={() => router.push(`/events/${c.id}/inscricao`)}
+                      onClick={() => router.push(`/events/${100 + parseInt(c.id)}/inscricao`)}
                       className="mt-2 w-full bg-purple-800 text-white py-1 rounded text-sm hover:bg-purple-700 transition"
                     >
                       Inscreva-se

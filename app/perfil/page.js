@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { MoreHorizontal, MapPin, Calendar, LogOut, Users, X, MessageCircle } from "lucide-react";
+import { MoreHorizontal, MapPin, Calendar, LogOut, Users, Crown, Check, Star, Zap, X } from "lucide-react";
 import BottomNav from "../components/BottomNav";
 import Header from "../components/Header";
 import UserProfileModal from "../components/UserProfileModal";
@@ -21,6 +21,8 @@ export default function PerfilPage() {
   const [following, setFollowing] = useState([]);
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [hasPremium, setHasPremium] = useState(false); // Estado temporário
   const router = useRouter();
 
   useEffect(() => {
@@ -31,10 +33,19 @@ export default function PerfilPage() {
       fetchUserPosts(parsedUser.id);
       fetchFollowers(parsedUser.id);
       fetchFollowing(parsedUser.id);
+      
+      // Temporário: verificar se usuário tem premium (mock)
+      checkPremiumStatus(parsedUser.id);
     } else {
       router.push("/login");
     }
   }, [router]);
+
+  // Função temporária - depois integra com backend
+  const checkPremiumStatus = (userId) => {
+    // Mock - sempre false por enquanto
+    setHasPremium(false);
+  };
 
   const fetchUserPosts = async (userId) => {
     try {
@@ -56,9 +67,7 @@ export default function PerfilPage() {
               image: post.image,
               likes: post.likes_count || 0,
               likedBy: likedByUser ? [user?.name] : [],
-              created_at: post.created_at,
-              user_name: post.user_name,
-              user_id: post.user_id
+              created_at: post.created_at
             };
           })
         );
@@ -104,16 +113,181 @@ export default function PerfilPage() {
     router.push("/login");
   };
 
-  const handlePostClick = (postId) => {
-    router.push(`/comments?id=${postId}`);
+  const handleSubscribe = () => {
+    // Temporário - só abre o modal
+    setShowPremiumModal(true);
   };
 
-  const handleUserClick = (userId) => {
-    // Fecha o modal de seguidores/seguindo e abre o modal do perfil
-    setShowFollowers(false);
-    setShowFollowing(false);
-    setSelectedUser(userId);
+  // COMPONENTE DO CARD PREMIUM
+  const PremiumCard = () => {
+    if (hasPremium) {
+      return (
+        <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl shadow-lg p-6 text-white mb-6">
+          <div className="flex items-center gap-3 mb-4">
+            <Crown className="h-8 w-8 text-yellow-300" />
+            <div>
+              <h3 className="text-xl font-bold">Torcedor Elite ✅</h3>
+              <p className="text-green-100 text-sm">Sua assinatura está ativa!</p>
+            </div>
+          </div>
+          <p className="text-sm mb-4">Aproveite todos os benefícios premium!</p>
+          <div className="space-y-2 text-sm">
+            <div className="flex items-center gap-2">
+              <Check className="h-4 w-4 text-green-300" />
+              <span>IA Ilimitada Ativa</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Check className="h-4 w-4 text-green-300" />
+              <span>Lembretes Inteligentes</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Check className="h-4 w-4 text-green-300" />
+              <span>Arquivo Histórico Completo</span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="bg-gradient-to-br from-purple-600 to-pink-500 rounded-2xl shadow-lg p-6 text-white mb-6">
+        <div className="flex items-center gap-3 mb-4">
+          <Crown className="h-8 w-8 text-yellow-300" />
+          <div>
+            <h3 className="text-xl font-bold">Torcedor Elite</h3>
+            <p className="text-purple-100 text-sm">Experiência premium completa</p>
+          </div>
+        </div>
+        
+        <div className="space-y-3 mb-6">
+  <div className="flex items-center gap-2">
+    <Check className="h-4 w-4 text-green-300" />
+    <span className="text-sm">IA Personalizada Ilimitada</span>
+  </div>
+  <div className="flex items-center gap-2">
+    <Check className="h-4 w-4 text-green-300" />
+    <span className="text-sm">Lembretes Inteligentes</span>
+  </div>
+  <div className="flex items-center gap-2">
+    <Check className="h-4 w-4 text-green-300" />
+    <span className="text-sm">Arquivo Histórico Completo</span>
+  </div>
+  <div className="flex items-center gap-2">
+    <Check className="h-4 w-4 text-green-300" />
+    <span className="text-sm">Notícias Antecipadas</span>
+  </div>
+  <div className="flex items-center gap-2">
+    <Check className="h-4 w-4 text-green-300" />
+    <span className="text-sm">Descontos Exclusivos</span>
+  </div>
+  {/* NOVOS BENEFÍCIOS PARA JOGADORAS */}
+  <div className="flex items-center gap-2">
+    <Check className="h-4 w-4 text-green-300" />
+    <span className="text-sm">Portfólio Profissional</span>
+  </div>
+  <div className="flex items-center gap-2">
+    <Check className="h-4 w-4 text-green-300" />
+    <span className="text-sm">Perfil Verificado</span>
+  </div>
+</div>
+        
+        <button
+          onClick={handleSubscribe}
+          className="w-full bg-yellow-400 text-purple-900 font-bold py-3 px-4 rounded-xl hover:bg-yellow-300 transition-colors flex items-center justify-center gap-2"
+        >
+          <Star className="h-5 w-5" />
+          Obter Torcedor Elite
+        </button>
+      </div>
+    );
   };
+
+  // MODAL PREMIUM
+  const PremiumModal = () => (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-xl max-w-md w-full">
+        <div className="bg-gradient-to-r from-purple-600 to-pink-500 rounded-t-2xl p-6 text-white text-center relative">
+          <button 
+            onClick={() => setShowPremiumModal(false)}
+            className="absolute top-4 right-4 text-white hover:text-gray-200"
+          >
+            <X className="h-5 w-5" />
+          </button>
+          <Crown className="h-12 w-12 mx-auto mb-3 text-yellow-300" />
+          <h2 className="text-2xl font-bold">Torcedor Elite</h2>
+          <p className="text-purple-100">Upgrade para a experiência completa</p>
+        </div>
+        
+        <div className="p-6">
+          <div className="space-y-4 mb-6">
+            <div className="flex items-center gap-3">
+              <Zap className="h-5 w-5 text-green-500" />
+              <div>
+                <p className="font-semibold">IA Ilimitada</p>
+                <p className="text-sm text-gray-600">Acesso sem restrições à nossa IA especializada</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <Zap className="h-5 w-5 text-green-500" />
+              <div>
+                <p className="font-semibold">Lembretes Inteligentes</p>
+                <p className="text-sm text-gray-600">Notificações personalizadas dos seus times</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <Zap className="h-5 w-5 text-green-500" />
+              <div>
+                <p className="font-semibold">Conteúdo Exclusivo</p>
+                <p className="text-sm text-gray-600">Arquivo histórico e notícias antecipadas</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <Zap className="h-5 w-5 text-green-500" />
+              <div>
+                <p className="font-semibold">Vantagens Exclusivas</p>
+                <p className="text-sm text-gray-600">Descontos e benefícios com parceiros</p>
+              </div>
+            </div>
+             <div className="flex items-center gap-3">
+    <Zap className="h-5 w-5 text-green-500" />
+    <div>
+      <p className="font-semibold">Portfólio Profissional</p>
+      <p className="text-sm text-gray-600">Perfil verificado, estatísticas e visibilidade para olheiros</p>
+    </div>
+  </div>
+          </div>
+          
+          <div className="bg-gray-50 rounded-xl p-4 mb-6">
+            <div className="text-center">
+              <div className="flex items-baseline justify-center gap-1">
+                <span className="text-3xl font-bold text-gray-900">R$ 19,90</span>
+                <span className="text-gray-600">/mês</span>
+              </div>
+              <p className="text-sm text-gray-600 mt-1">ou R$ 167,90/ano (economize 30%)</p>
+            </div>
+          </div>
+          
+          <div className="space-y-3">
+  <button
+    onClick={() => router.push("/checkout-premium")}
+    className="w-full bg-purple-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-purple-700 transition-colors"
+  >
+    Assinar Agora
+  </button>
+  <button
+    onClick={() => setShowPremiumModal(false)}
+    className="w-full bg-gray-200 text-gray-700 font-medium py-3 px-4 rounded-xl hover:bg-gray-300 transition-colors"
+  >
+    Talvez Depois
+  </button>
+</div>
+        </div>
+      </div>
+    </div>
+  );
 
   const FollowersModal = () => (
     <div className="fixed inset-0 bg-[#0000006d] flex items-center justify-center z-50 p-4">
@@ -122,7 +296,7 @@ export default function PerfilPage() {
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-semibold">Seguidores</h3>
             <button onClick={() => setShowFollowers(false)} className="text-gray-500 hover:text-gray-700">
-              <X className="h-5 w-5" />
+              <MoreHorizontal className="h-5 w-5" />
             </button>
           </div>
         </div>
@@ -136,8 +310,8 @@ export default function PerfilPage() {
               {followers.map((follower) => (
                 <div 
                   key={follower.id} 
-                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-                  onClick={() => handleUserClick(follower.id)}
+                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer"
+                  onClick={() => setSelectedUser(follower.id)}
                 >
                   <img
                     src={follower.avatar || "/perfilPadrao.jpg"}
@@ -164,7 +338,7 @@ export default function PerfilPage() {
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-semibold">Seguindo</h3>
             <button onClick={() => setShowFollowing(false)} className="text-gray-500 hover:text-gray-700">
-              <X className="h-5 w-5" />
+              <MoreHorizontal className="h-5 w-5" />
             </button>
           </div>
         </div>
@@ -178,8 +352,8 @@ export default function PerfilPage() {
               {following.map((followed) => (
                 <div 
                   key={followed.id} 
-                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-                  onClick={() => handleUserClick(followed.id)}
+                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer"
+                  onClick={() => setSelectedUser(followed.id)}
                 >
                   <img
                     src={followed.avatar || "/perfilPadrao.jpg"}
@@ -190,7 +364,7 @@ export default function PerfilPage() {
                     <p className="font-semibold text-gray-900">{followed.name}</p>
                     <p className="text-sm text-gray-500">@{followed.username}</p>
                   </div>
-                  <span className="text-[var(--primary-color)] text-sm">Seguindo</span>
+                  <span className="text-purple-600 text-sm">Seguindo</span>
                 </div>
               ))}
             </div>
@@ -215,7 +389,7 @@ export default function PerfilPage() {
         <div className="w-full mx-auto min-h-screen"> 
           <div className="relative bg-[var(--primary-color)] pt-6 pb-20">
             <div className="px-4">
-              <div className="flex justify-between items-start  mb-4">
+              <div className="flex justify-between items-start mb-4">
                 <span></span>
                 <div className="flex gap-2">
                   <button
@@ -226,7 +400,7 @@ export default function PerfilPage() {
                   </button>
                   <button
                     onClick={handleLogout}
-                    className="text-white p-2 bg-red-400 rounded-full  backdrop-blur-sm"
+                    className="text-white p-2 bg-red-400 rounded-full backdrop-blur-sm"
                   >
                     <LogOut className="h-5 w-5" />
                   </button>
@@ -280,7 +454,12 @@ export default function PerfilPage() {
             </div>
           </div>
 
-          <div className="px-4 mt-6">
+          {/* CARD PREMIUM NO MOBILE */}
+          <div className="px-4 mt-4">
+            <PremiumCard />
+          </div>
+
+          <div className="px-4 mt-4">
             <div className="bg-white rounded-2xl shadow-sm p-6">
               <p className="text-gray-700 leading-relaxed mb-4">
                 {user.bio || "Adicione uma bio criativa para que outros usuários possam te conhecer melhor!"}
@@ -289,10 +468,15 @@ export default function PerfilPage() {
               <div className="space-y-3">
                 {user.location && (
                   <div className="flex items-center gap-3 text-gray-600">
-                    <MapPin className="h-4 w-4 text-[var(--primary-color)]" />
+                    <MapPin className="h-4 w-4 text-purple-500" />
                     <span className="text-sm">{user.location}</span>
                   </div>
                 )}
+                
+                <div className="flex items-center gap-3 text-gray-600">
+                  <Calendar className="h-4 w-4 text-purple-500" />
+                  <span className="text-sm">Membro desde 2024</span>
+                </div>
               </div>
             </div>
           </div>
@@ -308,26 +492,18 @@ export default function PerfilPage() {
             ) : posts.length > 0 ? (
               <div className="space-y-4">
                 {posts.map((post) => (
-                  <div 
-                    key={post.id} 
-                    className="bg-white rounded-xl shadow p-4 cursor-pointer hover:shadow-md transition-shadow"
-                    onClick={() => handlePostClick(post.id)}
-                  >
+                  <div key={post.id} className="bg-white rounded-xl shadow p-4">
                     <p className="mb-3 break-words whitespace-pre-wrap">{post.text}</p>
                     {post.image && (
                       <img
                         src={post.image}
                         alt="Imagem do post"
-                        className="rounded-lg max-h-80 mx-auto items-center  mb-3"
+                        className="rounded-lg max-h-80 mx-auto items-center mb-3"
                       />
                     )}
                     <div className="flex gap-4 items-center text-sm mt-3 pt-2 border-t border-gray-100">
                       <span className="flex items-center gap-1 text-gray-500">
-                       {post.likes || 0} curtidas
-                      </span>
-                      <span className="flex items-center gap-1 text-gray-500 hover:text-[var(--primary-color)]">
-                        <MessageCircle className="h-4 w-4" />
-                        Comentar
+                        ❤️ {post.likes || 0} curtidas
                       </span>
                       <span className="text-gray-500 text-xs">
                         {new Date(post.created_at).toLocaleDateString('pt-BR')}
@@ -399,26 +575,29 @@ export default function PerfilPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-1 space-y-6">
+              {/* CARD PREMIUM NO DESKTOP */}
+              <PremiumCard />
+              
               <div className="bg-white rounded-2xl shadow-lg p-6">
                 <h3 className="font-semibold text-gray-900 mb-4">Estatísticas</h3>
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600">Publicações</span>
-                    <span className="font-semibold text-[var(--primary-color)]">{posts.length}</span>
+                    <span className="font-semibold text-purple-600">{posts.length}</span>
                   </div>
                   <div 
                     className="flex justify-between items-center cursor-pointer hover:opacity-80 transition-opacity"
                     onClick={() => setShowFollowers(true)}
                   >
                     <span className="text-gray-600">Seguidores</span>
-                    <span className="font-semibold text-[var(--primary-color)]">{followersCount}</span>
+                    <span className="font-semibold text-purple-600">{followersCount}</span>
                   </div>
                   <div 
                     className="flex justify-between items-center cursor-pointer hover:opacity-80 transition-opacity"
                     onClick={() => setShowFollowing(true)}
                   >
                     <span className="text-gray-600">Seguindo</span>
-                    <span className="font-semibold text-[var(--primary-color)]">{followingCount}</span>
+                    <span className="font-semibold text-purple-600">{followingCount}</span>
                   </div>
                 </div>
               </div>
@@ -432,10 +611,15 @@ export default function PerfilPage() {
                 <div className="space-y-3">
                   {user.location && (
                     <div className="flex items-center gap-3 text-gray-600">
-                      <MapPin className="h-4 w-4 text-[var(--primary-color)]" />
+                      <MapPin className="h-4 w-4 text-purple-500" />
                       <span className="text-sm">{user.location}</span>
                     </div>
                   )}
+                  
+                  <div className="flex items-center gap-3 text-gray-600">
+                    <Calendar className="h-4 w-4 text-purple-500" />
+                    <span className="text-sm">Membro desde 2024</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -446,31 +630,23 @@ export default function PerfilPage() {
                 
                 {loading ? (
                   <div className="flex justify-center py-12">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--primary-color)]"></div>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
                   </div>
                 ) : posts.length > 0 ? (
                   <div className="grid grid-cols-1 gap-4">
                     {posts.map((post) => (
-                      <div 
-                        key={post.id} 
-                        className="bg-gray-50 rounded-xl p-4 cursor-pointer hover:bg-gray-100 transition-colors"
-                        onClick={() => handlePostClick(post.id)}
-                      >
+                      <div key={post.id} className="bg-gray-50 rounded-xl p-4">
                         <p className="mb-3 break-words whitespace-pre-wrap">{post.text}</p>
                         {post.image && (
                           <img
                             src={post.image}
                             alt="Imagem do post"
-                            className="rounded-lg max-h-80 mx-auto items-center  mb-3"
+                            className="rounded-lg max-h-80 mx-auto items-center mb-3"
                           />
                         )}
                         <div className="flex gap-4 items-center text-sm text-gray-500">
                           <span className="flex items-center gap-1">
-                           {post.likes || 0} curtidas
-                          </span>
-                          <span className="flex items-center gap-1 text-gray-500 hover:text-[var(--primary-color)]">
-                            <MessageCircle className="h-4 w-4" />
-                            Comentarios
+                            ❤️ {post.likes || 0} curtidas
                           </span>
                           <span>{new Date(post.created_at).toLocaleDateString('pt-BR')}</span>
                         </div>
@@ -502,6 +678,7 @@ export default function PerfilPage() {
 
       {showFollowers && <FollowersModal />}
       {showFollowing && <FollowingModal />}
+      {showPremiumModal && <PremiumModal />}
     </div>
   );
 }
