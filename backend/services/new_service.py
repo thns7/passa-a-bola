@@ -201,7 +201,7 @@ class NewsService:
         elif any(word in title_lower for word in ['seleção', 'selecao', 'cbf']):
             return '/images/news-selecao.jpg'
         else:
-            return f'/images/news-default{random.randint(1, 3)}.jpg'
+            return f'/images/news-default{random.randint(1, 2)}.jpg'
 
     def _clean_summary(self, text):
         if not text:
