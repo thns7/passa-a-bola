@@ -1,49 +1,82 @@
 {
   "eventos": [
     {
-      "id": 1,
-      "titulo": "Encontro PAB",
-      "hora": "05:25",
-      "local": "Apipito Arena Limão",
-      "data": "2025-05-29",
+      "id": "1",
+      "titulo": "Campeonato de Futebol Society",
+      "local": "Arena Limão - São Paulo/SP",
+      "data": "15/12/2024",
+      "hora": "14:00",
+      "valor": "R$ Gratuito",
+      "categoria": "SOCIAL",
+      "descricao": "Campeonato aberto para todas as idades. Formato Society com times de 5 jogadores. Inscrições individuais.",
       "img": "/encontropab.png"
+    },
+    {
+      "id": "2", 
+      "titulo": "Torneio de Futsal Sub-20",
+      "local": "Ginásio Municipal - São Paulo/SP",
+      "data": "20/12/2024",
+      "hora": "19:00",
+      "valor": "R$ 25 por pessoa",
+      "categoria": "SUB-20",
+      "descricao": "Torneio exclusivo para jogadores até 20 anos. Formato futsal com times de 5 jogadores.",
+      "img": "/futsal.png"
+    },
+    {
+      "id": "3",
+      "titulo": "Liga Amadora de Futebol 7",
+      "local": "Campo do ABCD - São Paulo/SP", 
+      "data": "22/12/2024",
+      "hora": "16:00",
+      "valor": "R$ 40 por time",
+      "categoria": "LIGA",
+      "descricao": "Liga amadora com formato futebol 7. Temporada com 8 rodadas + playoffs.",
+      "img": "/torneio.png"
     }
-    
   ],
   "copas": [
     {
-      "id": 1,
-      "titulo": "Copa Passa a Bola",
-      "local": "São Paulo",
-      "hora": "08h às 18h",
-      "data": "2025-10-01",
-      "img": "/copa.png"
+      "id": "1",
+      "titulo": "Copa Passa a Bola - Futebol Society", 
+      "local": "Arena Central - São Paulo/SP",
+      "data": "25/12/2024",
+      "hora": "16:00",
+      "valor": "R$ 30 por pessoa",
+      "descricao": "Copa especial com formato Society. Premiação em dinheiro para o campeão."
     }
   ],
   "peneiras": [
     {
-      "id": 1,
-      "clube": "Corinthians",
-      "data": "10/06/2025",
-      "idade": "15-20",
-      "local": "Parque São Jorge",
-      "valor": "R$60,00"
-    },
-    {
-      "id": 2,
-      "clube": "Santos FC",
-      "data": "12/06/2025",
-      "idade": "14-18",
-      "local": "Vila Belmiro",
-      "valor": "R$80,00"
-    },
-    {
-      "id": 3,
-      "clube": "Palmeiras",
-      "data": "15/06/2025",
-      "idade": "15-21",
-      "local": "Allianz Parque",
+      "id": "1",
+      "clube": "São Paulo FC",
+      "data": "10/12/2024",
+      "idade": "Sub-17",
+      "local": "CT do São Paulo",
       "valor": "Gratuito"
+    },
+    {
+      "id": "2", 
+      "clube": "Corinthians",
+      "data": "12/12/2024",
+      "idade": "Sub-20",
+      "local": "CT do Corinthians",
+      "valor": "R$ 50"
+    },
+    {
+      "id": "3",
+      "clube": "Palmeiras",
+      "data": "15/12/2024",
+      "idade": "Sub-15", 
+      "local": "Academia de Futebol",
+      "valor": "Gratuito"
+    },
+    {
+      "id": "4",
+      "clube": "Santos FC",
+      "data": "18/12/2024",
+      "idade": "Sub-17",
+      "local": "CT do Santos", 
+      "valor": "R$ 40"
     }
   ]
 }

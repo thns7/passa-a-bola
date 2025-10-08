@@ -3,26 +3,44 @@ import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
-// DADOS MOCK - 2 EVENTOS DIFERENTES
+// DADOS MOCK EXPANDIDOS - MAIS EVENTOS
 const eventosMock = [
   {
     id: "1",
     titulo: "Campeonato de Futebol Society",
     local: "Arena Limão - São Paulo/SP",
-    data: "15/12/2024",
+    data: "15/12/2024", 
     hora: "14:00",
     valor: "R$ Gratuito",
     descricao: "Campeonato aberto para todas as idades. Formato Society com times de 5 jogadores. Inscrições individuais."
   },
   {
+    id: "2",
+    titulo: "Torneio de Futsal Sub-20", 
+    local: "Ginásio Municipal - São Paulo/SP",
+    data: "20/12/2024",
+    hora: "19:00",
+    valor: "R$ 25 por pessoa",
+    descricao: "Torneio exclusivo para jogadores até 20 anos. Formato futsal com times de 5 jogadores."
+  },
+  {
+    id: "3",
+    titulo: "Liga Amadora de Futebol 7",
+    local: "Campo do ABCD - São Paulo/SP",
+    data: "22/12/2024",
+    hora: "16:00", 
+    valor: "R$ 40 por time",
+    descricao: "Liga amadora com formato futebol 7. Temporada com 8 rodadas + playoffs."
+  },
+  {
     id: "101",
     titulo: "Copa Passa a Bola - Futebol Society",
-    local: "Arena Central - São Paulo/SP",
+    local: "Arena Central - São Paulo/SP", 
     data: "25/12/2024",
     hora: "16:00",
     valor: "R$ 30 por pessoa",
     descricao: "Copa especial com formato Society. Premiação em dinheiro para o campeão."
-  },
+  }
 ];
 
 export default function InscricaoPage() {
@@ -236,7 +254,7 @@ export default function InscricaoPage() {
     return (
       <div className="min-h-screen bg-gray-100 p-6 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--primary-color)] mx-auto mb-4"></div>
           <p className="text-gray-600">Carregando evento...</p>
         </div>
       </div>
@@ -249,7 +267,7 @@ export default function InscricaoPage() {
         <div className="mb-4">
           <Link 
             href="/events" 
-            className="flex items-center text-purple-600 hover:text-purple-800 font-medium"
+            className="flex items-center text-[var(--primary-color)] hover:text-purple-800 font-medium"
           >
             <span className="mr-2">←</span>
             Voltar para Eventos
@@ -260,7 +278,7 @@ export default function InscricaoPage() {
           <p className="text-gray-600 mb-4">O evento com ID <strong>{id}</strong> não foi encontrado.</p>
           <button 
             onClick={() => router.push("/events")}
-            className="bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 transition duration-200"
+            className="bg-[var(--primary-color)] text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 transition duration-200"
           >
             Voltar para Eventos
           </button>
@@ -275,7 +293,7 @@ export default function InscricaoPage() {
       <div className="mb-6">
         <Link 
           href="/events" 
-          className="inline-flex items-center text-purple-600 hover:text-purple-800 font-medium transition duration-200"
+          className="inline-flex items-center text-[var(--primary-color)] hover:text-purple-800 font-medium transition duration-200"
         >
           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -290,7 +308,7 @@ export default function InscricaoPage() {
       
       {/* DETALHES DO EVENTO */}
       <div className="bg-white p-6 rounded-lg shadow-md mb-8 max-w-2xl mx-auto border-l-4 border-purple-500">
-        <h2 className="font-bold text-xl text-purple-700 mb-3">{evento.titulo}</h2>
+        <h2 className="font-bold text-xl text-[var(--primary-color)] mb-3">{evento.titulo}</h2>
         <p className="text-gray-600 mb-4">{evento.descricao}</p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
           <div className="flex items-center">
@@ -385,7 +403,7 @@ export default function InscricaoPage() {
                 value="solo" 
                 checked={tipo === "solo"} 
                 onChange={() => setTipo("solo")} 
-                className="w-4 h-4 text-purple-600 focus:ring-purple-500"
+                className="w-4 h-4 text-[var(--primary-color)] focus:ring-purple-500"
               /> 
               <span className="text-gray-700">👤 Jogador Solo</span>
             </label>
@@ -395,7 +413,7 @@ export default function InscricaoPage() {
                 value="equipe" 
                 checked={tipo === "equipe"} 
                 onChange={() => setTipo("equipe")} 
-                className="w-4 h-4 text-purple-600 focus:ring-purple-500"
+                className="w-4 h-4 text-[var(--primary-color)] focus:ring-purple-500"
               /> 
               <span className="text-gray-700">👥 Equipe</span>
             </label>
@@ -437,13 +455,13 @@ export default function InscricaoPage() {
         {/* MEMBROS DA EQUIPE (se for equipe) */}
         {tipo === "equipe" && (
           <div className="space-y-4 p-4 bg-purple-50 rounded-lg border border-purple-200">
-            <h3 className="font-semibold text-purple-800 flex items-center">
+            <h3 className="font-semibold text-[var(--primary-color)] flex items-center">
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
               Membros da Equipe ({membros.length}/10)
             </h3>
-            <p className="text-sm text-purple-600">Adicione os nomes dos membros da sua equipe</p>
+            <p className="text-sm text-[var(--primary-color)]">Adicione os nomes dos membros da sua equipe</p>
             
             {membros.map((membro, index) => (
               <div key={index} className="flex space-x-2">
@@ -472,7 +490,7 @@ export default function InscricaoPage() {
             
             <button 
               type="button" 
-              className="bg-purple-100 text-purple-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-purple-200 transition duration-200 flex items-center"
+              className="bg-purple-100 text-[var(--primary-color)] px-4 py-2 rounded-lg text-sm font-medium hover:bg-purple-200 transition duration-200 flex items-center"
               onClick={adicionarMembro}
               disabled={membros.length >= 10}
             >
@@ -488,7 +506,7 @@ export default function InscricaoPage() {
         <button 
           type="submit" 
           disabled={enviando} 
-          className="w-full bg-purple-600 text-white p-4 rounded-lg font-semibold hover:bg-purple-700 transition duration-200 disabled:bg-purple-400 disabled:cursor-not-allowed flex items-center justify-center"
+          className="w-full bg-[var(--primary-color)] text-white p-4 rounded-lg font-semibold hover:bg-purple-700 transition duration-200 disabled:bg-purple-400 disabled:cursor-not-allowed flex items-center justify-center"
         >
           {enviando ? (
             <>

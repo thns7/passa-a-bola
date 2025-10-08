@@ -39,84 +39,137 @@ export default function HomePage() {
 
   if (!user) {
     return (
-      <div className="flex items-center justify-center h-screen text-gray-700">
-        Carregando...
+      <div className="flex items-center justify-center h-screen bg-[#f5f6f8] text-gray-700">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--primary-color)] mx-auto mb-4"></div>
+          <p className="text-lg">Carregando...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-[#f5f6f8] min-h-screen flex flex-col ">
+    <div className="bg-[#f5f6f8] min-h-screen flex flex-col">
       {/* Header */}
       <Header name={user.name || "Usuário"} />
 
-      <main className="md:mt-24 flex-1 w-full max-w-[24rem] md:max-w-5xl mx-auto px-4 md:px-8 py-6 space-y-10 pb-28 divide-y divide-gray-300">
+      <main className="md:mt-24 flex-1 w-full max-w-[24rem] md:max-w-6xl mx-auto px-4 md:px-8 py-6 space-y-8 pb-28">
+        
+
         {/* Eventos */}
-        <section className="pb-6 ">
-          <h2 className="text-xl font-bold mb-2">Eventos</h2>
-          <div className="flex gap-4 overflow-x-auto md:overflow-visible md:flex-wrap pb-2">
+        <section className="relative">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-800 flex items-center">
+              <span className="w-3 h-8 bg-[var(--primary-color)] rounded-full mr-3"></span>
+              Eventos em Destaque
+            </h2>
+            <span className="text-gray-500 text-sm bg-white px-3 py-1 rounded-full border">🔥 {eventos.length} Eventos</span>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {eventos.map((ev, index) => (
               <div
                 key={ev.id}
-                className="min-w-[180px] md:min-w-[220px] bg-white shadow-md rounded-xl overflow-hidden flex-shrink-0"
+                className="bg-white rounded-2xl overflow-hidden border border-gray-200 hover:border-[var(--primary-color)] transition-all duration-300 hover:scale-105 hover:shadow-xl group"
               >
-                <img
-                  src={ev.img}
-                  alt={ev.titulo}
-                  className="h-28 md:h-40 w-full object-cover rounded-t-xl"
-                />
-                <div className="p-2 md:p-4">
-                  <h3 className="font-semibold text-gray-800">{ev.titulo}</h3>
-                  <p className="text-sm text-gray-600">{ev.local}</p>
-                  <p className="text-xs text-gray-500">
-                    {ev.data} • {ev.hora}
-                  </p>
+                <div className="relative overflow-hidden">
+                  <img
+                    src={ev.img || "/encontropab.png"}
+                    alt={ev.titulo}
+                    className="h-48 w-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                  <div className="absolute top-3 left-3 bg-[var(--primary-color)] text-white px-3 py-1 rounded-full text-xs font-bold">
+                    {ev.categoria || "EVENTO"}
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                </div>
+                
+                <div className="p-5">
+                  <h3 className="font-bold text-gray-800 text-lg mb-2 line-clamp-2">{ev.titulo}</h3>
+                  <div className="space-y-2 mb-4">
+                    <div className="flex items-center text-gray-600 text-sm">
+                      <span className="w-4 h-4 mr-2">📍</span>
+                      <span className="line-clamp-1">{ev.local}</span>
+                    </div>
+                    <div className="flex items-center text-gray-600 text-sm">
+                      <span className="w-4 h-4 mr-2">📅</span>
+                      <span>{ev.data} • {ev.hora}</span>
+                    </div>
+                    <div className="flex items-center text-gray-600 text-sm">
+                      <span className="w-4 h-4 mr-2">💰</span>
+                      <span className="font-semibold text-green-600">{ev.valor}</span>
+                    </div>
+                  </div>
 
-                  {/* Botão Inscreva-se - IDs 1, 2, 3... */}
-                  {index < 2 && (
-                    <button
-                      onClick={() => router.push(`/events/${ev.id}/inscricao`)}
-                      className="mt-2 w-full bg-purple-800 text-white py-1 rounded text-sm hover:bg-purple-700 transition"
-                    >
-                      Inscreva-se
-                    </button>
-                  )}
+                  <button
+                    onClick={() => router.push(`/events/${ev.id}/inscricao`)}
+                    className="w-full bg-gradient-to-r from-[var(--primary-color)] to-purple-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300 flex items-center justify-center group/btn"
+                  >
+                    <span>Inscreva-se</span>
+                    <span className="ml-2 group-hover/btn:translate-x-1 transition-transform">→</span>
+                  </button>
                 </div>
               </div>
             ))}
           </div>
         </section>
 
-        {/* Copas */}
-        <section className="pt-6 pb-6">
-          <h2 className="text-xl font-bold mb-2">Copas</h2>
-          <div className="flex gap-4 overflow-x-auto md:overflow-visible md:flex-wrap pb-2">
-            {copas.map((c, index) => (
+        {/* Copa Única */}
+        <section className="relative mt-12">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-800 flex items-center">
+              <span className="w-3 h-8 bg-yellow-500 rounded-full mr-3"></span>
+              Copa Premium
+            </h2>
+            <span className="text-gray-500 text-sm bg-white px-3 py-1 rounded-full border">🏆 Exclusiva</span>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+            {copas.slice(0, 1).map((c) => (
               <div
                 key={c.id}
-                className="min-w-[240px] md:min-w-[220px] bg-white shadow-md rounded-xl overflow-hidden flex-shrink-0"
+                className="bg-white rounded-2xl overflow-hidden border-2 border-yellow-400 hover:border-yellow-500 transition-all duration-300 hover:scale-105 group relative shadow-lg"
               >
-                <img
-                  src={c.img}
-                  alt={c.titulo}
-                  className="h-36 md:h-48 w-full object-cover rounded-t-xl"
-                />
-                <div className="p-2 md:p-4">
-                  <h3 className="font-semibold text-gray-800">{c.titulo}</h3>
-                  <p className="text-sm text-gray-600">
-                    {c.local} • {c.hora}
-                  </p>
-                  <p className="text-xs text-gray-500">{c.data}</p>
+                <div className="absolute top-0 right-0 w-24 h-24 bg-yellow-100 rounded-full -translate-y-12 translate-x-12"></div>
+                <div className="absolute bottom-0 left-0 w-20 h-20 bg-purple-100 rounded-full translate-y-10 -translate-x-10"></div>
+                
+                <div className="relative z-10 p-6">
+                  <div className="flex items-center mb-4">
+                    <div className="w-16 h-16 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center mr-4 shadow-lg">
+                      <span className="text-3xl">🏆</span>
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-gray-800 text-2xl">{c.titulo}</h3>
+                      <p className="text-yellow-600 text-sm font-semibold">COPA PREMIUM - PREMIAÇÃO EM DINHEIRO</p>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3 mb-6">
+                    <div className="flex items-center text-gray-700">
+                      <span className="w-5 h-5 mr-2 text-gray-500">📍</span>
+                      <span className="text-sm">{c.local}</span>
+                    </div>
+                    <div className="flex items-center text-gray-700">
+                      <span className="w-5 h-5 mr-2 text-gray-500">📅</span>
+                      <span className="text-sm">{c.data} • {c.hora}</span>
+                    </div>
+                    <div className="flex items-center text-gray-700">
+                      <span className="w-5 h-5 mr-2 text-gray-500">💰</span>
+                      <span className="text-sm font-bold text-green-600">{c.valor}</span>
+                    </div>
+                    <div className="flex items-center text-gray-700">
+                      <span className="w-5 h-5 mr-2 text-gray-500">⭐</span>
+                      <span className="text-sm">Premiação: R$ 2.000 para o campeão</span>
+                    </div>
+                  </div>
 
-                  {/* Botão Inscreva-se - IDs 101, 102, 103... */}
-                  {index < 2 && (
-                    <button
-                      onClick={() => router.push(`/events/${100 + parseInt(c.id)}/inscricao`)}
-                      className="mt-2 w-full bg-purple-800 text-white py-1 rounded text-sm hover:bg-purple-700 transition"
-                    >
-                      Inscreva-se
-                    </button>
-                  )}
+                  <button
+                    onClick={() => router.push(`/events/${100 + parseInt(c.id)}/inscricao`)}
+                    className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white py-4 rounded-xl font-bold hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300 group/btn shadow-md text-lg"
+                  >
+                    <span>Participar da Copa</span>
+                    <span className="ml-2 group-hover/btn:scale-110 transition-transform">⚔️</span>
+                  </button>
                 </div>
               </div>
             ))}
@@ -124,31 +177,116 @@ export default function HomePage() {
         </section>
 
         {/* Peneiras */}
-        <section className="pt-6">
-          <h2 className="text-xl font-bold mb-2">Peneiras</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full bg-white shadow-md rounded-md text-[11px] md:text-sm lg:text-base">
-              <thead className="bg-[var(--primary-color)] text-white">
-                <tr>
-                  <th className="p-2 md:p-4 text-left">Clube</th>
-                  <th className="p-2 md:p-4 text-left">Data</th>
-                  <th className="p-2 md:p-4 text-left">Idade</th>
-                  <th className="p-2 md:p-4 text-left">Local</th>
-                  <th className="p-2 md:p-4 text-left">Valor</th>
-                </tr>
-              </thead>
-              <tbody>
-                {peneiras.map((p) => (
-                  <tr key={p.id} className="border-t">
-                    <td className="p-2 md:p-4">{p.clube}</td>
-                    <td className="p-2 md:p-4">{p.data}</td>
-                    <td className="p-2 md:p-4">{p.idade}</td>
-                    <td className="p-2 md:p-4">{p.local}</td>
-                    <td className="p-2 md:p-4">{p.valor}</td>
+        <section className="relative mt-12">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-800 flex items-center">
+              <span className="w-3 h-8 bg-[var(--primary-color)] rounded-full mr-3"></span>
+              Peneiras Profissionais
+            </h2>
+            <span className="text-gray-500 text-sm bg-white px-3 py-1 rounded-full border">⭐ {peneiras.length} Oportunidades</span>
+          </div>
+          
+          <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-gradient-to-r from-[var(--primary-color)] to-purple-600">
+                    <th className="p-4 md:p-6 text-left text-white font-bold text-sm md:text-base">
+                      <div className="flex items-center">
+                        <span className="mr-2">🏛️</span>
+                        Clube
+                      </div>
+                    </th>
+                    <th className="p-4 md:p-6 text-left text-white font-bold text-sm md:text-base">
+                      <div className="flex items-center">
+                        <span className="mr-2">📅</span>
+                        Data
+                      </div>
+                    </th>
+                    <th className="p-4 md:p-6 text-left text-white font-bold text-sm md:text-base">
+                      <div className="flex items-center">
+                        <span className="mr-2">👥</span>
+                        Idade
+                      </div>
+                    </th>
+                    <th className="p-4 md:p-6 text-left text-white font-bold text-sm md:text-base">
+                      <div className="flex items-center">
+                        <span className="mr-2">📍</span>
+                        Local
+                      </div>
+                    </th>
+                    <th className="p-4 md:p-6 text-left text-white font-bold text-sm md:text-base">
+                      <div className="flex items-center">
+                        <span className="mr-2">💰</span>
+                        Valor
+                      </div>
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {peneiras.map((p, index) => (
+                    <tr 
+                      key={p.id} 
+                      className={`border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200 ${
+                        index % 2 === 0 ? 'bg-gray-50/50' : 'bg-white'
+                      }`}
+                    >
+                      <td className="p-4 md:p-6 text-gray-800 font-semibold">
+                        <div className="flex items-center">
+                          <div className="w-8 h-8 bg-gradient-to-r from-[var(--primary-color)] to-purple-500 rounded-lg flex items-center justify-center mr-3 shadow-sm">
+                            <span className="text-xs text-white">⚽</span>
+                          </div>
+                          {p.clube}
+                        </div>
+                      </td>
+                      <td className="p-4 md:p-6 text-gray-700">{p.data}</td>
+                      <td className="p-4 md:p-6">
+                        <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold border border-green-200">
+                          {p.idade}
+                        </span>
+                      </td>
+                      <td className="p-4 md:p-6 text-gray-700 max-w-[150px] truncate">{p.local}</td>
+                      <td className="p-4 md:p-6">
+                        <span className={`px-3 py-1 rounded-full text-xs font-bold border ${
+                          p.valor === 'Gratuito' 
+                            ? 'bg-green-100 text-green-700 border-green-200' 
+                            : 'bg-blue-100 text-blue-700 border-blue-200'
+                        }`}>
+                          {p.valor}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            
+            {peneiras.length === 0 && (
+              <div className="text-center py-12">
+                <div className="text-6xl mb-4 text-gray-300">🔍</div>
+                <p className="text-gray-500 text-lg">Nenhuma peneira disponível no momento</p>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* CTA Section */}
+        <section className="text-center mt-12 mb-8">
+          <div className="bg-gradient-to-r from-[var(--primary-color)] to-purple-600 rounded-2xl p-8 md:p-12 relative overflow-hidden shadow-xl">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/20 rounded-full -translate-y-16 translate-x-16"></div>
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/20 rounded-full translate-y-12 -translate-x-12"></div>
+            
+            <div className="relative z-10">
+              <h2 className="text-2xl md:text-4xl font-bold text-white mb-4">
+                Pronto para o Próximo Nível?
+              </h2>
+              <p className="text-white/90 text-lg mb-6 max-w-2xl mx-auto">
+                Junte-se a milhares de atletas e descubra oportunidades únicas no mundo do futebol
+              </p>
+              <button className="bg-white text-[var(--primary-color)] px-8 py-4 rounded-xl font-bold text-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 shadow-lg">
+                Explorar Todos os Eventos
+              </button>
+            </div>
           </div>
         </section>
       </main>
