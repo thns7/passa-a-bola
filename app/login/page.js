@@ -36,7 +36,6 @@ export default function LoginPage() {
       }
 
       const data = await res.json();
-      // Salva info do usuário logado (opcional)
       localStorage.setItem("loggedIn", "true");
       localStorage.setItem("currentUser", JSON.stringify(data.user));
       router.push("/home");
@@ -49,8 +48,8 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="h-screen w-full">
-      {/* Mobile */}
+    <div className="h-screen w-full overflow-hidden">
+      {/* Mobile - mantido igual */}
       <div className="md:hidden relative h-full bg-[var(--primary-color)]">
         <HeroImage />
         <CardSection title="Login" size="base">
@@ -84,44 +83,98 @@ export default function LoginPage() {
       </div>
 
       {/* Desktop */}
-      <div className="hidden md:grid grid-cols-2 h-full">
-        <div className="bg-[var(--primary-color)] flex items-center justify-center">
-          <div className=" w-[50vh] ">
-            <HeroImage />
+      <div className="hidden md:flex h-full bg-white">
+        
+        <div className="flex-1 relative overflow-hidden bg-[var(--primary-color)]">
+          
+          <div className="absolute inset-16 rounded-3xl overflow-hidden border-4 border-white/20">
+            <div className="h-full w-full flex items-center justify-center">
+              <div className="w-4/5 h-full object-contain">
+                <HeroImage />
+              </div>
+            </div>
+          </div>
+          
+          {/* Título principal na imagem */}
+          <div className="absolute top-12 left-12">
+            <h1 className="text-5xl font-black text-white leading-tight">
+              PASSA<br />A BOLA
+            </h1>
+            <div className="w-20 h-1 bg-white mt-3"></div>
+          </div>
+
+          {/* Elemento decorativo */}
+          <div className="absolute bottom-12 right-12 text-white/30">
+            <div className="text-xl font-black text-right space-y-1">
+              <div>JOGUE</div>
+              <div>CONECTE</div>
+              <div>EVOLUA</div>
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center bg-white p-12">
-          <div className="max-w-md w-full text-left">
-            <h1 className="text-4xl font-bold mb-6">Login</h1>
-
-            <AuthForm onSubmit={handleSubmit}>
-              <FormInput label="Email" type="text" name="email" disabled={loading} />
-              <FormInput label="Senha" type="password" name="password" disabled={loading} />
-              <FormButton type="submit" disabled={loading}>
-                {loading ? (
-                  <div className="flex items-center justify-center gap-2">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    <span>Entrando...</span>
-                  </div>
-                ) : (
-                  "Entrar"
-                )}
-              </FormButton>
-            </AuthForm>
-
-            {error && <p className="text-red-500 mt-2">{error}</p>}
-
-            <p className="text-sm mt-4">
-              Não tem conta?{" "}
-              <span
-                className="text-[var(--primary-color)] font-semibold cursor-pointer hover:opacity-80 transition-opacity"
-                onClick={() => !loading && router.push("/register")}
-              >
-                Registrar
-              </span>
-            </p>
+        {/* Lado direito - conteúdo */}
+        <div className="flex-1 relative min-w-0">
+          
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-white">
+            <div className="absolute top-0 left-0 w-32 h-32 bg-[var(--primary-color)]/5 rounded-full -translate-x-16 -translate-y-16"></div>
+            <div className="absolute bottom-0 right-0 w-48 h-48 bg-[var(--primary-color)]/5 rounded-full translate-x-24 translate-y-24"></div>
           </div>
+
+          {/* Container do conteúdo */}
+          <div className="relative z-10 h-full flex items-center justify-start pl-12">
+            <div className="max-w-sm w-full">
+              {/* Conteúdo textual */}
+              <div className="space-y-8 mb-10">
+                <h2 className="text-4xl font-bold text-gray-900 leading-tight">
+                  Entre na<br />Sua Conta
+                </h2>
+                <p className="text-gray-600 text-lg leading-relaxed">
+                  Acesse sua conta para conectar com outras atletas, 
+                  agendar partidas e fazer parte da comunidade.
+                </p>
+              </div>
+
+              {/* Formulário */}
+              <div className="transform  -mx-2">
+                <AuthForm onSubmit={handleSubmit}>
+                  <FormInput label="Email" type="text" name="email" disabled={loading} />
+                  <FormInput label="Senha" type="password" name="password" disabled={loading} />
+                  <FormButton type="submit" disabled={loading}>
+                    {loading ? (
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        <span>Entrando...</span>
+                      </div>
+                    ) : (
+                      "Entrar"
+                    )}
+                  </FormButton>
+                </AuthForm>
+              </div>
+
+              {error && <p className="text-red-500 mt-4 text-center">{error}</p>}
+
+              {/* Link para registrar */}
+              <div className="mt-8 text-center">
+                <p className="text-gray-600">
+                  Não tem conta?{" "}
+                  <span
+                    className="text-[var(--primary-color)] font-semibold cursor-pointer hover:opacity-80 transition-opacity"
+                    onClick={() => !loading && router.push("/register")}
+                  >
+                    Registrar
+                  </span>
+                </p>
+                <p className="text-gray-400 text-sm font-medium mt-4">
+                   Partidas •  Comunidade •  Competições
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Linha decorativa vertical */}
+          <div className="absolute top-0 bottom-0 left-8 w-px bg-gradient-to-b from-transparent via-gray-300 to-transparent"></div>
         </div>
       </div>
     </div>
