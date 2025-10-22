@@ -2,40 +2,51 @@ import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 
 export async function POST(request) {
-  console.log('🔍 DEBUG - Variáveis de ambiente no servidor:', {
-    EMAIL_USER: process.env.EMAIL_USER ? '✅ Existe' : '❌ Não existe',
-    EMAIL_PASS: process.env.EMAIL_PASS ? '✅ Existe' : '❌ Não existe'
+ 
+  console.log('🔍 ENV DEBUG no Render:', {
+    NODE_ENV: process.env.NODE_ENV,
+    EMAIL_USER_EXISTS: !!process.env.EMAIL_USER,
+    EMAIL_PASS_EXISTS: !!process.env.EMAIL_PASS,
+    ALL_EMAIL_VARS: Object.keys(process.env).filter(key => 
+      key.includes('EMAIL') || key.includes('MAIL')
+    )
   });
 
   try {
     const { email, nome, evento, telefone, idade, altura, posicao } = await request.json();
 
-    // ✅ VERIFICA SE AS VARIÁVEIS EXISTEM
+    
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-      console.error('❌ Variáveis de email não configuradas no servidor');
+      console.error('❌ VARIÁVEIS FALTANDO NO RENDER:', {
+        EMAIL_USER: process.env.EMAIL_USER || 'UNDEFINED',
+        EMAIL_PASS: process.env.EMAIL_PASS ? '***' : 'UNDEFINED'
+      });
+      
       return NextResponse.json(
         { 
           success: false, 
-          message: 'Serviço de email não configurado no servidor'
+          message: 'Variáveis de email não configuradas no servidor',
+          debug: {
+            nodeEnv: process.env.NODE_ENV,
+            userExists: !!process.env.EMAIL_USER,
+            passExists: !!process.env.EMAIL_PASS
+          }
         },
         { status: 500 }
       );
     }
 
-    console.log('✅ Credenciais encontradas no servidor, configurando email...');
+    console.log('✅ Credenciais encontradas no Render, enviando email...');
 
-      const transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 587,
-        secure: false,
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS,
-        },
-        tls: {
-          rejectUnauthorized: false
-        }
-      });
+    const transporter = nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
 
     const mailOptions = {
       from: `"Passa a Bola" <${process.env.EMAIL_USER}>`,
@@ -76,7 +87,7 @@ export async function POST(request) {
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log('✅ Email enviado com sucesso para:', email);
+    console.log('✅ Email enviado com sucesso do Render!');
 
     return NextResponse.json({
       success: true,
@@ -84,7 +95,7 @@ export async function POST(request) {
     });
 
   } catch (error) {
-    console.error('❌ Erro no servidor ao enviar email:', error);
+    console.error('❌ Erro no Render:', error);
     
     return NextResponse.json(
       { 
