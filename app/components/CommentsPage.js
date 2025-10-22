@@ -29,7 +29,7 @@ export default function CommentsPage() {
   // Estado para o modal de perfil
   const [selectedUser, setSelectedUser] = useState(null);
 
-  // Estados para likes - atualizados conforme CommunityPage
+  // Estados para likes - ATUALIZADOS conforme CommunityPage
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
   const [likesLoading, setLikesLoading] = useState(false);
@@ -43,9 +43,7 @@ export default function CommentsPage() {
         setUser(userObj);
         
         if (postId) {
-          // Carregar likes primeiro, pois não depende do post
-          fetchLikes(userObj.id);
-          fetchPost();
+          fetchPostAndLikes(userObj.id);
           fetchComments();
         } else {
           setPostError("ID do post não encontrado");
@@ -59,11 +57,81 @@ export default function CommentsPage() {
     } else {
       setLikesInitialLoading(false);
       if (postId) {
-        fetchPost();
+        fetchPostAndLikes();
         fetchComments();
       }
     }
   }, [postId]);
+
+  // FUNÇÃO CORRIGIDA: Buscar post e likes de forma integrada
+  const fetchPostAndLikes = async (userId = null) => {
+    setPostLoading(true);
+    setPostError(null);
+    setLikesInitialLoading(true);
+    
+    try {
+      // Buscar o post
+      const postRes = await fetch(`${API_BASE_URL}/posts/${postId}`);
+      
+      if (!postRes.ok) {
+        throw new Error(`Erro ${postRes.status}: Não foi possível carregar o post`);
+      }
+      
+      const postData = await postRes.json();
+      
+      // Buscar informações completas do autor do post
+      const authorInfo = await getUserInfo(postData.user_id);
+      const postWithAuthorInfo = {
+        ...postData,
+        author_name: authorInfo.name,
+        author_username: authorInfo.username,
+        author_avatar: authorInfo.avatar,
+        author_id: authorInfo.id
+      };
+      
+      setPost(postWithAuthorInfo);
+      
+      // Buscar likes do post
+      await fetchLikes(postData, userId);
+      
+    } catch (error) {
+      console.error("Erro ao buscar post:", error);
+      setPostError(error.message);
+      setLikesCount(0);
+      setIsLiked(false);
+    } finally {
+      setPostLoading(false);
+      setLikesInitialLoading(false);
+    }
+  };
+
+  // FUNÇÃO ATUALIZADA para buscar likes
+  const fetchLikes = async (postData, userId = null) => {
+    try {
+      const likesRes = await fetch(`${API_BASE_URL}/posts/${postId}/likes`);
+      
+      if (likesRes.ok) {
+        const likesData = await likesRes.json();
+        
+        // Verificar se o usuário atual curtiu o post
+        const userLiked = userId && likesData.likes && Array.isArray(likesData.likes) 
+          ? likesData.likes.includes(userId)
+          : false;
+        
+        setIsLiked(userLiked);
+        setLikesCount(likesData.likes_count || likesData.likes?.length || postData.likes_count || 0);
+      } else {
+        // Fallback: usar dados do post
+        setLikesCount(postData.likes_count || 0);
+        setIsLiked(false);
+      }
+    } catch (error) {
+      console.error("Erro ao buscar likes:", error);
+      // Fallback: usar dados do post
+      setLikesCount(postData.likes_count || 0);
+      setIsLiked(false);
+    }
+  };
 
   // Função para buscar informações completas do usuário
   const getUserInfo = async (userId) => {
@@ -89,39 +157,6 @@ export default function CommentsPage() {
       username: null,
       avatar: "/perfilPadrao.jpg"
     };
-  };
-
-  const fetchPost = async () => {
-    setPostLoading(true);
-    setPostError(null);
-    
-    try {
-      const res = await fetch(`${API_BASE_URL}/posts/${postId}`);
-      
-      if (!res.ok) {
-        throw new Error(`Erro ${res.status}: Não foi possível carregar o post`);
-      }
-      
-      const postData = await res.json();
-      
-      // Buscar informações completas do autor do post
-      const authorInfo = await getUserInfo(postData.user_id);
-      const postWithAuthorInfo = {
-        ...postData,
-        author_name: authorInfo.name,
-        author_username: authorInfo.username,
-        author_avatar: authorInfo.avatar,
-        author_id: authorInfo.id
-      };
-      
-      setPost(postWithAuthorInfo);
-      
-    } catch (error) {
-      console.error("Erro ao buscar post:", error);
-      setPostError(error.message);
-    } finally {
-      setPostLoading(false);
-    }
   };
 
   const fetchComments = async () => {
@@ -161,51 +196,6 @@ export default function CommentsPage() {
     }
   };
 
-  // Função para buscar likes do post - ATUALIZADA para carregar primeiro
-  const fetchLikes = async (userId) => {
-    setLikesInitialLoading(true);
-    try {
-      const res = await fetch(`${API_BASE_URL}/posts/${postId}/likes`);
-      if (res.ok) {
-        const likesData = await res.json();
-        console.log("Likes data:", likesData); // Para debug
-        
-        // Verificar se o usuário atual curtiu o post
-        const userLiked = likesData.likes && Array.isArray(likesData.likes) 
-          ? likesData.likes.includes(userId)
-          : false;
-        
-        setIsLiked(userLiked);
-        setLikesCount(likesData.likes_count || likesData.likes?.length || 0);
-      } else {
-        // Se der erro, tentar buscar do próprio post como fallback
-        await fetchLikesFromPost();
-      }
-    } catch (error) {
-      console.error("Erro ao buscar likes:", error);
-      // Fallback: buscar likes do próprio post
-      await fetchLikesFromPost();
-    } finally {
-      setLikesInitialLoading(false);
-    }
-  };
-
-  // Fallback: buscar informações de likes do próprio post
-  const fetchLikesFromPost = async () => {
-    try {
-      const res = await fetch(`${API_BASE_URL}/posts/${postId}`);
-      if (res.ok) {
-        const postData = await res.json();
-        setLikesCount(postData.likes_count || 0);
-        setIsLiked(false); // Não podemos determinar se o usuário curtiu sem userId
-      }
-    } catch (error) {
-      console.error("Erro ao buscar likes do post:", error);
-      setLikesCount(0);
-      setIsLiked(false);
-    }
-  };
-
   // Função para curtir/descurtir o post - ATUALIZADA conforme CommunityPage
   const handleLike = async () => {
     if (!user || !postId || likesLoading) return;
@@ -230,7 +220,6 @@ export default function CommentsPage() {
       }
     } catch (error) {
       console.error("Erro ao curtir:", error);
-      alert("Erro ao curtir publicação. Tente novamente.");
     } finally {
       setLikesLoading(false);
     }
@@ -313,6 +302,37 @@ export default function CommentsPage() {
     setSelectedUser(userId);
   };
 
+  // Componente para exibir mídia (imagem ou vídeo)
+  const MediaDisplay = ({ post }) => {
+    if (post.image) {
+      return (
+        <div className="mb-4">
+          <img
+            src={post.image}
+            alt="Post"
+            className="rounded-xl w-full max-h-96 object-cover shadow-sm"
+          />
+        </div>
+      );
+    }
+    
+    if (post.video) {
+      return (
+        <div className="mb-4">
+          <video
+            controls
+            className="rounded-xl w-full max-h-96 object-contain bg-black shadow-sm"
+          >
+            <source src={post.video} type="video/mp4" />
+            Seu navegador não suporta o elemento de vídeo.
+          </video>
+        </div>
+      );
+    }
+    
+    return null;
+  };
+
   // Componente do Menu para comentários
   const CommentMenu = ({ comment, onEdit, onDelete }) => {
     const [showMenu, setShowMenu] = useState(false);
@@ -387,7 +407,8 @@ export default function CommentsPage() {
       </div>
       <div className="h-4 bg-gray-200 rounded mb-3"></div>
       <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
-      <div className="h-48 bg-gray-200 rounded-lg"></div>
+      {/* Skeleton para mídia (imagem ou vídeo) */}
+      <div className="h-48 bg-gray-200 rounded-lg mb-4"></div>
       {/* Skeleton para os botões de like e comentário */}
       <div className="flex items-center gap-6 pt-4 border-t border-gray-100">
         <div className="flex items-center gap-2">
@@ -402,7 +423,7 @@ export default function CommentsPage() {
     </div>
   );
 
-  // Componente para o botão de like com loading
+  // Componente para o botão de like com loading - ATUALIZADO
   const LikeButton = () => {
     if (likesInitialLoading) {
       return (
@@ -416,7 +437,7 @@ export default function CommentsPage() {
     return (
       <button
         onClick={handleLike}
-        disabled={likesLoading}
+        disabled={likesLoading || !user}
         className={`flex items-center gap-2 transition-colors disabled:opacity-50 ${
           isLiked 
             ? "text-red-600 hover:text-red-700" 
@@ -424,7 +445,7 @@ export default function CommentsPage() {
         }`}
       >
         {likesLoading ? (
-          <div className="h-5 w-5 bg-gray-300 rounded-full animate-pulse"></div>
+          <div className="h-5 w-5 border-2 border-gray-300 border-t-red-600 rounded-full animate-spin"></div>
         ) : isLiked ? (
           <Heart className="h-5 w-5 fill-red-600 text-red-600" />
         ) : (
@@ -470,7 +491,7 @@ export default function CommentsPage() {
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Erro ao carregar post</h3>
               <p className="text-gray-600 mb-4">{postError}</p>
               <button
-                onClick={fetchPost}
+                onClick={() => user ? fetchPostAndLikes(user.id) : fetchPostAndLikes()}
                 className="bg-[var(--primary-color)] text-white px-6 py-2 rounded-lg hover:opacity-90 transition-opacity"
               >
                 Tentar Novamente
@@ -516,16 +537,8 @@ export default function CommentsPage() {
                 <p className="text-gray-800 text-lg leading-relaxed whitespace-pre-wrap">{post.content}</p>
               </div>
 
-              {/* Imagem do Post */}
-              {post.image && (
-                <div className="mb-4">
-                  <img
-                    src={post.image}
-                    alt="Post"
-                    className="rounded-xl w-full max-h-96 object-cover shadow-sm"
-                  />
-                </div>
-              )}
+              {/* Mídia do Post (Imagem ou Vídeo) */}
+              <MediaDisplay post={post} />
 
               {/* Stats do Post */}
               <div className="flex items-center gap-6 pt-4 border-t border-gray-100">
