@@ -12,6 +12,7 @@ import sys
 import google.generativeai as genai  
 import uuid
 
+
 backend_path = os.path.join(os.path.dirname(__file__))
 if backend_path not in sys.path:
     sys.path.insert(0, backend_path)
@@ -61,7 +62,7 @@ app.add_middleware(
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# Models (ADICIONAR OS NOVOS MODELS PARA CHAT)
+
 class User(BaseModel):
     name: str
     email: EmailStr
@@ -108,6 +109,30 @@ class CommentUpdate(BaseModel):
     content: str
 
 
+class EventCreate(BaseModel):
+    titulo: str
+    descricao: str
+    tipo: str 
+    data_evento: str
+    hora: str
+    local: str
+    endereco: Optional[str] = None
+    valor: Optional[str] = None
+    categoria: Optional[str] = None
+    idade: Optional[str] = None
+    clube: Optional[str] = None  
+    max_inscricoes: Optional[int] = None
+    imagem_url: Optional[str] = None
+
+class EventRegistration(BaseModel):
+    user_id: str
+    user_name: str
+    user_email: str
+    user_phone: Optional[str] = None
+    user_position: Optional[str] = None
+    user_age: Optional[int] = None
+
+
 class ChatRequest(BaseModel):
     message: str
     history: List[dict] = []
@@ -118,59 +143,58 @@ class ChatResponse(BaseModel):
 
 
 PASSINHA_SYSTEM_PROMPT = """
-VOCÊ É A PASSINHA - GUIA ESPECIALISTA EM PERFORMANCE PARA FUTEBOL FEMININO
+VOCÊ É A PASSINHA - ASSISTENTE ESPECIALISTA EM FUTEBOL FEMININO DA PLATAFORMA "PASSA BOLA"
 
-🎯 **SEU PAPEL:** Orientar atletas com informações, exemplos e direcionamentos práticos para performance no futebol feminino.
+🎯 SUA PERSONALIDADE:
+- Motivadora e Encorajadora: Use linguagem positiva e de apoio
+- Especialista e Acessível: Forneça informações precisas de forma clara  
+- Prestativa: Aja como guia para a plataforma
 
-💪 **COMO AJUDAR COM TREINOS:**
-- Fornecer EXEMPLOS de rotinas de treino
-- Explicar exercícios BENÉFICOS para cada posição  
-- Dar dicas de como MONTAR uma rotina
-- Sugerir divisões de treino semanal
-- Orientar sobre progressão e evolução
+📱 SUAS CAPACIDADES PRINCIPAIS:
+1. Tirar dúvidas sobre a plataforma Passa Bola
+2. Dar exemplos de rotinas de treino
+3. Ensinar receitas práticas para atletas
 
-🍳 **COMO AJUDAR COM NUTRIÇÃO:**
-- Ensinar receitas PRÁTICAS para atletas
-- Explicar timing alimentar (pré/pós-treino)
-- Dar exemplos de lanches saudáveis
-- Orientar sobre hidratação
+🚫 REGRAS ESTRITAS:
+- NUNCA invente módulos que não existem (como módulo de treinos, nutrição ou desempenho)
+- NUNCA use asteriscos (*) ou markdown na formatação
+- Use apenas as funcionalidades reais da plataforma descritas abaixo
+- NUNCA diga "Módulo de..." - a plataforma não tem módulos separados
 
-📱 **CONHECIMENTO DA PLATAFORMA:**
-- Tirar dúvidas sobre funcionalidades do Passa Bola
-- Explicar como usar cada módulo
-- Guiar na navegação
+⭐ FUNCIONALIDADES REAIS DA PLATAFORMA:
 
-⚠️ **AVISO IMPORTANTE:**
-Sempre finalize com: "Lembre-se: para um plano 100% personalizado, consulte profissionais especializados!"
+PÁGINA PRINCIPAL (ícone 🏠):
+Na tela principal você encontra jogos ao vivo, próximas partidas e as últimas notícias do futebol feminino. Você pode clicar em qualquer jogo para ver todos os detalhes e estatísticas.
 
-**EXEMPLOS DE RESPOSTAS PRÁTICAS:**
+EVENTOS E COMPETIÇÕES (ícone 🏆):
+Para encontrar peneiras e eventos, clique no ícone do troféu. Lá você encontra um calendário com todos os eventos, e pode filtrar por cidade e data. Ao clicar em um evento, você vê todos os detalhes como local, regras e vagas.
 
-Quando pedirem "plano de treino":
-"Vou te dar um EXEMPLO de rotina que pode te inspirar! Para uma jogadora de meio-campo, uma semana poderia incluir:
-• Segunda: Força inferior (agachamentos, afundos) 
-• Terça: Treino técnico com bola
-• Quarta: Descanso ou mobilidade
-• Quinta: Força superior + cardio
-• Sexta: Treino tático e finalização
-• Sábado: Jogo ou simulação
-• Domingo: Descanso
+COMUNIDADE (ícone 🧑‍🤝‍🧑):
+Para fazer posts e compartilhar seus lances, vá para a Comunidade no ícone das pessoas, e clique no ícone de "+" no topo da tela. Aí é só escrever seu texto e adicionar suas fotos ou vídeos.
 
-Com base no seu objetivo, posso sugerir exercícios específicos! Me conta sua posição em campo?"
+PERFIL (ícone 👤):
+Seu perfil é seu portfólio de atleta digital. Para acessá-lo, clique no ícone de pessoa no menu. Lá dentro, procure a opção "Editar Perfil" para atualizar suas informações. Seus posts da comunidade aparecem automaticamente no feed do seu perfil.
 
-Quando pedirem "receitas":
-"Tenho receitas práticas para atletas! 🍳
-• PANQUECA PRÉ-TREINO: 1 ovo + 2 colheres de aveia + 1 banana
-• SANDUÍCHE PÓS-TREINO: Pão integral + frango desfiado + folhas
-• VITAMINA RECUPERATÓRIA: Leite + whey + fruta + aveia
+💪 EXEMPLOS DE TREINO:
+Posso te dar exemplos de rotinas de treino como:
+Segunda: Força inferior (agachamentos, afundos)
+Terça: Técnica com bola (domínio, passe)
+Quarta: Descanso ativo
+Quinta: Resistência (corrida)
+Sexta: Força superior
+Sábado: Jogo/Simulação
+Domingo: Descanso
 
-Qual te interessa? Posso dar o passo a passo!"
+🍳 RECEITAS PRÁTICAS:
+Tenho receitas como Panqueca Pré-Treino, Sanduíche Pós-Treino e Vitamina Recuperatória. Posso ensinar o passo a passo de qualquer uma!
+
+⚠️ AVISO IMPORTANTE:
+Só fale sobre as funcionalidades reais listadas acima. Não invente módulos.
 """
 
 @app.post("/api/chat", response_model=ChatResponse)
 async def chat_with_passinha(request: ChatRequest):
-    """
-    Endpoint REALISTA - Guia de Performance
-    """
+
     print(f"💬 Mensagem: {request.message}")
     
     if not GEMINI_API_KEY:
@@ -185,105 +209,55 @@ async def chat_with_passinha(request: ChatRequest):
         final_prompt = f"""
         {PASSINHA_SYSTEM_PROMPT}
         
-        Histórico: {request.history}
+        PERGUNTA DO USUÁRIO: {request.message}
         
-        Usuário: {request.message}
+        INSTRUÇÕES FINAIS:
+        - Responda como Passinha de forma natural e direta
+        - Use APENAS as funcionalidades reais da plataforma descritas
+        - NUNCA use asteriscos, markdown ou formatação complexa
+        - NUNCA invente módulos que não existem
+        - Seja prática e ofereça ajuda concreta
+        - Use quebras de linha normais, não listas com marcadores
         
-        Responda como Passinha - seja PRÁTICA, INSPIRADORA e ÚTIL.
-        Forneça exemplos concretos, dicas acionáveis e orientações claras.
+        RESPOSTA:
         """
         
         response = model.generate_content(final_prompt)
         return ChatResponse(response=response.text, success=True)
         
     except Exception as e:
-        # Fallback prático
+        
         user_msg = request.message.lower()
         
-        if any(word in user_msg for word in ['plano', 'treino', 'exercício']):
+        if any(word in user_msg for word in ['plataforma', 'app', 'como funciona', 'como usar', 'dicas']):
             return ChatResponse(
-                response="""💪 **VOU TE DAR UM EXEMPLO PRÁTICO!**
+                response="""Olá! Que bom que quer explorar a plataforma! 😊
 
-Para uma **jogadora de futebol**, uma rotina semanal equilibrada pode ser:
+Aqui estão as principais funcionalidades do Passa Bola:
 
-**SEGUNDA - Força & Potência**
-• Agachamentos: 3x10 repetições
-• Afundos: 3x8 cada perna  
-• Saltos: 3x8
-• Prancha: 3x30 segundos
+Na Página Principal (ícone 🏠) você vê jogos ao vivo, próximas partidas e as últimas notícias do futebol feminino.
 
-**TERÇA - Técnica com Bola**
-• Domínio: 15 minutos
-• Passe: 10 minutos
-• Finalização: 15 minutos
-• Drible: 10 minutos
+Nos Eventos (ícone 🏆) encontra peneiras e competições. É só clicar no evento para ver detalhes e se inscrever.
 
-**QUARTA - Descanso Ativo**
-• Alongamento leve
-• Caminhada tranquila
-• Hidratação extra
+Na Comunidade (ícone 🧑‍🤝‍🧑) pode compartilhar seus lances clicando no "+" e fazendo posts com fotos e vídeos.
 
-**QUINTA - Resistência**
-• Corrida intervalada: 8x200m
-• Tiros de velocidade: 10x50m
-• Mobilidade articular
+No seu Perfil (ícone 👤) edita suas informações e vê todos os posts que já fez.
 
-**SEXTA - Força Superior + Habilidades**
-• Flexões: 3x10
-• Remada: 3x10
-• Abdominais: 3x15
-• Treino de precisão de passe
-
-**SABADO - Jogo/Simulação**
-• Partida prática
-• Aplicação tática
-• Trabalho em equipe
-
-**DOMINGO - Descanso Total**
-
-**Me conta sua posição em campo que dou mais dicas específicas!** 🎯""",
-                success=False
-            )
-        
-        elif any(word in user_msg for word in ['receita', 'comida']):
-            return ChatResponse(
-                response="""🍳 **RECEITAS PRÁTICAS PARA ATLETAS:**
-
-**🥞 PANQUECA PRÉ-TREINO**
-• 1 ovo + 2 colheres de aveia + 1 banana amassada
-• Misture tudo e leve à frigideira antiaderente
-• Sirva com mel (opcional)
-
-**🥪 SANDUÍCHE PÓS-TREINO**  
-• 2 fatias de pão integral
-• 1 filé de frango grelhado
-• Folhas de alface e tomate
-• Requeijão light
-
-**🥤 VITAMINA RECUPERATÓRIA**
-• 200ml de leite
-• 1 scoop de whey protein
-• 1 banana
-• 1 colher de aveia
-• Bata tudo e beba após o treino
-
-**Qual você quer aprender em detalhes?** 👩‍🍳""",
+Qual parte te interessa mais? Posso explicar melhor!""",
                 success=False
             )
         
         else:
             return ChatResponse(
-                response="""Olá! Sou a Passinha 🎯
+                response="""Olá! Sou a Passinha, sua assistente do Passa Bola! 🎯
 
-Sua guia de performance para futebol feminino!
+Posso te ajudar com:
+Dúvidas sobre a plataforma
+Exemplos de treinos 
+Receitas para atletas
+Informações sobre futebol feminino
 
-**Posso te ajudar com:**
-• 💪 Exemplos de rotinas de treino
-• 🍳 Receitas práticas para atletas  
-• 📊 Dicas de nutrição esportiva
-• 📱 Como usar a plataforma Passa Bola
-
-**O que você precisa hoje?** 😊""",
+O que você precisa hoje? 😊""",
                 success=False
             )
     
@@ -969,6 +943,164 @@ async def get_match_details(match_id: str):
             "data": None,
             "source": "error"
         }
+    
+@app.get("/api/events")
+async def get_events(tipo: Optional[str] = None):
+    """Busca todos os eventos ativos"""
+    try:
+        query = supabase.table("eventos").select("*").eq("is_active", True)
+        
+        if tipo:
+            query = query.eq("tipo", tipo)
+            
+        response = query.order("data_evento", desc=False).execute()
+        
+        return response.data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao buscar eventos: {str(e)}")
+
+@app.get("/api/events/{event_id}")
+async def get_event(event_id: str):
+    """Busca um evento específico"""
+    try:
+        response = supabase.table("eventos").select("*").eq("id", event_id).eq("is_active", True).single().execute()
+        
+        if not response.data:
+            raise HTTPException(status_code=404, detail="Evento não encontrado")
+            
+        return response.data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao buscar evento: {str(e)}")
+
+@app.post("/api/events")
+async def create_event(event: EventCreate):
+    """Cria um novo evento (admin apenas)"""
+    try:
+        event_data = event.dict()
+        event_data["inscricoes_atuais"] = 0
+        event_data["created_at"] = datetime.now().isoformat()
+        
+        response = supabase.table("eventos").insert(event_data).execute()
+        
+        if not response.data:
+            raise HTTPException(status_code=400, detail="Erro ao criar evento")
+            
+        return response.data[0]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao criar evento: {str(e)}")
+
+@app.post("/api/events/{event_id}/register")
+async def register_for_event(event_id: str, registration: EventRegistration):
+    """Inscreve usuário em um evento"""
+    try:
+        # Verifica se evento existe e tem vagas
+        event_response = supabase.table("eventos").select("*").eq("id", event_id).eq("is_active", True).single().execute()
+        
+        if not event_response.data:
+            raise HTTPException(status_code=404, detail="Evento não encontrado")
+        
+        event_data = event_response.data
+        
+        # Verifica se há vagas disponíveis
+        if event_data["max_inscricoes"] and event_data["inscricoes_atuais"] >= event_data["max_inscricoes"]:
+            raise HTTPException(status_code=400, detail="Evento lotado")
+        
+        # Verifica se usuário já está inscrito
+        existing_registration = supabase.table("event_registrations")\
+            .select("*")\
+            .eq("event_id", event_id)\
+            .eq("user_id", registration.user_id)\
+            .execute()
+            
+        if existing_registration.data:
+            raise HTTPException(status_code=400, detail="Usuário já inscrito neste evento")
+        
+        # Cria a inscrição
+        registration_data = registration.dict()
+        registration_data["event_id"] = event_id
+        registration_data["status"] = "confirmed"
+        registration_data["created_at"] = datetime.now().isoformat()
+        
+        registration_response = supabase.table("event_registrations").insert(registration_data).execute()
+        
+        # Atualiza contador de inscrições no evento
+        new_participants_count = event_data["inscricoes_atuais"] + 1
+        supabase.table("eventos")\
+            .update({"inscricoes_atuais": new_participants_count})\
+            .eq("id", event_id)\
+            .execute()
+        
+        return registration_response.data[0]
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao inscrever no evento: {str(e)}")
+
+@app.get("/api/events/{event_id}/registrations")
+async def get_event_registrations(event_id: str):
+    """Busca todas as inscrições de um evento (admin apenas)"""
+    try:
+        response = supabase.table("event_registrations")\
+            .select("*")\
+            .eq("event_id", event_id)\
+            .order("created_at", desc=True)\
+            .execute()
+            
+        return response.data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao buscar inscrições: {str(e)}")
+
+@app.delete("/api/events/{event_id}")
+async def delete_event(event_id: str):
+    """Deleta um evento (soft delete - admin apenas)"""
+    try:
+        # Soft delete - marca como inativo
+        response = supabase.table("eventos")\
+            .update({"is_active": False})\
+            .eq("id", event_id)\
+            .execute()
+            
+        if not response.data:
+            raise HTTPException(status_code=404, detail="Evento não encontrado")
+            
+        return {"message": "Evento deletado com sucesso"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao deletar evento: {str(e)}")
+
+@app.delete("/api/events/{event_id}/registrations/{registration_id}")
+async def cancel_registration(event_id: str, registration_id: str):
+    """Cancela uma inscrição em evento"""
+    try:
+        # Busca a inscrição
+        registration_response = supabase.table("event_registrations")\
+            .select("*")\
+            .eq("id", registration_id)\
+            .eq("event_id", event_id)\
+            .single()\
+            .execute()
+            
+        if not registration_response.data:
+            raise HTTPException(status_code=404, detail="Inscrição não encontrada")
+        
+        # Deleta a inscrição
+        supabase.table("event_registrations")\
+            .delete()\
+            .eq("id", registration_id)\
+            .execute()
+            
+        # Atualiza contador do evento
+        event_response = supabase.table("eventos").select("inscricoes_atuais").eq("id", event_id).single().execute()
+        if event_response.data:
+            new_count = max(0, event_response.data["inscricoes_atuais"] - 1)
+            supabase.table("eventos")\
+                .update({"inscricoes_atuais": new_count})\
+                .eq("id", event_id)\
+                .execute()
+        
+        return {"message": "Inscrição cancelada com sucesso"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao cancelar inscrição: {str(e)}")
 
 @app.get("/api/status")
 async def get_api_status():
