@@ -21,7 +21,7 @@ export default function CommunityPage() {
   const [showPostModal, setShowPostModal] = useState(false);
   const [newPostText, setNewPostText] = useState("");
   const [newPostImage, setNewPostImage] = useState(null);
-  const [newPostVideo, setNewPostVideo] = useState(null); // Novo estado para vídeo
+  const [newPostVideo, setNewPostVideo] = useState(null);
   const [loading, setLoading] = useState(false);
   const [editingPost, setEditingPost] = useState(null);
   const [editText, setEditText] = useState("");
@@ -37,6 +37,9 @@ export default function CommunityPage() {
   const [postsLoading, setPostsLoading] = useState(true);
   const [postsError, setPostsError] = useState(null);
   const [followingLoading, setFollowingLoading] = useState(false);
+
+  // Novo estado para controlar likes em loading
+  const [likesLoading, setLikesLoading] = useState({});
 
   useEffect(() => {
     const loggedIn = localStorage.getItem("loggedIn");
@@ -117,7 +120,7 @@ export default function CommunityPage() {
               likes: likesCount,
               likedBy: likedByUser ? [user.name] : [],
               image: post.image,
-              video: post.video, // Adicionando vídeo
+              video: post.video,
               created_at: post.created_at
             };
           } catch (error) {
@@ -243,23 +246,31 @@ export default function CommunityPage() {
 
     setLoading(true);
     try {
+      const postData = {
+        content: newPostText,
+        user_id: user.id,
+        user_email: user.email,
+        user_name: user.name,
+      };
+
+      // Adicionar URL da mídia se existir
+      if (newPostImage) {
+        postData.image = newPostImage;
+      }
+      if (newPostVideo) {
+        postData.video = newPostVideo;
+      }
+
       const res = await fetch(`${API_BASE_URL}/posts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          content: newPostText,
-          user_id: user.id,
-          user_email: user.email,
-          user_name: user.name,
-          image: newPostImage,
-          video: newPostVideo // Adicionando vídeo
-        }),
+        body: JSON.stringify(postData),
       });
 
       if (res.ok) {
         setNewPostText("");
         setNewPostImage(null);
-        setNewPostVideo(null); // Limpar vídeo
+        setNewPostVideo(null);
         setShowPostModal(false);
         await fetchPosts(user.id);
       } else {
@@ -273,8 +284,15 @@ export default function CommunityPage() {
     }
   };
 
+  // Função de like ATUALIZADA com loading state
   const handleLike = async (postId) => {
     if (!user) return;
+
+    // Marcar este post como carregando
+    setLikesLoading(prev => ({
+      ...prev,
+      [postId]: true
+    }));
 
     try {
       const res = await fetch(`${API_BASE_URL}/posts/like`, {
@@ -297,9 +315,18 @@ export default function CommunityPage() {
               }
             : post
         ));
+      } else {
+        throw new Error("Erro ao curtir post");
       }
     } catch (error) {
       console.error("Erro ao curtir:", error);
+      alert("Erro ao curtir publicação. Tente novamente.");
+    } finally {
+      // Remover o estado de loading deste post
+      setLikesLoading(prev => ({
+        ...prev,
+        [postId]: false
+      }));
     }
   };
 
@@ -351,37 +378,58 @@ export default function CommunityPage() {
     }
   };
 
-  const handleImageUpload = (e) => {
+  // FUNÇÃO DE UPLOAD UNIFICADA PARA SUPABASE STORAGE
+  const handleFileUpload = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      // Verificar se é imagem
-      if (file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setNewPostImage(reader.result);
-          setNewPostVideo(null); // Remover vídeo se houver
-        };
-        reader.readAsDataURL(file);
-      } else {
-        alert('Por favor, selecione apenas imagens para upload de imagem.');
-      }
-    }
-  };
+    if (!file) return;
 
-  const handleVideoUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      // Verificar se é vídeo
-      if (file.type.startsWith('video/')) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setNewPostVideo(reader.result);
-          setNewPostImage(null); // Remover imagem se houver
-        };
-        reader.readAsDataURL(file);
-      } else {
-        alert('Por favor, selecione apenas vídeos para upload de vídeo.');
+    // Validar tipo de arquivo
+    if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+      alert('Por favor, selecione apenas imagens ou vídeos.');
+      return;
+    }
+
+    // Validar tamanho do arquivo (50MB máximo)
+    const maxSize = 50 * 1024 * 1024; // 50MB
+    if (file.size > maxSize) {
+      alert('Arquivo muito grande. Máximo 50MB permitido.');
+      return;
+    }
+
+    setLoading(true);
+    
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const uploadRes = await fetch(`${API_BASE_URL}/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!uploadRes.ok) {
+        const errorData = await uploadRes.json();
+        throw new Error(errorData.detail || 'Erro no servidor de upload');
       }
+
+      const uploadData = await uploadRes.json();
+      
+      if (uploadData.success) {
+        if (uploadData.type === 'image') {
+          setNewPostImage(uploadData.url);
+          setNewPostVideo(null);
+        } else if (uploadData.type === 'video') {
+          setNewPostVideo(uploadData.url);
+          setNewPostImage(null);
+        }
+      } else {
+        throw new Error(uploadData.error || 'Erro desconhecido no upload');
+      }
+    } catch (error) {
+      console.error('Erro no upload:', error);
+      alert(`Erro ao fazer upload: ${error.message}`);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -529,6 +577,37 @@ export default function CommunityPage() {
     }
     
     return null;
+  };
+
+  // Componente do botão de like com loading
+  const LikeButton = ({ post }) => {
+    const isLoading = likesLoading[post.id];
+    const isLiked = post.likedBy?.includes(user?.name);
+
+    return (
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          handleLike(post.id);
+        }}
+        disabled={isLoading}
+        className={`flex items-center gap-2 transition-colors disabled:opacity-50 ${
+          isLiked 
+            ? "text-red-600 hover:text-red-700" 
+            : "text-gray-500 hover:text-red-600"
+        }`}
+      >
+        {isLoading ? (
+          // Spinner de loading
+          <div className="h-5 w-5 border-2 border-gray-300 border-t-red-600 rounded-full animate-spin"></div>
+        ) : isLiked ? (
+          <Heart className="h-5 w-5 fill-red-600 text-red-600" />
+        ) : (
+          <Heart className="h-5 w-5" />
+        )}
+        <span className="text-sm">{post.likes || 0} Curtidas</span>
+      </button>
+    );
   };
 
   // Componente de loading para posts
@@ -724,20 +803,9 @@ export default function CommunityPage() {
                             )}
 
                             <div className="flex gap-6 items-center text-sm text-gray-500">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleLike(post.id);
-                                }}
-                                className="flex items-center gap-2 focus:outline-none hover:text-red-600"
-                              >
-                                {post.likedBy?.includes(user.name) ? (
-                                  <Heart className="h-5 w-5 fill-red-600 text-red-600" />
-                                ) : (
-                                  <Heart className="h-5 w-5" />
-                                )}
-                                <span>{post.likes || 0} Curtidas</span>
-                              </button>
+                              {/* Substituído pelo componente LikeButton com loading */}
+                              <LikeButton post={post} />
+                              
                               <span 
                                 className="text-gray-500 flex items-center gap-2 cursor-pointer hover:text-[var(--primary-color)] transition-colors"
                                 onClick={(e) => {
@@ -880,7 +948,7 @@ export default function CommunityPage() {
         </div>
       </section>
 
-      {/* Modal de Nova Publicação - MODIFICADO PARA VÍDEOS */}
+      {/* Modal de Nova Publicação */}
       {showPostModal && (
         <div className="fixed inset-0 bg-[#0000006d] flex items-center justify-center z-100 p-4">
           <div className="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -914,36 +982,31 @@ export default function CommunityPage() {
                 </div>
               </div>
 
-              {/* Preview de Imagem */}
-              {newPostImage && (
+              {/* Preview de Mídia Unificado */}
+              {(newPostImage || newPostVideo) && (
                 <div className="mb-4 relative">
-                  <img
-                    src={newPostImage}
-                    alt="Preview"
-                    className="rounded-lg max-h-60 w-full object-cover"
-                  />
+                  {newPostImage ? (
+                    <img
+                      src={newPostImage}
+                      alt="Preview"
+                      className="rounded-lg max-h-60 w-full object-cover"
+                    />
+                  ) : newPostVideo ? (
+                    <video
+                      controls
+                      className="rounded-lg max-h-60 w-full"
+                    >
+                      <source src={newPostVideo} type="video/mp4" />
+                      Seu navegador não suporta o elemento de vídeo.
+                    </video>
+                  ) : null}
+                  
                   <button
-                    onClick={() => setNewPostImage(null)}
-                    className="absolute top-2 right-2 bg-[#0000006d] bg-opacity-50 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-opacity-70"
-                  >
-                    ×
-                  </button>
-                </div>
-              )}
-
-              {/* Preview de Vídeo */}
-              {newPostVideo && (
-                <div className="mb-4 relative">
-                  <video
-                    controls
-                    className="rounded-lg max-h-60 w-full"
-                  >
-                    <source src={newPostVideo} type="video/mp4" />
-                    Seu navegador não suporta o elemento de vídeo.
-                  </video>
-                  <button
-                    onClick={() => setNewPostVideo(null)}
-                    className="absolute top-2 right-2 bg-[#0000006d] bg-opacity-50 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-opacity-70"
+                    onClick={() => {
+                      setNewPostImage(null);
+                      setNewPostVideo(null);
+                    }}
+                    className="absolute top-2 right-2 bg-[#0000006d] bg-opacity-50 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-opacity-70 transition-colors"
                   >
                     ×
                   </button>
@@ -952,36 +1015,30 @@ export default function CommunityPage() {
 
               <div className="flex justify-between items-center mb-6">
                 <div className="flex gap-2">
-                  {/* Upload de Imagem */}
+                  {/* Upload Unificado para Supabase Storage */}
                   <input
                     type="file"
-                    id="image-upload"
-                    accept="image/*"
-                    onChange={handleImageUpload}
+                    id="file-upload"
+                    accept="image/*,video/*"
+                    onChange={handleFileUpload}
                     className="hidden"
+                    disabled={loading}
                   />
                   <label
-                    htmlFor="image-upload"
-                    className="cursor-pointer bg-gray-100 hover:bg-gray-200 rounded-lg px-4 py-2 flex items-center gap-2 transition-colors"
+                    htmlFor="file-upload"
+                    className={`cursor-pointer bg-gray-100 hover:bg-gray-200 rounded-lg px-4 py-2 flex items-center gap-2 transition-colors ${
+                      loading ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
                   >
-                    <Image className="h-4 w-4" />
-                    Adicionar imagem
-                  </label>
-
-                  {/* Upload de Vídeo */}
-                  <input
-                    type="file"
-                    id="video-upload"
-                    accept="video/*"
-                    onChange={handleVideoUpload}
-                    className="hidden"
-                  />
-                  <label
-                    htmlFor="video-upload"
-                    className="cursor-pointer bg-gray-100 hover:bg-gray-200 rounded-lg px-4 py-2 flex items-center gap-2 transition-colors"
-                  >
-                    <Video className="h-4 w-4" />
-                    Adicionar vídeo
+                    {loading ? (
+                      <div className="h-4 w-4 border-2 border-gray-400 border-t-[var(--primary-color)] rounded-full animate-spin"></div>
+                    ) : (
+                      <>
+                        <Image className="h-4 w-4" />
+                        <Video className="h-4 w-4" />
+                      </>
+                    )}
+                    {loading ? 'Enviando...' : 'Adicionar mídia'}
                   </label>
                 </div>
               </div>

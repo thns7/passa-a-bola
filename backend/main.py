@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import UploadFile, File, FastAPI, HTTPException
 from pydantic import BaseModel, EmailStr
 from supabase import create_client, Client
 import os
@@ -10,6 +10,7 @@ from datetime import datetime
 import base64
 import sys
 import google.generativeai as genai  
+import uuid
 
 backend_path = os.path.join(os.path.dirname(__file__))
 if backend_path not in sys.path:
@@ -18,10 +19,12 @@ if backend_path not in sys.path:
 from services.football_service_hybrid import football_service
 from services.new_service import news_service
 
+
 load_dotenv()
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") 
+STORAGE_BUCKET = "posts-media"
 
 if not SUPABASE_URL or not SUPABASE_KEY:
     raise RuntimeError("SUPABASE_URL e SUPABASE_KEY não estão definidos no .env")
@@ -336,6 +339,78 @@ def login(data: LoginData):
         return {"message": "Login OK", "user": user}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro interno: {str(e)}")
+    
+@app.post("/upload")
+async def upload_file(file: UploadFile = File(...)):
+    """
+    Upload de arquivos para Supabase Storage
+    """
+    try:
+        # Validar tipo de arquivo
+        if not file.content_type.startswith(('image/', 'video/')):
+            raise HTTPException(
+                status_code=400, 
+                detail="Apenas imagens e vídeos são permitidos"
+            )
+
+        # Validar tamanho do arquivo (50MB máximo)
+        max_size = 50 * 1024 * 1024  # 50MB
+        file_content = await file.read()
+        if len(file_content) > max_size:
+            raise HTTPException(
+                status_code=400,
+                detail="Arquivo muito grande. Máximo 50MB permitido."
+            )
+
+        # Gerar nome único para o arquivo
+        file_extension = file.filename.split('.')[-1]
+        unique_filename = f"{uuid.uuid4()}.{file_extension}"
+        
+        # Fazer upload para Supabase Storage
+        upload_result = supabase.storage.from_(STORAGE_BUCKET).upload(
+            unique_filename,
+            file_content,
+            {"content-type": file.content_type}
+        )
+        
+        if not upload_result:
+            raise HTTPException(
+                status_code=500,
+                detail="Erro ao fazer upload para o storage"
+            )
+        
+        # Obter URL pública do arquivo
+        file_url = supabase.storage.from_(STORAGE_BUCKET).get_public_url(unique_filename)
+        
+        return {
+            "success": True,
+            "url": file_url,
+            "filename": unique_filename,
+            "type": file.content_type.split('/')[0]  # 'image' ou 'video'
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Erro no upload: {str(e)}")
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Erro interno no upload: {str(e)}"
+        )
+    
+@app.delete("/upload/{filename}")
+async def delete_file(filename: str):
+    """
+    Deletar arquivo do Supabase Storage
+    """
+    try:
+        result = supabase.storage.from_(STORAGE_BUCKET).remove([filename])
+        return {"success": True, "message": "Arquivo deletado"}
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Erro ao deletar arquivo: {str(e)}"
+        )
 
 
 @app.get("/api/noticias")

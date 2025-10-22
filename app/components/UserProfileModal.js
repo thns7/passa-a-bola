@@ -18,6 +18,8 @@ export default function UserProfileModal({ userId, currentUser, onClose, onFollo
   const [following, setFollowing] = useState([]);
   const [selectedPost, setSelectedPost] = useState(null);
   const [nestedUser, setNestedUser] = useState(null);
+  const [postsError, setPostsError] = useState(null);
+  const [likesLoading, setLikesLoading] = useState({});
 
   useEffect(() => {
     if (userId) {
@@ -28,6 +30,7 @@ export default function UserProfileModal({ userId, currentUser, onClose, onFollo
   const fetchUserProfile = async () => {
     try {
       setLoading(true);
+      setPostsError(null);
       
       const userRes = await fetch(`${API_BASE_URL}/user/${userId}`);
       if (userRes.ok) {
@@ -35,21 +38,58 @@ export default function UserProfileModal({ userId, currentUser, onClose, onFollo
         setUser(userData);
       }
 
+      // BUSCAR POSTS CORRIGIDA - mesma estrutura da comunidade
       const postsRes = await fetch(`${API_BASE_URL}/posts`);
-      if (postsRes.ok) {
-        const allPosts = await postsRes.json();
-        const userPostsData = allPosts.filter(post => post.user_id === userId)
-          .map(post => ({
-            id: post.id,
-            text: post.content,
-            image: post.image,
-            likes: post.likes_count || 0,
-            created_at: post.created_at,
-            user_name: post.user_name,
-            user_id: post.user_id
-          }));
-        setUserPosts(userPostsData);
+      
+      if (!postsRes.ok) {
+        throw new Error(`Erro ${postsRes.status}: Não foi possível carregar os posts`);
       }
+      
+      const allPosts = await postsRes.json();
+      const userPostsData = allPosts.filter(post => post.user_id === userId);
+      
+      const postsWithLikes = await Promise.all(
+        userPostsData.map(async (post) => {
+          try {
+            const likesRes = await fetch(`${API_BASE_URL}/posts/${post.id}/likes`);
+            let likedByUser = false;
+            let likesCount = post.likes_count || 0;
+            
+            if (likesRes.ok) {
+              const likesData = await likesRes.json();
+              likedByUser = currentUser && likesData.likes && likesData.likes.includes(currentUser.id);
+            }
+            
+            return {
+              id: post.id,
+              text: post.content,
+              author: post.user_name,
+              author_id: post.user_id,
+              likes: likesCount,
+              likedBy: likedByUser ? [currentUser?.id] : [],
+              image: post.image,
+              video: post.video,
+              created_at: post.created_at
+            };
+          } catch (error) {
+            console.error(`Erro ao processar post ${post.id}:`, error);
+            return {
+              id: post.id,
+              text: post.content,
+              author: post.user_name,
+              author_id: post.user_id,
+              likes: post.likes_count || 0,
+              likedBy: [],
+              image: post.image,
+              video: post.video,
+              created_at: post.created_at,
+              error: true
+            };
+          }
+        })
+      );
+      
+      setUserPosts(postsWithLikes.filter(post => post !== null));
 
       if (currentUser) {
         const followRes = await fetch(`${API_BASE_URL}/user/${currentUser.id}/is_following/${userId}`);
@@ -75,8 +115,54 @@ export default function UserProfileModal({ userId, currentUser, onClose, onFollo
 
     } catch (error) {
       console.error("Erro ao buscar perfil:", error);
+      setPostsError(error.message);
+      setUserPosts([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // FUNÇÃO DE LIKE CORRIGIDA
+  const handleLike = async (postId) => {
+    if (!currentUser) return;
+
+    setLikesLoading(prev => ({
+      ...prev,
+      [postId]: true
+    }));
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/posts/like`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          post_id: postId,
+          user_id: currentUser.id
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        
+        setUserPosts(userPosts.map(post => 
+          post.id === postId 
+            ? { 
+                ...post, 
+                likes: data.post.likes_count, 
+                likedBy: data.action === "added" ? [currentUser.id] : [] 
+              }
+            : post
+        ));
+      } else {
+        throw new Error("Erro ao curtir post");
+      }
+    } catch (error) {
+      console.error("Erro ao curtir:", error);
+    } finally {
+      setLikesLoading(prev => ({
+        ...prev,
+        [postId]: false
+      }));
     }
   };
 
@@ -132,6 +218,75 @@ export default function UserProfileModal({ userId, currentUser, onClose, onFollo
   const handleBackFromComments = () => {
     setSelectedPost(null);
   };
+
+  // Componente para exibir mídia (imagem ou vídeo)
+  const MediaDisplay = ({ post }) => {
+    if (post.image) {
+      return (
+        <img
+          src={post.image}
+          alt="Post"
+          className="rounded-lg max-h-80 w-full object-cover mb-3"
+        />
+      );
+    }
+    
+    if (post.video) {
+      return (
+        <video
+          controls
+          className="rounded-lg max-h-80 w-full mb-3"
+        >
+          <source src={post.video} type="video/mp4" />
+          Seu navegador não suporta o elemento de vídeo.
+        </video>
+      );
+    }
+    
+    return null;
+  };
+
+  // Componente do botão de like com loading
+  const LikeButton = ({ post }) => {
+    const isLoading = likesLoading[post.id];
+    const isLiked = currentUser && Array.isArray(post.likedBy) && post.likedBy.includes(currentUser.id);
+
+    return (
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          handleLike(post.id);
+        }}
+        disabled={isLoading || !currentUser}
+        className={`flex items-center gap-1 transition-colors disabled:opacity-50 ${
+          isLiked 
+            ? "text-red-600 hover:text-red-700" 
+            : "text-gray-500 hover:text-red-600"
+        }`}
+      >
+        {isLoading ? (
+          <div className="h-4 w-4 border-2 border-gray-300 border-t-red-600 rounded-full animate-spin"></div>
+        ) : isLiked ? (
+          <Heart className="h-4 w-4 fill-red-600 text-red-600" />
+        ) : (
+          <Heart className="h-4 w-4" />
+        )}
+        <span className="text-sm">{post.likes || 0}</span>
+      </button>
+    );
+  };
+
+  // Componente de loading para posts
+  const PostSkeleton = () => (
+    <div className="bg-gray-50 rounded-xl p-4 animate-pulse">
+      <div className="h-4 bg-gray-200 rounded mb-2"></div>
+      <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
+      <div className="flex gap-6">
+        <div className="h-6 w-12 bg-gray-200 rounded"></div>
+        <div className="h-6 w-16 bg-gray-200 rounded"></div>
+      </div>
+    </div>
+  );
 
   const FollowersModal = () => (
     <div className="fixed inset-0 bg-[#0000006d] flex items-center justify-center z-60 p-4">
@@ -219,7 +374,7 @@ export default function UserProfileModal({ userId, currentUser, onClose, onFollo
     </div>
   );
 
-  // Componente de Comentários (simplificado do CommentsPage)
+  // Componente de Comentários (atualizado para vídeos)
   const CommentsSection = ({ post }) => {
     const [comments, setComments] = useState([]);
     const [newComment, setNewComment] = useState("");
@@ -334,26 +489,20 @@ export default function UserProfileModal({ userId, currentUser, onClose, onFollo
             </div>
           </div>
 
-          {/* Post original */}
+          {/* Post original - ATUALIZADO para usar MediaDisplay */}
           <div className="p-4 border-b border-gray-200">
             <div className="flex items-center gap-3 mb-3">
               <img
                 src={user?.avatar || "/perfilPadrao.jpg"}
-                alt={post.user_name}
+                alt={post.author}
                 className="h-8 w-8 rounded-full object-cover"
               />
               <div>
-                <p className="font-semibold text-sm">{post.user_name}</p>
+                <p className="font-semibold text-sm">{post.author}</p>
               </div>
             </div>
             <p className="text-gray-800 mb-3">{post.text}</p>
-            {post.image && (
-              <img
-                src={post.image}
-                alt="Post"
-                className="rounded-lg max-h-80 mx-auto items-center  mb-3"
-              />
-            )}
+            <MediaDisplay post={post} />
           </div>
 
           {/* Lista de comentários */}
@@ -617,7 +766,27 @@ export default function UserProfileModal({ userId, currentUser, onClose, onFollo
             <div className="p-4">
               <h3 className="font-semibold text-gray-900 mb-4">Publicações</h3>
               
-              {userPosts.length === 0 ? (
+              {/* Estados de carregamento e erro */}
+              {loading ? (
+                <div>
+                  {[...Array(2)].map((_, index) => (
+                    <PostSkeleton key={index} />
+                  ))}
+                </div>
+              ) : postsError ? (
+                <div className="text-center py-4">
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <p className="text-red-600 font-semibold mb-2">Erro ao carregar posts</p>
+                    <p className="text-red-500 text-sm mb-4">{postsError}</p>
+                    <button
+                      onClick={fetchUserProfile}
+                      className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm"
+                    >
+                      Tentar Novamente
+                    </button>
+                  </div>
+                </div>
+              ) : userPosts.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
                   <p>Nenhuma publicação ainda</p>
                 </div>
@@ -631,22 +800,16 @@ export default function UserProfileModal({ userId, currentUser, onClose, onFollo
                     >
                       <p className="text-gray-800 mb-3">{post.text}</p>
                       
-                      {post.image && (
-                        <img
-                          src={post.image}
-                          alt="Post"
-                          className="rounded-lg max-h-80 mx-auto items-center  mb-3"
-                        />
-                      )}
+                      {/* MediaDisplay para imagens e vídeos */}
+                      <MediaDisplay post={post} />
                       
                       <div className="flex gap-4 items-center text-sm text-gray-500">
-                        <span className="flex items-center gap-1">
-                          <Heart className="h-4 w-4" />
-                          {post.likes}
-                        </span>
+                        {/* Substituído por LikeButton com loading */}
+                        <LikeButton post={post} />
+                        
                         <span className="flex items-center gap-1 text-gray-500 hover:text-[var(--primary-color)]">
                           <MessageCircle className="h-4 w-4" />
-                          Comentarios
+                          Comentários
                         </span>
                         <span>{new Date(post.created_at).toLocaleDateString('pt-BR')}</span>
                       </div>

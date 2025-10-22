@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { MoreHorizontal, MapPin, Calendar, LogOut, Users, Crown, Check, Star, Zap, X } from "lucide-react";
+import { MoreHorizontal, MapPin, Calendar, LogOut, Users, Crown, Check, Star, Zap, X, Heart, MessageCircle } from "lucide-react";
 import BottomNav from "../components/BottomNav";
 import Header from "../components/Header";
 import UserProfileModal from "../components/UserProfileModal";
@@ -22,7 +22,9 @@ export default function PerfilPage() {
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
-  const [hasPremium, setHasPremium] = useState(false); // Estado temporário
+  const [hasPremium, setHasPremium] = useState(false);
+  const [likesLoading, setLikesLoading] = useState({});
+  const [postsError, setPostsError] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -34,50 +36,136 @@ export default function PerfilPage() {
       fetchFollowers(parsedUser.id);
       fetchFollowing(parsedUser.id);
       
-      // Temporário: verificar se usuário tem premium (mock)
       checkPremiumStatus(parsedUser.id);
     } else {
       router.push("/login");
     }
   }, [router]);
 
-  // Função temporária - depois integra com backend
   const checkPremiumStatus = (userId) => {
-    // Mock - sempre false por enquanto
     setHasPremium(false);
   };
 
+  // FUNÇÃO CORRIGIDA para buscar posts do usuário
   const fetchUserPosts = async (userId) => {
+    setLoading(true);
+    setPostsError(null);
+    
     try {
-      setLoading(true);
       const res = await fetch(`${API_BASE_URL}/posts`);
-      if (res.ok) {
-        const allPosts = await res.json();
-        const userPosts = allPosts.filter(post => post.user_id === userId);
-        
-        const postsWithLikes = await Promise.all(
-          userPosts.map(async (post) => {
+      
+      if (!res.ok) {
+        throw new Error(`Erro ${res.status}: Não foi possível carregar os posts`);
+      }
+      
+      const data = await res.json();
+      
+      // Se não há posts, definir array vazio
+      if (!data || data.length === 0) {
+        setPosts([]);
+        setLoading(false);
+        return;
+      }
+      
+      // Filtrar posts do usuário e processar likes
+      const userPosts = data.filter(post => post.user_id === userId);
+      
+      const postsWithLikes = await Promise.all(
+        userPosts.map(async (post) => {
+          try {
             const likesRes = await fetch(`${API_BASE_URL}/posts/${post.id}/likes`);
-            const likesData = await likesRes.json();
-            const likedByUser = likesData.likes.includes(userId);
+            let likedByUser = false;
+            let likesCount = post.likes_count || 0;
+            
+            if (likesRes.ok) {
+              const likesData = await likesRes.json();
+              likedByUser = likesData.likes && likesData.likes.includes(userId);
+            }
             
             return {
               id: post.id,
               text: post.content,
+              author: post.user_name,
+              author_id: post.user_id,
+              likes: likesCount,
+              likedBy: likedByUser ? [userId] : [],
               image: post.image,
-              likes: post.likes_count || 0,
-              likedBy: likedByUser ? [user?.name] : [],
+              video: post.video,
               created_at: post.created_at
             };
-          })
-        );
-        
-        setPosts(postsWithLikes);
-      }
+          } catch (error) {
+            console.error(`Erro ao processar post ${post.id}:`, error);
+            // Retornar post básico em caso de erro
+            return {
+              id: post.id,
+              text: post.content,
+              author: post.user_name,
+              author_id: post.user_id,
+              likes: post.likes_count || 0,
+              likedBy: [],
+              image: post.image,
+              video: post.video,
+              created_at: post.created_at,
+              error: true
+            };
+          }
+        })
+      );
+      
+      const validPosts = postsWithLikes.filter(post => post !== null);
+      setPosts(validPosts);
+      
     } catch (error) {
-      console.error("Erro ao buscar posts do usuário:", error);
+      console.error("Erro ao buscar posts:", error);
+      setPostsError(error.message);
+      setPosts([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Função para curtir/descurtir posts - ATUALIZADA
+  const handleLike = async (postId) => {
+    if (!user) return;
+
+    setLikesLoading(prev => ({
+      ...prev,
+      [postId]: true
+    }));
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/posts/like`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          post_id: postId,
+          user_id: user.id
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        
+        // Atualizar o estado dos posts com a nova informação de like
+        setPosts(posts.map(post => 
+          post.id === postId 
+            ? { 
+                ...post, 
+                likes: data.post.likes_count, 
+                likedBy: data.action === "added" ? [user.id] : [] 
+              }
+            : post
+        ));
+      } else {
+        throw new Error("Erro ao curtir post");
+      }
+    } catch (error) {
+      console.error("Erro ao curtir:", error);
+    } finally {
+      setLikesLoading(prev => ({
+        ...prev,
+        [postId]: false
+      }));
     }
   };
 
@@ -114,11 +202,86 @@ export default function PerfilPage() {
   };
 
   const handleSubscribe = () => {
-    // Temporário - só abre o modal
     setShowPremiumModal(true);
   };
 
-  // COMPONENTE DO CARD PREMIUM
+  // Componente para exibir mídia (imagem ou vídeo)
+  const MediaDisplay = ({ post }) => {
+    if (post.image) {
+      return (
+        <img
+          src={post.image}
+          alt="Imagem do post"
+          className="rounded-lg max-h-80 w-full object-cover mb-3"
+        />
+      );
+    }
+    
+    if (post.video) {
+      return (
+        <video
+          controls
+          className="rounded-lg max-h-80 w-full mb-3"
+        >
+          <source src={post.video} type="video/mp4" />
+          Seu navegador não suporta o elemento de vídeo.
+        </video>
+      );
+    }
+    
+    return null;
+  };
+
+  // Componente do botão de like com loading - CORRIGIDA
+  const LikeButton = ({ post }) => {
+    const isLoading = likesLoading[post.id];
+    const isLiked = user && Array.isArray(post.likedBy) && post.likedBy.includes(user.id);
+
+    return (
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          handleLike(post.id);
+        }}
+        disabled={isLoading}
+        className={`flex items-center gap-1 transition-colors disabled:opacity-50 ${
+          isLiked 
+            ? "text-red-600 hover:text-red-700" 
+            : "text-gray-500 hover:text-red-600"
+        }`}
+      >
+        {isLoading ? (
+          <div className="h-4 w-4 border-2 border-gray-300 border-t-red-600 rounded-full animate-spin"></div>
+        ) : isLiked ? (
+          <Heart className="h-4 w-4 fill-red-600 text-red-600" />
+        ) : (
+          <Heart className="h-4 w-4" />
+        )}
+        <span className="text-sm">{post.likes || 0}</span>
+      </button>
+    );
+  };
+
+  // Componente de loading para posts
+  const PostSkeleton = () => (
+    <div className="bg-white rounded-xl shadow p-4 mb-4 animate-pulse">
+      <div className="flex items-center gap-3 mb-3">
+        <div className="h-10 w-10 bg-gray-300 rounded-full"></div>
+        <div className="flex-1">
+          <div className="h-4 bg-gray-300 rounded w-1/4 mb-2"></div>
+          <div className="h-3 bg-gray-200 rounded w-1/6"></div>
+        </div>
+      </div>
+      <div className="h-4 bg-gray-200 rounded mb-2"></div>
+      <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
+      <div className="flex gap-6">
+        <div className="h-6 w-12 bg-gray-200 rounded"></div>
+        <div className="h-6 w-16 bg-gray-200 rounded"></div>
+      </div>
+    </div>
+  );
+
+  // COMPONENTE DO CARD PREMIUM (mantido igual)
   const PremiumCard = () => {
     if (hasPremium) {
       return (
@@ -160,36 +323,35 @@ export default function PerfilPage() {
         </div>
         
         <div className="space-y-3 mb-6">
-  <div className="flex items-center gap-2">
-    <Check className="h-4 w-4 text-green-300" />
-    <span className="text-sm">IA Personalizada Ilimitada</span>
-  </div>
-  <div className="flex items-center gap-2">
-    <Check className="h-4 w-4 text-green-300" />
-    <span className="text-sm">Lembretes Inteligentes</span>
-  </div>
-  <div className="flex items-center gap-2">
-    <Check className="h-4 w-4 text-green-300" />
-    <span className="text-sm">Arquivo Histórico Completo</span>
-  </div>
-  <div className="flex items-center gap-2">
-    <Check className="h-4 w-4 text-green-300" />
-    <span className="text-sm">Notícias Antecipadas</span>
-  </div>
-  <div className="flex items-center gap-2">
-    <Check className="h-4 w-4 text-green-300" />
-    <span className="text-sm">Descontos Exclusivos</span>
-  </div>
-  {/* NOVOS BENEFÍCIOS PARA JOGADORAS */}
-  <div className="flex items-center gap-2">
-    <Check className="h-4 w-4 text-green-300" />
-    <span className="text-sm">Portfólio Profissional</span>
-  </div>
-  <div className="flex items-center gap-2">
-    <Check className="h-4 w-4 text-green-300" />
-    <span className="text-sm">Perfil Verificado</span>
-  </div>
-</div>
+          <div className="flex items-center gap-2">
+            <Check className="h-4 w-4 text-green-300" />
+            <span className="text-sm">IA Personalizada Ilimitada</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Check className="h-4 w-4 text-green-300" />
+            <span className="text-sm">Lembretes Inteligentes</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Check className="h-4 w-4 text-green-300" />
+            <span className="text-sm">Arquivo Histórico Completo</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Check className="h-4 w-4 text-green-300" />
+            <span className="text-sm">Notícias Antecipadas</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Check className="h-4 w-4 text-green-300" />
+            <span className="text-sm">Descontos Exclusivos</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Check className="h-4 w-4 text-green-300" />
+            <span className="text-sm">Portfólio Profissional</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Check className="h-4 w-4 text-green-300" />
+            <span className="text-sm">Perfil Verificado</span>
+          </div>
+        </div>
         
         <button
           onClick={handleSubscribe}
@@ -202,7 +364,7 @@ export default function PerfilPage() {
     );
   };
 
-  // MODAL PREMIUM
+  // MODAL PREMIUM (mantido igual)
   const PremiumModal = () => (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-xl max-w-md w-full">
@@ -251,13 +413,13 @@ export default function PerfilPage() {
                 <p className="text-sm text-gray-600">Descontos e benefícios com parceiros</p>
               </div>
             </div>
-             <div className="flex items-center gap-3">
-    <Zap className="h-5 w-5 text-green-500" />
-    <div>
-      <p className="font-semibold">Portfólio Profissional</p>
-      <p className="text-sm text-gray-600">Perfil verificado, estatísticas e visibilidade para olheiros</p>
-    </div>
-  </div>
+            <div className="flex items-center gap-3">
+              <Zap className="h-5 w-5 text-green-500" />
+              <div>
+                <p className="font-semibold">Portfólio Profissional</p>
+                <p className="text-sm text-gray-600">Perfil verificado, estatísticas e visibilidade para olheiros</p>
+              </div>
+            </div>
           </div>
           
           <div className="bg-gray-50 rounded-xl p-4 mb-6">
@@ -271,19 +433,19 @@ export default function PerfilPage() {
           </div>
           
           <div className="space-y-3">
-  <button
-    onClick={() => router.push("/checkout-premium")}
-    className="w-full bg-purple-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-purple-700 transition-colors"
-  >
-    Assinar Agora
-  </button>
-  <button
-    onClick={() => setShowPremiumModal(false)}
-    className="w-full bg-gray-200 text-gray-700 font-medium py-3 px-4 rounded-xl hover:bg-gray-300 transition-colors"
-  >
-    Talvez Depois
-  </button>
-</div>
+            <button
+              onClick={() => router.push("/checkout-premium")}
+              className="w-full bg-purple-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-purple-700 transition-colors"
+            >
+              Assinar Agora
+            </button>
+            <button
+              onClick={() => setShowPremiumModal(false)}
+              className="w-full bg-gray-200 text-gray-700 font-medium py-3 px-4 rounded-xl hover:bg-gray-300 transition-colors"
+            >
+              Talvez Depois
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -487,24 +649,45 @@ export default function PerfilPage() {
               <span className="text-gray-500 text-sm">{posts.length}</span>
             </div>
 
+            {/* Estado de Carregamento */}
             {loading ? (
-              <p className="text-gray-400 text-sm text-center">Carregando posts...</p>
+              <div>
+                {[...Array(2)].map((_, index) => (
+                  <PostSkeleton key={index} />
+                ))}
+              </div>
+            ) : postsError ? (
+              <div className="text-center py-4">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <p className="text-red-600 font-semibold mb-2">Erro ao carregar posts</p>
+                  <p className="text-red-500 text-sm mb-4">{postsError}</p>
+                  <button
+                    onClick={() => user && fetchUserPosts(user.id)}
+                    className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm"
+                  >
+                    Tentar Novamente
+                  </button>
+                </div>
+              </div>
             ) : posts.length > 0 ? (
               <div className="space-y-4">
                 {posts.map((post) => (
                   <div key={post.id} className="bg-white rounded-xl shadow p-4">
                     <p className="mb-3 break-words whitespace-pre-wrap">{post.text}</p>
-                    {post.image && (
-                      <img
-                        src={post.image}
-                        alt="Imagem do post"
-                        className="rounded-lg max-h-80 mx-auto items-center mb-3"
-                      />
-                    )}
+                    
+                    <MediaDisplay post={post} />
+                    
                     <div className="flex gap-4 items-center text-sm mt-3 pt-2 border-t border-gray-100">
-                      <span className="flex items-center gap-1 text-gray-500">
-                        ❤️ {post.likes || 0} curtidas
-                      </span>
+                      <LikeButton post={post} />
+                      
+                      <button
+                        onClick={() => router.push(`/comments?id=${post.id}`)}
+                        className="flex items-center gap-1 text-gray-500 hover:text-[var(--primary-color)] transition-colors"
+                      >
+                        <MessageCircle className="h-4 w-4" />
+                        <span>Comentários</span>
+                      </button>
+                      
                       <span className="text-gray-500 text-xs">
                         {new Date(post.created_at).toLocaleDateString('pt-BR')}
                       </span>
@@ -575,7 +758,6 @@ export default function PerfilPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-1 space-y-6">
-              {/* CARD PREMIUM NO DESKTOP */}
               <PremiumCard />
               
               <div className="bg-white rounded-2xl shadow-lg p-6">
@@ -629,25 +811,43 @@ export default function PerfilPage() {
                 <h3 className="text-lg font-semibold mb-4">Publicações</h3>
                 
                 {loading ? (
-                  <div className="flex justify-center py-12">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+                  <div>
+                    {[...Array(3)].map((_, index) => (
+                      <PostSkeleton key={index} />
+                    ))}
+                  </div>
+                ) : postsError ? (
+                  <div className="text-center py-8">
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md mx-auto">
+                      <p className="text-red-600 font-semibold mb-2">Erro ao carregar posts</p>
+                      <p className="text-red-500 text-sm mb-4">{postsError}</p>
+                      <button
+                        onClick={() => user && fetchUserPosts(user.id)}
+                        className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+                      >
+                        Tentar Novamente
+                      </button>
+                    </div>
                   </div>
                 ) : posts.length > 0 ? (
                   <div className="grid grid-cols-1 gap-4">
                     {posts.map((post) => (
                       <div key={post.id} className="bg-gray-50 rounded-xl p-4">
                         <p className="mb-3 break-words whitespace-pre-wrap">{post.text}</p>
-                        {post.image && (
-                          <img
-                            src={post.image}
-                            alt="Imagem do post"
-                            className="rounded-lg max-h-80 mx-auto items-center mb-3"
-                          />
-                        )}
+                        
+                        <MediaDisplay post={post} />
+                        
                         <div className="flex gap-4 items-center text-sm text-gray-500">
-                          <span className="flex items-center gap-1">
-                            ❤️ {post.likes || 0} curtidas
-                          </span>
+                          <LikeButton post={post} />
+                          
+                          <button
+                            onClick={() => router.push(`/comments?id=${post.id}`)}
+                            className="flex items-center gap-1 text-gray-500 hover:text-[var(--primary-color)] transition-colors"
+                          >
+                            <MessageCircle className="h-4 w-4" />
+                            <span>Comentários</span>
+                          </button>
+                          
                           <span>{new Date(post.created_at).toLocaleDateString('pt-BR')}</span>
                         </div>
                       </div>
