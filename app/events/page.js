@@ -8,9 +8,10 @@ import BottomNav from "../components/BottomNav";
 export default function HomePage() {
   const [user, setUser] = useState(null);
   const [active, setActive] = useState(1);
-  const [eventos, setEventos] = useState([]);
+  const [eventos, setEventos] = useState([]);5
   const [copas, setCopas] = useState([]);
   const [peneiras, setPeneiras] = useState([]);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
@@ -23,7 +24,34 @@ export default function HomePage() {
   }, [router]);
 
   useEffect(() => {
-    async function load() {
+    async function loadEventos() {
+      try {
+        setLoading(true);
+        
+        // 🔄 MUDANÇA AQUI: Busca do Supabase em vez do JSON
+        const response = await fetch('http://localhost:8000/api/events');
+        const eventosData = await response.json();
+        
+        // Filtra os eventos por tipo (mantendo a mesma estrutura)
+        const torneios = eventosData.filter(e => e.tipo === 'torneio');
+        const copasData = eventosData.filter(e => e.tipo === 'copa');
+        const peneirasData = eventosData.filter(e => e.tipo === 'peneira');
+        
+        setEventos(torneios);
+        setCopas(copasData);
+        setPeneiras(peneirasData);
+        
+      } catch (err) {
+        console.error("Erro ao carregar eventos:", err);
+        // Fallback para dados mockados se a API falhar
+        await loadMockData();
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    // Fallback com dados mockados
+    async function loadMockData() {
       try {
         const res = await fetch("/data/db.json");
         const db = await res.json();
@@ -31,21 +59,24 @@ export default function HomePage() {
         setCopas(db.copas || []);
         setPeneiras(db.peneiras || []);
       } catch (err) {
-        console.error("Erro ao carregar dados", err);
+        console.error("Erro ao carregar dados mockados", err);
       }
     }
-    load();
+
+    loadEventos();
   }, []);
 
-  // Função para lidar com clique nos eventos
-  const handleEventClick = (evento) => {
-    if (evento.id === "next-fiap") {
-      // Evento NEXT FIAP vai direto para o desafio
-      router.push("/events/next-fiap");
-    } else {
-      // Outros eventos vão para inscrição normal
-      router.push(`/events/${evento.id}/inscricao`);
-    }
+  // Função para formatar data do Supabase
+  const formatarData = (dataISO) => {
+    if (!dataISO) return '';
+    const data = new Date(dataISO);
+    return data.toLocaleDateString('pt-BR');
+  };
+
+  // Função para formatar hora do Supabase
+  const formatarHora = (horaISO) => {
+    if (!horaISO) return '';
+    return horaISO.substring(0, 5); // Extrai HH:MM
   };
 
   if (!user) {
@@ -59,6 +90,20 @@ export default function HomePage() {
     );
   }
 
+  if (loading) {
+    return (
+      <div className="bg-[#f5f6f8] min-h-screen flex flex-col">
+        <Header name={user.name || "Usuário"} />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--primary-color)] mx-auto mb-4"></div>
+            <p className="text-gray-600">Carregando eventos...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-[#f5f6f8] min-h-screen flex flex-col">
       {/* Header */}
@@ -66,95 +111,16 @@ export default function HomePage() {
 
       <main className="md:mt-24 flex-1 w-full max-w-[24rem] md:max-w-6xl mx-auto px-4 md:px-8 py-6 space-y-8 pb-28">
         
-        {/* EVENTO NEXT FIAP EM DESTAQUE ESPECIAL */}
-        <section className="relative">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-800 flex items-center">
-              <span className="w-3 h-8 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full mr-3"></span>
-              Evento em Destaque
-            </h2>
-            <span className="text-gray-500 text-sm bg-white px-3 py-1 rounded-full border">🔥 ESPECIAL</span>
-          </div>
-          
-          {/* Card Destaque NEXT FIAP */}
-          {eventos.filter(ev => ev.id === "next-fiap").map((ev) => (
-            <div
-              key={ev.id}
-              className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-3xl overflow-hidden border-2 border-white shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-[1.02] group relative"
-            >
-              {/* Efeitos de fundo */}
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white/20 rounded-full -translate-y-16 translate-x-16"></div>
-              <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/20 rounded-full translate-y-12 -translate-x-12"></div>
-              
-              <div className="relative z-10 p-8">
-                <div className="flex flex-col md:flex-row items-center gap-6">
-                  {/* Imagem */}
-                  <div className="flex-shrink-0">
-                    <div className="w-24 h-24 bg-white/20 rounded-2xl flex items-center justify-center shadow-lg">
-                      <span className="text-4xl">⚽</span>
-                    </div>
-                  </div>
-                  
-                  {/* Conteúdo */}
-                  <div className="flex-1 text-center md:text-left">
-                    <div className="flex items-center justify-center md:justify-start gap-3 mb-3">
-                      <span className="bg-yellow-400 text-purple-800 px-4 py-1 rounded-full text-sm font-bold animate-pulse">
-                        🎯 DESAFIO EXCLUSIVO
-                      </span>
-                      <span className="bg-white/30 text-white px-3 py-1 rounded-full text-xs">
-                        NEXT FIAP 2024
-                      </span>
-                    </div>
-                    
-                    <h3 className="text-3xl md:text-4xl font-bold text-white mb-3 group-hover:scale-105 transition-transform">
-                      {ev.titulo}
-                    </h3>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                      <div className="flex items-center justify-center md:justify-start text-white/90">
-                        <span className="w-5 h-5 mr-2">📍</span>
-                        <span>{ev.local}</span>
-                      </div>
-                      <div className="flex items-center justify-center md:justify-start text-white/90">
-                        <span className="w-5 h-5 mr-2">📅</span>
-                        <span>{ev.data} • {ev.hora}</span>
-                      </div>
-                      
-                    </div>
-
-                    {/* Botões Especiais para NEXT FIAP */}
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-                      <button
-                        onClick={() => handleEventClick(ev)}
-                        className="bg-white text-purple-600 px-8 py-4 rounded-xl font-bold text-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 shadow-lg flex items-center justify-center group/btn"
-                      >
-                        <span>🎯 Começar Desafio</span>
-                        <span className="ml-2 group-hover/btn:translate-x-1 transition-transform">→</span>
-                      </button>
-                      
-                      <button
-                        onClick={() => router.push("/events/next-fiap/ranking")}
-                        className="bg-white/20 text-white border-2 border-white/30 px-6 py-4 rounded-xl font-bold text-lg hover:bg-white/30 transform hover:-translate-y-1 transition-all duration-300 flex items-center justify-center group/btn2"
-                      >
-                        <span>🏆 Ver Ranking</span>
-                        <span className="ml-2 group-hover/btn2:scale-110 transition-transform">📊</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </section>
-
-        {/* Demais Eventos */}
+        {/* Eventos */}
         <section className="relative">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl md:text-3xl font-bold text-gray-800 flex items-center">
               <span className="w-3 h-8 bg-[var(--primary-color)] rounded-full mr-3"></span>
               Outros Eventos
             </h2>
-            <span className="text-gray-500 text-sm bg-white px-3 py-1 rounded-full border">📅 {eventos.filter(ev => ev.id !== "next-fiap").length} Eventos</span>
+            <span className="text-gray-500 text-sm bg-white px-3 py-1 rounded-full border">
+              🔥 {eventos.length} Eventos
+            </span>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
@@ -165,7 +131,7 @@ export default function HomePage() {
               >
                 <div className="relative overflow-hidden">
                   <img
-                    src={ev.img || "/encontropab.png"}
+                    src={ev.imagem_url || "/encontropab.png"}
                     alt={ev.titulo}
                     className="h-48 w-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
@@ -184,12 +150,22 @@ export default function HomePage() {
                     </div>
                     <div className="flex items-center text-gray-600 text-sm">
                       <span className="w-4 h-4 mr-2">📅</span>
-                      <span>{ev.data} • {ev.hora}</span>
+                      {/* 🔄 MUDANÇA: Formata data do Supabase */}
+                      <span>{formatarData(ev.data_evento)} • {formatarHora(ev.hora)}</span>
                     </div>
                     <div className="flex items-center text-gray-600 text-sm">
                       <span className="w-4 h-4 mr-2">💰</span>
                       <span className="font-semibold text-green-600">{ev.valor}</span>
                     </div>
+                    {/* 🔄 NOVO: Mostra vagas disponíveis */}
+                    {ev.max_inscricoes && (
+                      <div className="flex items-center text-gray-600 text-sm">
+                        <span className="w-4 h-4 mr-2">👥</span>
+                        <span>
+                          {ev.inscricoes_atuais || 0}/{ev.max_inscricoes} vagas
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   <button
@@ -212,7 +188,9 @@ export default function HomePage() {
               <span className="w-3 h-8 bg-yellow-500 rounded-full mr-3"></span>
               Copa Premium
             </h2>
-            <span className="text-gray-500 text-sm bg-white px-3 py-1 rounded-full border">🏆 Exclusiva</span>
+            <span className="text-gray-500 text-sm bg-white px-3 py-1 rounded-full border">
+              🏆 {copas.length > 0 ? 'Exclusiva' : 'Em Breve'}
+            </span>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
@@ -242,7 +220,8 @@ export default function HomePage() {
                     </div>
                     <div className="flex items-center text-gray-700">
                       <span className="w-5 h-5 mr-2 text-gray-500">📅</span>
-                      <span className="text-sm">{c.data} • {c.hora}</span>
+                      {/* 🔄 MUDANÇA: Formata data do Supabase */}
+                      <span className="text-sm">{formatarData(c.data_evento)} • {formatarHora(c.hora)}</span>
                     </div>
                     <div className="flex items-center text-gray-700">
                       <span className="w-5 h-5 mr-2 text-gray-500">💰</span>
@@ -255,7 +234,7 @@ export default function HomePage() {
                   </div>
 
                   <button
-                    onClick={() => router.push(`/events/${100 + parseInt(c.id)}/inscricao`)}
+                    onClick={() => router.push(`/events/${c.id}/inscricao`)}
                     className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white py-4 rounded-xl font-bold hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300 group/btn shadow-md text-lg"
                   >
                     <span>Participar da Copa</span>
@@ -264,6 +243,14 @@ export default function HomePage() {
                 </div>
               </div>
             ))}
+            
+            {copas.length === 0 && (
+              <div className="bg-white rounded-2xl border-2 border-dashed border-yellow-300 p-8 text-center">
+                <div className="text-6xl mb-4 text-yellow-400">🏆</div>
+                <h3 className="text-xl font-bold text-gray-700 mb-2">Nova Copa em Breve</h3>
+                <p className="text-gray-500">Estamos preparando uma copa especial para você!</p>
+              </div>
+            )}
           </div>
         </section>
 
@@ -274,7 +261,9 @@ export default function HomePage() {
               <span className="w-3 h-8 bg-[var(--primary-color)] rounded-full mr-3"></span>
               Peneiras Profissionais
             </h2>
-            <span className="text-gray-500 text-sm bg-white px-3 py-1 rounded-full border">⭐ {peneiras.length} Oportunidades</span>
+            <span className="text-gray-500 text-sm bg-white px-3 py-1 rounded-full border">
+              ⭐ {peneiras.length} Oportunidades
+            </span>
           </div>
           
           <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
@@ -330,7 +319,10 @@ export default function HomePage() {
                           {p.clube}
                         </div>
                       </td>
-                      <td className="p-4 md:p-6 text-gray-700">{p.data}</td>
+                      <td className="p-4 md:p-6 text-gray-700">
+                        {/* 🔄 MUDANÇA: Formata data do Supabase */}
+                        {formatarData(p.data_evento)}
+                      </td>
                       <td className="p-4 md:p-6">
                         <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold border border-green-200">
                           {p.idade}
@@ -361,7 +353,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* CTA Section */}
+        {/* Resto do código permanece igual */}
         <section className="text-center mt-12 mb-8">
           <div className="bg-gradient-to-r from-[var(--primary-color)] to-purple-600 rounded-2xl p-8 md:p-12 relative overflow-hidden shadow-xl">
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/20 rounded-full -translate-y-16 translate-x-16"></div>

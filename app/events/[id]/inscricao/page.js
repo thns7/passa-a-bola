@@ -3,96 +3,87 @@ import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
-// DADOS MOCK EXPANDIDOS - MAIS EVENTOS
-const eventosMock = [
-  {
-    id: "1",
-    titulo: "Campeonato de Futebol Society",
-    local: "Arena Limão - São Paulo/SP",
-    data: "15/12/2024", 
-    hora: "14:00",
-    valor: "R$ Gratuito",
-    descricao: "Campeonato aberto para todas as idades. Formato Society com times de 5 jogadores. Inscrições individuais."
-  },
-  {
-    id: "2",
-    titulo: "Torneio de Futsal Sub-20", 
-    local: "Ginásio Municipal - São Paulo/SP",
-    data: "20/12/2024",
-    hora: "19:00",
-    valor: "R$ 25 por pessoa",
-    descricao: "Torneio exclusivo para jogadores até 20 anos. Formato futsal com times de 5 jogadores."
-  },
-  {
-    id: "3",
-    titulo: "Liga Amadora de Futebol 7",
-    local: "Campo do ABCD - São Paulo/SP",
-    data: "22/12/2024",
-    hora: "16:00", 
-    valor: "R$ 40 por time",
-    descricao: "Liga amadora com formato futebol 7. Temporada com 8 rodadas + playoffs."
-  },
-  {
-    id: "101",
-    titulo: "Copa Passa a Bola - Futebol Society",
-    local: "Arena Central - São Paulo/SP", 
-    data: "25/12/2024",
-    hora: "16:00",
-    valor: "R$ 30 por pessoa",
-    descricao: "Copa especial com formato Society. Premiação em dinheiro para o campeão."
-  }
-];
-
 export default function InscricaoPage() {
   const { id } = useParams();
   const router = useRouter();
   const [evento, setEvento] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
   
-  const [tipo, setTipo] = useState("solo");
-  const [membros, setMembros] = useState([""]);
   const [form, setForm] = useState({ 
     nome: "", 
     email: "", 
     telefone: "", 
     idade: "", 
-    altura: "" 
+    altura: "",
+    posicao: ""
   });
   const [enviando, setEnviando] = useState(false);
 
-  // Carregar dados do evento
+
+  const API_BASE_URL = process.env.NODE_ENV === 'development' 
+    ? 'http://localhost:8000' 
+    : "https://passa-a-bola.onrender.com"
+
+
+
+  
+  useEffect(() => {
+    const currentUser = localStorage.getItem("currentUser");
+    if (currentUser) {
+      const userData = JSON.parse(currentUser);
+      setUser(userData);
+      setForm(prev => ({
+        ...prev,
+        nome: userData.name || "",
+        email: userData.email || ""
+      }));
+    }
+  }, []);
+
+  
   useEffect(() => {
     async function carregarEvento() {
       try {
         console.log("🔍 Buscando evento com ID:", id);
         
-        // Buscar evento nos dados mock
-        const eventoEncontrado = eventosMock.find(ev => ev.id === id);
         
-        if (eventoEncontrado) {
-          console.log("✅ Evento encontrado:", eventoEncontrado.titulo);
-          setEvento(eventoEncontrado);
+        const response = await fetch(`${API_BASE_URL}/api/events/${id}`);
+        
+        if (!response.ok) {
+          throw new Error(`Erro ${response.status}`);
+        }
+        
+        const eventoData = await response.json();
+        
+        if (eventoData) {
+          console.log("✅ Evento encontrado:", eventoData.titulo);
+          setEvento(eventoData);
         } else {
-          console.log("❌ Evento não encontrado, usando fallback");
+          console.log("❌ Evento não encontrado na API");
+          
           setEvento({
             id: id,
             titulo: `Evento ${id}`,
             local: "Local a definir",
-            data: "Em breve",
+            data_evento: "Em breve",
             hora: "A definir", 
-            valor: "Gratuito"
+            valor: "Gratuito",
+            descricao: "Descrição do evento"
           });
         }
         
       } catch (err) {
         console.error("❌ Erro ao carregar evento:", err);
+        
         setEvento({
           id: id,
           titulo: `Evento ${id}`,
           local: "Local a definir",
-          data: "Em breve",
+          data_evento: "Em breve",
           hora: "A definir",
-          valor: "Gratuito"
+          valor: "Gratuito",
+          descricao: "Descrição do evento"
         });
       } finally {
         setLoading(false);
@@ -102,152 +93,141 @@ export default function InscricaoPage() {
     carregarEvento();
   }, [id]);
 
-  // FUNÇÃO DE ENVIO DE EMAIL - TESTADA E FUNCIONANDO
-  const enviarEmail = async (formData, eventoNome, tipoInscricao) => {
-  try {
-    console.log('📧 Preparando envio de email...', { 
-      email: formData.email, 
-      nome: formData.nome,
-      evento: eventoNome 
-    });
-
-    const res = await fetch("/api/sendEmail", {
-      method: "POST",
-      headers: { 
-        "Content-Type": "application/json" 
-      },
-      body: JSON.stringify({ 
-        email: formData.email, 
-        nome: formData.nome,
-        evento: eventoNome,
-        telefone: formData.telefone,
-        idade: formData.idade,
-        altura: formData.altura,
-        tipo: tipoInscricao,
-        membros: tipoInscricao === 'equipe' ? membros.filter(m => m.trim() !== '') : []
-      }),
-    });
-
-    const data = await res.json();
-    console.log('📧 Resposta da API:', data);
-    
-    if (!res.ok) {
-      throw new Error(data.message || `Erro HTTP ${res.status}`);
-    }
-    
-    return data;
-    
-  } catch (error) {
-    console.error('❌ Erro crítico ao enviar email:', error);
-    return { 
-      success: false, 
-      message: "Falha no serviço de email: " + error.message 
-    };
-  }
-};
-
-  // Função para salvar inscrição
-  const salvarInscricao = async (dadosInscricao) => {
+  
+  const salvarInscricaoNoSupabase = async (dadosInscricao) => {
     try {
-      console.log('💾 Salvando inscrição no banco de dados...');
+      console.log('💾 Salvando inscrição no Supabase...', dadosInscricao);
       
-      // Simular salvamento - você pode integrar com seu banco real aqui
-      await new Promise(resolve => setTimeout(resolve, 800));
+      const registrationData = {
+        user_id: user?.id || "guest",
+        user_name: dadosInscricao.nome,
+        user_email: dadosInscricao.email,
+        user_phone: dadosInscricao.telefone,
+        user_position: dadosInscricao.posicao,
+        user_age: parseInt(dadosInscricao.idade) || 0
+      };
+
       
-      console.log('✅ Inscrição salva com sucesso');
+      const response = await fetch(`${API_BASE_URL}/api/events/${id}/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(registrationData)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || `Erro HTTP ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Inscrição salva no Supabase:', result);
+      
       return { 
         success: true, 
-        id: Math.random().toString(36).substr(2, 9),
+        id: result.id,
         message: 'Inscrição salva com sucesso' 
       };
       
     } catch (error) {
-      console.error('❌ Erro ao salvar inscrição:', error);
+      console.error('Erro ao salvar inscrição no Supabase:', error);
       return { 
         success: false, 
-        message: 'Erro ao salvar inscrição no banco de dados' 
+        message: error.message || 'Erro ao salvar inscrição no banco de dados' 
       };
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setEnviando(true);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setEnviando(true);
 
+  try {
+    if (!evento || !evento.titulo) {
+      alert("Erro: Evento não carregado corretamente");
+      return;
+    }
+
+    console.log('Iniciando processo de inscrição...');
+
+    // Validar campos obrigatórios
+    if (!form.nome.trim() || !form.email.trim() || !form.telefone.trim() || !form.idade.trim() || !form.altura.trim()) {
+      alert("Por favor, preencha todos os campos obrigatórios");
+      return;
+    }
+
+    // Validar email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(form.email)) {
+      alert("Por favor, insira um email válido");
+      return;
+    }
+
+    
+    const resultadoSalvar = await salvarInscricaoNoSupabase(form);
+
+    if (!resultadoSalvar.success) {
+      if (resultadoSalvar.message.includes("já inscrito") || resultadoSalvar.message.includes("duplicada")) {
+        alert("Você já está inscrito neste evento!");
+      } else if (resultadoSalvar.message.includes("lotado")) {
+        alert("Este evento está lotado. Não há mais vagas disponíveis.");
+      } else {
+        alert(`${resultadoSalvar.message}`);
+      }
+      return;
+    }
+
+    console.log('✅ Inscrição salva no Supabase');
+
+    
     try {
-      if (!evento || !evento.titulo) {
-        alert("❌ Erro: Evento não carregado corretamente");
-        return;
-      }
-
-      console.log('📝 Iniciando processo de inscrição...');
-
-      // Validar campos obrigatórios
-      if (!form.nome.trim() || !form.email.trim() || !form.telefone.trim() || !form.idade.trim() || !form.altura.trim()) {
-        alert("❌ Por favor, preencha todos os campos obrigatórios");
-        return;
-      }
-
-      // Validar email
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(form.email)) {
-        alert("❌ Por favor, insira um email válido");
-        return;
-      }
-
-      // 1. Salvar a inscrição no banco de dados
-      const resultadoSalvar = await salvarInscricao({ 
-        ...form, 
-        tipo, 
-        membros: tipo === 'equipe' ? membros.filter(m => m.trim() !== '') : [],
-        eventoId: id,
-        eventoNome: evento.titulo,
-        dataInscricao: new Date().toISOString()
+      const emailResponse = await fetch('/api/sendEmail', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: form.email,
+          nome: form.nome,
+          evento: evento.titulo,
+          telefone: form.telefone,
+          idade: form.idade,
+          altura: form.altura,
+          posicao: form.posicao,
+          tipo: 'solo',
+          membros: []
+        }),
       });
 
-      if (!resultadoSalvar.success) {
-        alert(`❌ ${resultadoSalvar.message}`);
-        return;
-      }
+      const emailResult = await emailResponse.json();
 
-      console.log('✅ Inscrição salva, enviando email...');
-
-      // 2. Enviar email de confirmação
-      const resultadoEmail = await enviarEmail(form, evento.titulo, tipo);
-      
-      if (resultadoEmail.success) {
+      if (emailResult.success) {
         alert(`🎉 INSCRIÇÃO CONFIRMADA!\n\n✅ Email de confirmação enviado para:\n${form.email}\n\n📧 Verifique sua caixa de entrada e spam`);
-        console.log('✅ Email enviado com sucesso, redirecionando...');
-        router.push("/events");
       } else {
-        console.warn('⚠️ Email não enviado, mas inscrição foi salva');
-        alert(`✅ INSCRIÇÃO RECEBIDA!\n\nSua inscrição foi registrada com sucesso, mas não foi possível enviar o email de confirmação.\n\nMotivo: ${resultadoEmail.message}\n\nAnote seus dados:\nNome: ${form.nome}\nEvento: ${evento.titulo}`);
-        router.push("/events");
+        console.warn('⚠️ Email não enviado:', emailResult.message);
+        alert(`✅ INSCRIÇÃO CONFIRMADA!\n\nSua inscrição foi registrada com sucesso!\n\n⚠️ O email não pôde ser enviado: ${emailResult.message}`);
       }
-
-    } catch (err) {
-      console.error('❌ Erro crítico no processo:', err);
-      alert("❌ Ocorreu um erro inesperado na inscrição. Tente novamente em alguns instantes.");
-    } finally {
-      setEnviando(false);
+    } catch (emailError) {
+      console.warn('⚠️ Erro ao enviar email:', emailError);
+      alert(`✅ INSCRIÇÃO CONFIRMADA!\n\nSua inscrição foi registrada no sistema!\n\n📋 Anote seus dados:\nNome: ${form.nome}\nEvento: ${evento.titulo}\nData: ${formatarData(evento.data_evento)}\nLocal: ${evento.local}`);
     }
-  };
 
-  // Função para adicionar membro da equipe
-  const adicionarMembro = () => {
-    if (membros.length < 10) {
-      setMembros([...membros, ""]);
-    } else {
-      alert("⚠️ Limite máximo de 10 membros por equipe");
-    }
-  };
+    router.push("/events");
 
-  // Função para remover membro da equipe
-  const removerMembro = (index) => {
-    if (membros.length > 1) {
-      const novosMembros = membros.filter((_, i) => i !== index);
-      setMembros(novosMembros);
-    }
+  } catch (err) {
+    console.error('Erro crítico no processo:', err);
+    alert("Ocorreu um erro inesperado na inscrição. Tente novamente em alguns instantes.");
+  } finally {
+    setEnviando(false);
+  }
+};
+
+ 
+  const formatarData = (dataISO) => {
+    if (!dataISO) return 'Data a definir';
+    const data = new Date(dataISO);
+    return data.toLocaleDateString('pt-BR');
   };
 
   if (loading) {
@@ -310,6 +290,33 @@ export default function InscricaoPage() {
       <div className="bg-white p-6 rounded-lg shadow-md mb-8 max-w-2xl mx-auto border-l-4 border-purple-500">
         <h2 className="font-bold text-xl text-[var(--primary-color)] mb-3">{evento.titulo}</h2>
         <p className="text-gray-600 mb-4">{evento.descricao}</p>
+        
+        {/* Informações específicas por tipo de evento */}
+        {evento.tipo === 'peneira' && evento.clube && (
+          <div className="mb-3 p-3 bg-blue-50 rounded-lg">
+            <p className="text-blue-800 font-semibold">
+              🏛️ {evento.clube} • {evento.idade}
+            </p>
+          </div>
+        )}
+        
+        {evento.tipo === 'copa' && (
+          <div className="mb-3 p-3 bg-yellow-50 rounded-lg">
+            <p className="text-yellow-800 font-semibold">
+              🏆 Copa com Premiação
+            </p>
+          </div>
+        )}
+
+        {/* Vagas disponíveis */}
+        {evento.max_inscricoes && (
+          <div className="mb-3 p-3 bg-green-50 rounded-lg">
+            <p className="text-green-800 font-semibold">
+              ✅ {evento.inscricoes_atuais || 0}/{evento.max_inscricoes} vagas preenchidas
+            </p>
+          </div>
+        )}
+        
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
           <div className="flex items-center">
             <svg className="w-5 h-5 text-gray-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -322,13 +329,15 @@ export default function InscricaoPage() {
             <svg className="w-5 h-5 text-gray-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
-            <span>{evento.data}</span>
+            {/* ✅ USANDO DATA DO SUPABASE FORMATADA */}
+            <span>{formatarData(evento.data_evento)}</span>
           </div>
           <div className="flex items-center">
             <svg className="w-5 h-5 text-gray-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span>{evento.hora}</span>
+            {/* ✅ USANDO HORA DO SUPABASE */}
+            <span>{evento.hora ? evento.hora.substring(0, 5) : 'A definir'}</span>
           </div>
           {evento.valor && (
             <div className="flex items-center">
@@ -391,33 +400,25 @@ export default function InscricaoPage() {
           />
         </div>
 
-        {/* Tipo de Inscrição */}
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <label className="block text-sm font-medium text-gray-700 mb-3">
-            Tipo de Inscrição <span className="text-red-500">*</span>
+        {/* Campo POSIÇÃO */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Posição em Campo
           </label>
-          <div className="flex flex-col sm:flex-row sm:space-x-6 space-y-3 sm:space-y-0">
-            <label className="flex items-center space-x-3 cursor-pointer">
-              <input 
-                type="radio" 
-                value="solo" 
-                checked={tipo === "solo"} 
-                onChange={() => setTipo("solo")} 
-                className="w-4 h-4 text-[var(--primary-color)] focus:ring-purple-500"
-              /> 
-              <span className="text-gray-700">👤 Jogador Solo</span>
-            </label>
-            <label className="flex items-center space-x-3 cursor-pointer">
-              <input 
-                type="radio" 
-                value="equipe" 
-                checked={tipo === "equipe"} 
-                onChange={() => setTipo("equipe")} 
-                className="w-4 h-4 text-[var(--primary-color)] focus:ring-purple-500"
-              /> 
-              <span className="text-gray-700">👥 Equipe</span>
-            </label>
-          </div>
+          <select 
+            className="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+            value={form.posicao} 
+            onChange={e => setForm({ ...form, posicao: e.target.value })}
+          >
+            <option value="">Selecione sua posição</option>
+            <option value="Goleira">Goleira</option>
+            <option value="Zagueira">Zagueira</option>
+            <option value="Lateral">Lateral</option>
+            <option value="Volante">Volante</option>
+            <option value="Meia">Meia</option>
+            <option value="Atacante">Atacante</option>
+            <option value="Outra">Outra</option>
+          </select>
         </div>
 
         {/* Campo IDADE */}
@@ -452,56 +453,6 @@ export default function InscricaoPage() {
           />
         </div>
 
-        {/* MEMBROS DA EQUIPE (se for equipe) */}
-        {tipo === "equipe" && (
-          <div className="space-y-4 p-4 bg-purple-50 rounded-lg border border-purple-200">
-            <h3 className="font-semibold text-[var(--primary-color)] flex items-center">
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
-              Membros da Equipe ({membros.length}/10)
-            </h3>
-            <p className="text-sm text-[var(--primary-color)]">Adicione os nomes dos membros da sua equipe</p>
-            
-            {membros.map((membro, index) => (
-              <div key={index} className="flex space-x-2">
-                <input 
-                  type="text" 
-                  placeholder={`Nome do membro ${index + 1}`} 
-                  className="flex-1 border border-gray-300 p-2 rounded focus:outline-none focus:ring-1 focus:ring-purple-500" 
-                  value={membro} 
-                  onChange={e => { 
-                    const novo = [...membros]; 
-                    novo[index] = e.target.value; 
-                    setMembros(novo); 
-                  }} 
-                />
-                {membros.length > 1 && (
-                  <button 
-                    type="button" 
-                    className="bg-red-100 text-red-600 px-3 rounded hover:bg-red-200 transition duration-200"
-                    onClick={() => removerMembro(index)}
-                  >
-                    ✕
-                  </button>
-                )}
-              </div>
-            ))}
-            
-            <button 
-              type="button" 
-              className="bg-purple-100 text-[var(--primary-color)] px-4 py-2 rounded-lg text-sm font-medium hover:bg-purple-200 transition duration-200 flex items-center"
-              onClick={adicionarMembro}
-              disabled={membros.length >= 10}
-            >
-              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              Adicionar Membro
-            </button>
-          </div>
-        )}
-
         {/* BOTÃO DE CONFIRMAR */}
         <button 
           type="submit" 
@@ -524,8 +475,7 @@ export default function InscricaoPage() {
         </button>
 
         <p className="text-xs text-gray-500 text-center mt-4">
-          Ao confirmar a inscrição, você concorda com os termos do evento.
-          {tipo === 'equipe' && ' Você é responsável por todas as informações da equipe.'}
+          ✅ Sua inscrição será salva no sistema e você poderá acompanhar no seu perfil.
         </p>
       </form>
     </div>
