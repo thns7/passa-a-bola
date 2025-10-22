@@ -116,15 +116,15 @@ export default function HomePage() {
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl md:text-3xl font-bold text-gray-800 flex items-center">
               <span className="w-3 h-8 bg-[var(--primary-color)] rounded-full mr-3"></span>
-              Eventos em Destaque
+              Outros Eventos
             </h2>
             <span className="text-gray-500 text-sm bg-white px-3 py-1 rounded-full border">
               🔥 {eventos.length} Eventos
             </span>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {eventos.map((ev, index) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
+            {eventos.filter(ev => ev.id !== "next-fiap").map((ev, index) => (
               <div
                 key={ev.id}
                 className="bg-white rounded-2xl overflow-hidden border border-gray-200 hover:border-[var(--primary-color)] transition-all duration-300 hover:scale-105 hover:shadow-xl group"
@@ -169,7 +169,7 @@ export default function HomePage() {
                   </div>
 
                   <button
-                    onClick={() => router.push(`/events/${ev.id}/inscricao`)}
+                    onClick={() => handleEventClick(ev)}
                     className="w-full bg-gradient-to-r from-[var(--primary-color)] to-purple-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300 flex items-center justify-center group/btn"
                   >
                     <span>Inscreva-se</span>

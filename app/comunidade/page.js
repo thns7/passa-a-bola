@@ -6,7 +6,7 @@ import Header from "../components/Header";
 import BottomNav from "../components/BottomNav";
 import Script from "next/script";
 import UserProfileModal from "../components/UserProfileModal";
-import {MessageCircle , Heart } from "lucide-react";
+import {MessageCircle , Heart, Video, Image } from "lucide-react";
 
 const API_BASE_URL = "https://passa-a-bola.onrender.com";
 const MAX_POST_LENGTH = 500;
@@ -21,6 +21,7 @@ export default function CommunityPage() {
   const [showPostModal, setShowPostModal] = useState(false);
   const [newPostText, setNewPostText] = useState("");
   const [newPostImage, setNewPostImage] = useState(null);
+  const [newPostVideo, setNewPostVideo] = useState(null); // Novo estado para vídeo
   const [loading, setLoading] = useState(false);
   const [editingPost, setEditingPost] = useState(null);
   const [editText, setEditText] = useState("");
@@ -116,6 +117,7 @@ export default function CommunityPage() {
               likes: likesCount,
               likedBy: likedByUser ? [user.name] : [],
               image: post.image,
+              video: post.video, // Adicionando vídeo
               created_at: post.created_at
             };
           } catch (error) {
@@ -131,6 +133,7 @@ export default function CommunityPage() {
               likes: post.likes_count || 0,
               likedBy: [],
               image: post.image,
+              video: post.video,
               created_at: post.created_at,
               error: true
             };
@@ -248,13 +251,15 @@ export default function CommunityPage() {
           user_id: user.id,
           user_email: user.email,
           user_name: user.name,
-          image: newPostImage
+          image: newPostImage,
+          video: newPostVideo // Adicionando vídeo
         }),
       });
 
       if (res.ok) {
         setNewPostText("");
         setNewPostImage(null);
+        setNewPostVideo(null); // Limpar vídeo
         setShowPostModal(false);
         await fetchPosts(user.id);
       } else {
@@ -349,11 +354,34 @@ export default function CommunityPage() {
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setNewPostImage(reader.result);
-      };
-      reader.readAsDataURL(file);
+      // Verificar se é imagem
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setNewPostImage(reader.result);
+          setNewPostVideo(null); // Remover vídeo se houver
+        };
+        reader.readAsDataURL(file);
+      } else {
+        alert('Por favor, selecione apenas imagens para upload de imagem.');
+      }
+    }
+  };
+
+  const handleVideoUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Verificar se é vídeo
+      if (file.type.startsWith('video/')) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setNewPostVideo(reader.result);
+          setNewPostImage(null); // Remover imagem se houver
+        };
+        reader.readAsDataURL(file);
+      } else {
+        alert('Por favor, selecione apenas vídeos para upload de vídeo.');
+      }
     }
   };
 
@@ -474,6 +502,33 @@ export default function CommunityPage() {
         />
       </div>
     );
+  };
+
+  // Componente para exibir mídia (imagem ou vídeo)
+  const MediaDisplay = ({ post }) => {
+    if (post.image) {
+      return (
+        <img
+          src={post.image}
+          alt="Post"
+          className="rounded-lg max-h-80 w-full object-cover mb-3"
+        />
+      );
+    }
+    
+    if (post.video) {
+      return (
+        <video
+          controls
+          className="rounded-lg max-h-80 w-full mb-3"
+        >
+          <source src={post.video} type="video/mp4" />
+          Seu navegador não suporta o elemento de vídeo.
+        </video>
+      );
+    }
+    
+    return null;
   };
 
   // Componente de loading para posts
@@ -664,14 +719,7 @@ export default function CommunityPage() {
                             ) : (
                               <>
                                 <p className="mb-3 break-words whitespace-pre-wrap">{post.text}</p>
-
-                                {post.image && (
-                                  <img
-                                    src={post.image}
-                                    alt="Post"
-                                    className="rounded-lg max-h-80 mx-auto items-center  mb-3"
-                                  />
-                                )}
+                                <MediaDisplay post={post} />
                               </>
                             )}
 
@@ -832,7 +880,7 @@ export default function CommunityPage() {
         </div>
       </section>
 
-      {/* Modal de Nova Publicação (mantido igual) */}
+      {/* Modal de Nova Publicação - MODIFICADO PARA VÍDEOS */}
       {showPostModal && (
         <div className="fixed inset-0 bg-[#0000006d] flex items-center justify-center z-100 p-4">
           <div className="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -844,6 +892,7 @@ export default function CommunityPage() {
                     setShowPostModal(false);
                     setNewPostText("");
                     setNewPostImage(null);
+                    setNewPostVideo(null);
                   }}
                   className="text-gray-500 hover:text-gray-700 text-2xl"
                 >
@@ -865,6 +914,7 @@ export default function CommunityPage() {
                 </div>
               </div>
 
+              {/* Preview de Imagem */}
               {newPostImage && (
                 <div className="mb-4 relative">
                   <img
@@ -881,8 +931,28 @@ export default function CommunityPage() {
                 </div>
               )}
 
+              {/* Preview de Vídeo */}
+              {newPostVideo && (
+                <div className="mb-4 relative">
+                  <video
+                    controls
+                    className="rounded-lg max-h-60 w-full"
+                  >
+                    <source src={newPostVideo} type="video/mp4" />
+                    Seu navegador não suporta o elemento de vídeo.
+                  </video>
+                  <button
+                    onClick={() => setNewPostVideo(null)}
+                    className="absolute top-2 right-2 bg-[#0000006d] bg-opacity-50 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-opacity-70"
+                  >
+                    ×
+                  </button>
+                </div>
+              )}
+
               <div className="flex justify-between items-center mb-6">
                 <div className="flex gap-2">
+                  {/* Upload de Imagem */}
                   <input
                     type="file"
                     id="image-upload"
@@ -894,7 +964,24 @@ export default function CommunityPage() {
                     htmlFor="image-upload"
                     className="cursor-pointer bg-gray-100 hover:bg-gray-200 rounded-lg px-4 py-2 flex items-center gap-2 transition-colors"
                   >
-                    📷 Adicionar imagem
+                    <Image className="h-4 w-4" />
+                    Adicionar imagem
+                  </label>
+
+                  {/* Upload de Vídeo */}
+                  <input
+                    type="file"
+                    id="video-upload"
+                    accept="video/*"
+                    onChange={handleVideoUpload}
+                    className="hidden"
+                  />
+                  <label
+                    htmlFor="video-upload"
+                    className="cursor-pointer bg-gray-100 hover:bg-gray-200 rounded-lg px-4 py-2 flex items-center gap-2 transition-colors"
+                  >
+                    <Video className="h-4 w-4" />
+                    Adicionar vídeo
                   </label>
                 </div>
               </div>
@@ -905,6 +992,7 @@ export default function CommunityPage() {
                     setShowPostModal(false);
                     setNewPostText("");
                     setNewPostImage(null);
+                    setNewPostVideo(null);
                   }}
                   className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
                   disabled={loading}
