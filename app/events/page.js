@@ -28,11 +28,11 @@ export default function HomePage() {
       try {
         setLoading(true);
         
-        // 🔄 MUDANÇA AQUI: Busca do Supabase em vez do JSON
+        
         const response = await fetch('http://localhost:8000/api/events');
         const eventosData = await response.json();
         
-        // Filtra os eventos por tipo (mantendo a mesma estrutura)
+        
         const torneios = eventosData.filter(e => e.tipo === 'torneio');
         const copasData = eventosData.filter(e => e.tipo === 'copa');
         const peneirasData = eventosData.filter(e => e.tipo === 'peneira');
