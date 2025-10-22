@@ -76,6 +76,7 @@ class PostCreate(BaseModel):
     user_email: str
     user_name: str
     image: Optional[str] = None
+    video: Optional[str] = None
 
 class LikeRequest(BaseModel):
     user_id: str
@@ -360,14 +361,21 @@ async def get_noticias(limit: int = 6):
 @app.post("/posts")
 def create_post(post: PostCreate):
     try:
-        result = supabase.table("posts").insert({
+        # Preparar dados para inserção
+        post_data = {
             "content": post.content,
             "user_id": post.user_id,
             "user_email": post.user_email,
             "user_name": post.user_name,
             "likes_count": 0,
-            "image": post.image
-        }).execute()
+            "image": post.image,
+            "video": post.video  # ADICIONE ESTA LINHA
+        }
+        
+        # Remover campos None para não enviar dados desnecessários
+        post_data = {k: v for k, v in post_data.items() if v is not None}
+        
+        result = supabase.table("posts").insert(post_data).execute()
         
         if not result.data:
             raise HTTPException(status_code=400, detail="Erro ao criar post")
