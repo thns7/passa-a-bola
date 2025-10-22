@@ -226,7 +226,7 @@ export default function UserProfileModal({ userId, currentUser, onClose, onFollo
         <img
           src={post.image}
           alt="Post"
-          className="rounded-lg max-h-80 w-full object-cover mb-3"
+          className="rounded-lg max-h-80 mx-auto object-cover mb-3"
         />
       );
     }

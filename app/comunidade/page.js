@@ -559,7 +559,7 @@ export default function CommunityPage() {
         <img
           src={post.image}
           alt="Post"
-          className="rounded-lg max-h-80 w-full object-cover mb-3"
+          className="rounded-lg max-h-80 mx-auto items-center  mb-3"
         />
       );
     }
