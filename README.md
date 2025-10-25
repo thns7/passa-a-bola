@@ -3,11 +3,11 @@
 # ⚽ **Passa Bola App**  
 **Acompanhe o melhor do Futebol Feminino!**  
 
-<img src="https://github.com/thns7/passa-a-bola/assets/banner-passa-bola.png" alt="Banner do Passa Bola" width="100%"/>
+<img src="https://i.ibb.co/DfDRJNq9/imagem-2025-10-24-220611093.png" alt="Banner do Passa Bola" width="100%"/>
 
 ---
 
-### 🔥 Web App moderno feito com **Next.js**, **React** e **Tailwind CSS**  
+###  Web App moderno feito com **Next.js**, **React** e **Tailwind CSS**  
 > Notícias, calendário, perfis de jogadoras e eventos — tudo em um só lugar.  
 > Feito com carinho para dar **visibilidade ao futebol feminino**. 💪💜
 
@@ -15,7 +15,7 @@
 
 ---
 
-## 🚀 **Visão Geral**
+##  **Visão Geral**
 
 O **Passa Bola** é um projeto desenvolvido pela equipe **1ESPZ** com o objetivo de **valorizar o futebol feminino** por meio da tecnologia.  
 A aplicação traz uma experiência completa com **notícias atualizadas**, **eventos esportivos**, **calendário de jogos** e **perfis de atletas**.
@@ -24,7 +24,7 @@ A aplicação traz uma experiência completa com **notícias atualizadas**, **ev
 
 ---
 
-## ✨ **Principais Funcionalidades**
+##  **Principais Funcionalidades**
 
 ✅ Feed de **notícias** atualizadas sobre futebol feminino  
 ✅ Página de **eventos e calendário** com partidas e competições  
@@ -35,7 +35,7 @@ A aplicação traz uma experiência completa com **notícias atualizadas**, **ev
 
 ---
 
-## 🧠 **Stack Tecnológica**
+##  **Stack Tecnológica**
 
 | Tecnologia | Descrição |
 |-------------|------------|
@@ -46,14 +46,14 @@ A aplicação traz uma experiência completa com **notícias atualizadas**, **ev
 
 ---
 
-## 💻 **Preview do Projeto**
+##  **Preview do Projeto**
 
 <div align="center">
-  <img src="https://github.com/thns7/passa-a-bola/assets/preview-home.png" alt="Home do Passa Bola" width="90%"/>
-  <p><i>Página inicial com notícias e destaques</i></p>
+  <img src="https://i.ibb.co/CK73Qd4C/imagem-2025-10-24-220953340.png" alt="Home do Passa Bola" width="90%"/>
+  <p><i>Página inicial no computador</i></p>
 
-  <img src="https://github.com/thns7/passa-a-bola/assets/preview-perfis.png" alt="Perfis de jogadoras" width="90%"/>
-  <p><i>Perfis de jogadoras e calendário de eventos</i></p>
+  <img src="https://i.ibb.co/hrsymcV/imagem-2025-10-24-220845432.png" alt="Perfis de jogadoras" width="90%"/>
+  <p><i>Página inicial no celular</i></p>
 </div>
 
 ---
