@@ -59,12 +59,10 @@ A aplicação traz uma experiência completa com **notícias atualizadas**, **ev
 ---
 
 ## ⚙️ **Como Rodar o Projeto**
-
-Clone o repositório:
 ```bash
 git clone https://github.com/thns7/passa-a-bola.git  
 cd seu-projeto  
-npm install  
+npm install
 python -m venv venv  
 .\venv\Scripts\activate  
 pip install fastapi uvicorn supabase python-dotenv  
