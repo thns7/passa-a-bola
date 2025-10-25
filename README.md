@@ -49,7 +49,7 @@ A aplicação traz uma experiência completa com **notícias atualizadas**, **ev
 ##  **Preview do Projeto**
 
 <div align="center">
-  <img src="https://i.ibb.co/CK73Qd4C/imagem-2025-10-24-220953340.png" alt="Home do Passa Bola" width="90%"/>
+  <img src="https://i.ibb.co/Wv0trrJd/imagem-2025-10-24-221209645.png" alt="Home do Passa Bola" width="90%"/>
   <p><i>Página inicial no computador</i></p>
 
   <img src="https://i.ibb.co/hrsymcV/imagem-2025-10-24-220845432.png" alt="Perfis de jogadoras" width="40%"/>
