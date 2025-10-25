@@ -9,7 +9,7 @@
 
 ###  Web App moderno feito com **Next.js**, **React** e **Tailwind CSS**  
 > Notícias, calendário, perfis de jogadoras e eventos — tudo em um só lugar.  
-> Feito com carinho para dar **visibilidade ao futebol feminino**. 💪💜
+> Feito com carinho para dar **visibilidade ao futebol feminino**. 
 
 </div>
 
@@ -52,7 +52,7 @@ A aplicação traz uma experiência completa com **notícias atualizadas**, **ev
   <img src="https://i.ibb.co/CK73Qd4C/imagem-2025-10-24-220953340.png" alt="Home do Passa Bola" width="90%"/>
   <p><i>Página inicial no computador</i></p>
 
-  <img src="https://i.ibb.co/hrsymcV/imagem-2025-10-24-220845432.png" alt="Perfis de jogadoras" width="90%"/>
+  <img src="https://i.ibb.co/hrsymcV/imagem-2025-10-24-220845432.png" alt="Perfis de jogadoras" width="40%"/>
   <p><i>Página inicial no celular</i></p>
 </div>
 
