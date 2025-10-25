@@ -20,7 +20,7 @@
 O **Passa Bola** é um projeto desenvolvido pela equipe **1ESPZ** com o objetivo de **valorizar o futebol feminino** por meio da tecnologia.  
 A aplicação traz uma experiência completa com **notícias atualizadas**, **eventos esportivos**, **calendário de jogos** e **perfis de atletas**.
 
-📱 **Totalmente responsivo**, rápido e com design limpo — pensado para ser bonito tanto no desktop quanto no celular.
+ **Totalmente responsivo**, rápido e com design limpo — pensado para ser bonito tanto no desktop quanto no celular.
 
 ---
 
