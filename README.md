@@ -62,4 +62,15 @@ A aplicação traz uma experiência completa com **notícias atualizadas**, **ev
 
 Clone o repositório:
 ```bash
-git clone https://github.com/thns7/passa-a-bola.git
+git clone https://github.com/thns7/passa-a-bola.git  
+cd seu-projeto  
+npm install  
+python -m venv venv  
+.\venv\Scripts\activate  
+pip install fastapi uvicorn supabase python-dotenv  
+cd backend  
+pip install -r requirements.txt  
+- crie o .env ou passe ele para a pasta de backend do projeto
+1* cmd -> python -m uvicorn main:app --reload
+2* cmd -> npm run dev
+(para rodar o projeto completo é necessario 2 cmds rodando ao mesmo tempo)
