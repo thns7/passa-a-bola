@@ -43,6 +43,9 @@ A aplicação traz uma experiência completa com **notícias atualizadas**, **ev
 | [React](https://react.dev/) | Biblioteca para criação de interfaces modernas |
 | [Tailwind CSS](https://tailwindcss.com/) | Estilização rápida e responsiva |
 | [Lucide Icons](https://lucide.dev/) | Ícones simples e elegantes |
+| [Fast API](https://fastapi.tiangolo.com) | API Ultilizada no projeto |
+| [Supabase](https://supabase.com) | Database Ultilizada no projeto |
+
 
 ---
 
@@ -53,7 +56,7 @@ A aplicação traz uma experiência completa com **notícias atualizadas**, **ev
   <p><i>Página inicial no computador</i></p>
 
   <img src="https://i.ibb.co/hrsymcV/imagem-2025-10-24-220845432.png" alt="Perfis de jogadoras" width="40%"/>
-  <p><i>Página inicial no celular</i></p>
+  <p><i>Página Home no celular</i></p>
 </div>
 
 ---
