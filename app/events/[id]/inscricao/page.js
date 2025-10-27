@@ -122,12 +122,12 @@ export default function InscricaoPage() {
       }
 
       const result = await response.json();
-      console.log('✅ Inscrição salva no Supabase:', result);
+      console.log('Inscrição salva no Supabase:', result);
       
       return { 
         success: true, 
         id: result.id,
-        message: 'Inscrição salva com sucesso' 
+        message: 'Inscrição Salva com sucesso' 
       };
       
     } catch (error) {
