@@ -3,6 +3,41 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Header from "../../components/Header";
+import { createClient } from '@supabase/supabase-js';
+
+// Configuração do Supabase
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseAnonKey = process.env.SUPABASE_KEY;
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+// Função para adicionar pontos ao ranking
+const adicionarAoRanking = async (dados) => {
+  try {
+    const { data, error } = await supabase
+      .from('ranking_next_fiap')
+      .insert([
+        {
+          user_id: dados.userId,
+          nome: dados.nome,
+          pontos: dados.pontos,
+          acertos: dados.acertos,
+          created_at: new Date().toISOString()
+        }
+      ])
+      .select();
+
+    if (error) {
+      console.error('Erro ao salvar no ranking:', error);
+      throw error;
+    }
+
+    console.log('Pontos salvos no ranking:', data);
+    return data;
+  } catch (error) {
+    console.error('Erro ao salvar no ranking:', error);
+    throw error;
+  }
+};
 
 export default function NextFiapEvent() {
   const [user, setUser] = useState(null);
@@ -11,6 +46,7 @@ export default function NextFiapEvent() {
   const [pontos, setPontos] = useState(0);
   const [acertos, setAcertos] = useState(0);
   const [mostrarResultado, setMostrarResultado] = useState(false);
+  const [salvando, setSalvando] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -44,30 +80,44 @@ export default function NextFiapEvent() {
     }
   };
 
-  const finalizarRodada = () => {
+  const finalizarRodada = async () => {
     setRodadaAtiva(false);
     setMostrarResultado(true);
+    setSalvando(true);
     
-    // Salvar os pontos no ranking
-    const resultado = {
-      userId: user?.id,
-      nome: user?.name,
-      pontos: pontos,
-      acertos: acertos,
-      data: new Date().toISOString()
-    };
-    
-    // Salvar no localStorage como fallback
-    const rankingAtual = JSON.parse(localStorage.getItem('ranking-next-fiap') || '[]');
-    rankingAtual.push(resultado);
-    localStorage.setItem('ranking-next-fiap', JSON.stringify(rankingAtual));
-    
-    console.log("Pontos salvos no ranking:", resultado);
-    
-    // Redireciona automaticamente para o ranking após 3 segundos
-    setTimeout(() => {
-      router.push("/events/next-fiap/ranking");
-    }, 3000);
+    try {
+      // Salvar os pontos no Supabase
+      const resultado = {
+        userId: user?.id,
+        nome: user?.name,
+        pontos: pontos,
+        acertos: acertos
+      };
+      
+      await adicionarAoRanking(resultado);
+      console.log("Pontos salvos no Supabase com sucesso!");
+      
+    } catch (error) {
+      console.error("Erro ao salvar no Supabase:", error);
+      // Fallback para localStorage se o Supabase falhar
+      const rankingAtual = JSON.parse(localStorage.getItem('ranking-next-fiap') || '[]');
+      rankingAtual.push({
+        userId: user?.id,
+        nome: user?.name,
+        pontos: pontos,
+        acertos: acertos,
+        data: new Date().toISOString()
+      });
+      localStorage.setItem('ranking-next-fiap', JSON.stringify(rankingAtual));
+      console.log("Pontos salvos no localStorage (fallback)");
+    } finally {
+      setSalvando(false);
+      
+      // Redireciona automaticamente para o ranking após 3 segundos
+      setTimeout(() => {
+        router.push("/events/next-fiap/ranking");
+      }, 3000);
+    }
   };
 
   if (!user) {
@@ -168,10 +218,10 @@ export default function NextFiapEvent() {
 
             <div className="bg-purple-50 p-4 rounded-lg mb-6 border-2 border-purple-200">
               <p className="text-lg font-semibold text-purple-800">
-                ✅ Pontos salvos no ranking!
+                {salvando ? "💾 Salvando no ranking..." : "✅ Pontos salvos no ranking!"}
               </p>
               <p className="text-sm text-purple-600 mt-2">
-                Redirecionando para o ranking em 3 segundos...
+                {salvando ? "Aguarde..." : "Redirecionando para o ranking em 3 segundos..."}
               </p>
             </div>
 
@@ -207,3 +257,5 @@ export default function NextFiapEvent() {
     </div>
   );
 }
+
+export { adicionarAoRanking };

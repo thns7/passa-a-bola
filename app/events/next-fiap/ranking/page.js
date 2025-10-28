@@ -3,11 +3,18 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Header from "../../../components/Header";
+import { createClient } from '@supabase/supabase-js';
+
+// Configuração do Supabase
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseAnonKey = process.env.SUPABASE_KEY;
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export default function NextFiapRanking() {
   const [ranking, setRanking] = useState([]);
   const [user, setUser] = useState(null);
   const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -15,46 +22,48 @@ export default function NextFiapRanking() {
     if (currentUser) {
       setUser(JSON.parse(currentUser));
     }
+  }, []);
 
-    // Carregar ranking do localStorage
-    const carregarRanking = () => {
+  useEffect(() => {
+    const carregarRanking = async () => {
+      if (!user) return;
+      
       try {
-        const rankingSalvo = JSON.parse(localStorage.getItem('ranking-next-fiap') || '[]');
-        
-        // Agrupar por usuário e pegar melhor pontuação
-        const rankingAgrupado = rankingSalvo.reduce((acc, item) => {
-          const existing = acc.find(i => i.userId === item.userId);
-          if (!existing || item.pontos > existing.pontos) {
-            if (existing) {
-              // Remove o anterior se existir
-              acc = acc.filter(i => i.userId !== item.userId);
-            }
-            acc.push(item);
-          }
-          return acc;
-        }, []);
+        setCarregando(true);
+        setErro(null);
 
-        // Ordenar por pontos (maior primeiro)
-        const rankingOrdenado = rankingAgrupado.sort((a, b) => b.pontos - a.pontos);
-        
-        setRanking(rankingOrdenado);
+        // Buscar ranking do Supabase
+        const { data, error } = await supabase
+          .from('ranking_next_fiap')
+          .select('*')
+          .order('pontos', { ascending: false });
+
+        if (error) {
+          console.error('Erro ao carregar ranking:', error);
+          setErro('Erro ao carregar ranking');
+          return;
+        }
+
+        console.log('Ranking carregado:', data);
+        setRanking(data || []);
+
       } catch (error) {
-        console.error("Erro ao carregar ranking:", error);
-        setRanking([]);
+        console.error('Erro ao carregar ranking:', error);
+        setErro('Erro ao carregar ranking');
       } finally {
         setCarregando(false);
       }
     };
 
     carregarRanking();
-  }, []);
+  }, [user]);
 
   const getPosicaoUsuario = () => {
     if (!user) return -1;
-    return ranking.findIndex(item => item.userId === user.id);
+    return ranking.findIndex(item => item.user_id === user.id);
   };
 
-  const usuarioAtual = user ? ranking.find(item => item.userId === user.id) : null;
+  const usuarioAtual = user ? ranking.find(item => item.user_id === user.id) : null;
 
   return (
     <div className="bg-[#f5f6f8] min-h-screen">
@@ -69,6 +78,12 @@ export default function NextFiapRanking() {
           <p className="text-gray-600 mb-4">
             Cada acerto = 10 pontos • 3 chutes por rodada
           </p>
+          
+          {erro && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+              <p className="text-red-700">{erro}</p>
+            </div>
+          )}
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
             <div className="bg-purple-50 p-3 rounded-lg border border-purple-200">
@@ -109,33 +124,33 @@ export default function NextFiapRanking() {
             <div className="space-y-3">
               {ranking.map((player, index) => (
                 <div
-                  key={player.userId || index}
+                  key={player.id || index}
                   className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all ${
                     index === 0 
                       ? "bg-yellow-50 border-yellow-200 shadow-md" 
-                      : player.userId === user?.id
+                      : player.user_id === user?.id
                       ? "bg-purple-50 border-purple-200 shadow-sm"
                       : "bg-white border-gray-100"
-                  } ${player.userId === user?.id ? 'scale-105' : ''}`}
+                  } ${player.user_id === user?.id ? 'scale-105' : ''}`}
                 >
                   <div className="flex items-center gap-4">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${
                       index === 0 ? "bg-yellow-400 text-white shadow-lg" :
                       index === 1 ? "bg-gray-400 text-white shadow-md" :
                       index === 2 ? "bg-orange-400 text-white shadow-md" :
-                      player.userId === user?.id ? "bg-purple-500 text-white shadow-sm" :
+                      player.user_id === user?.id ? "bg-purple-500 text-white shadow-sm" :
                       "bg-gray-200 text-gray-600"
                     }`}>
                       {index + 1}
                     </div>
                     <div>
                       <p className={`font-semibold text-lg ${
-                        player.userId === user?.id ? "text-purple-700" : "text-gray-800"
+                        player.user_id === user?.id ? "text-purple-700" : "text-gray-800"
                       }`}>
-                        {player.nome} {player.userId === user?.id && "(Você)"}
+                        {player.nome} {player.user_id === user?.id && "(Você)"}
                       </p>
                       <p className="text-sm text-gray-500">
-                        {player.acertos} acertos • {new Date(player.data).toLocaleDateString('pt-BR')}
+                        {player.acertos} acertos • {new Date(player.created_at).toLocaleDateString('pt-BR')}
                       </p>
                     </div>
                   </div>
