@@ -5,17 +5,25 @@ import { useRouter } from "next/navigation";
 import Header from "../../../components/Header";
 import { createClient } from '@supabase/supabase-js';
 
-// Configuração do Supabase
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseAnonKey = process.env.SUPABASE_KEY;
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// ✅ CORRETO: Use variáveis públicas no cliente
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 export default function NextFiapRanking() {
   const [ranking, setRanking] = useState([]);
   const [user, setUser] = useState(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState(null);
+  const [supabase, setSupabase] = useState(null);
   const router = useRouter();
+
+  // ✅ CORRETO: Inicializar Supabase apenas no cliente
+  useEffect(() => {
+    if (supabaseUrl && supabaseAnonKey) {
+      const client = createClient(supabaseUrl, supabaseAnonKey);
+      setSupabase(client);
+    }
+  }, []);
 
   useEffect(() => {
     const currentUser = localStorage.getItem("currentUser");
@@ -26,7 +34,7 @@ export default function NextFiapRanking() {
 
   useEffect(() => {
     const carregarRanking = async () => {
-      if (!user) return;
+      if (!user || !supabase) return;
       
       try {
         setCarregando(true);
@@ -56,7 +64,7 @@ export default function NextFiapRanking() {
     };
 
     carregarRanking();
-  }, [user]);
+  }, [user, supabase]);
 
   const getPosicaoUsuario = () => {
     if (!user) return -1;
@@ -64,6 +72,18 @@ export default function NextFiapRanking() {
   };
 
   const usuarioAtual = user ? ranking.find(item => item.user_id === user.id) : null;
+
+  // ✅ Mostrar loading enquanto Supabase não carrega
+  if (!supabase) {
+    return (
+      <div className="bg-[#f5f6f8] min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Inicializando...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-[#f5f6f8] min-h-screen">
@@ -93,13 +113,13 @@ export default function NextFiapRanking() {
             <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
               <p className="text-sm text-blue-600">Total de Acertos</p>
               <p className="text-xl font-bold text-blue-700">
-                {ranking.reduce((sum, player) => sum + player.acertos, 0)}
+                {ranking.reduce((sum, player) => sum + (player.acertos || 0), 0)}
               </p>
             </div>
             <div className="bg-green-50 p-3 rounded-lg border border-green-200">
               <p className="text-sm text-green-600">Recorde</p>
               <p className="text-xl font-bold text-green-700">
-                {ranking.length > 0 ? Math.max(...ranking.map(p => p.pontos)) : 0} pts
+                {ranking.length > 0 ? Math.max(...ranking.map(p => p.pontos || 0)) : 0} pts
               </p>
             </div>
             <div className="bg-orange-50 p-3 rounded-lg border border-orange-200">
@@ -147,16 +167,16 @@ export default function NextFiapRanking() {
                       <p className={`font-semibold text-lg ${
                         player.user_id === user?.id ? "text-purple-700" : "text-gray-800"
                       }`}>
-                        {player.nome} {player.user_id === user?.id && "(Você)"}
+                        {player.nome || "Jogador"} {player.user_id === user?.id && "(Você)"}
                       </p>
                       <p className="text-sm text-gray-500">
-                        {player.acertos} acertos • {new Date(player.created_at).toLocaleDateString('pt-BR')}
+                        {(player.acertos || 0)} acertos • {player.created_at ? new Date(player.created_at).toLocaleDateString('pt-BR') : "Data não disponível"}
                       </p>
                     </div>
                   </div>
                   <div className="text-right">
                     <p className="text-2xl font-bold text-purple-700">
-                      {player.pontos} pts
+                      {player.pontos || 0} pts
                     </p>
                     {index === 0 && (
                       <p className="text-xs text-yellow-600 font-bold mt-1">🏆 LÍDER</p>
@@ -202,7 +222,7 @@ export default function NextFiapRanking() {
           <p>🏆 Vencedor será anunciado no final do NEXT FIAP!</p>
           {usuarioAtual && (
             <p className="mt-2 text-purple-600 font-semibold">
-              Sua melhor pontuação: <strong>{usuarioAtual.pontos} pontos</strong>
+              Sua melhor pontuação: <strong>{usuarioAtual.pontos || 0} pontos</strong>
             </p>
           )}
         </div>

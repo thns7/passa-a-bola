@@ -3,17 +3,19 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Header from "../../components/Header";
-import { createClient } from '@supabase/supabase-js';
 
-// Configuração do Supabase
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseAnonKey = process.env.SUPABASE_KEY;
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Função para adicionar pontos ao ranking
-const adicionarAoRanking = async (dados) => {
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+
+const adicionarAoRanking = async (dados, supabaseClient) => {
+  if (!supabaseClient) {
+    throw new Error('Cliente Supabase não inicializado');
+  }
+
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('ranking_next_fiap')
       .insert([
         {
@@ -47,7 +49,20 @@ export default function NextFiapEvent() {
   const [acertos, setAcertos] = useState(0);
   const [mostrarResultado, setMostrarResultado] = useState(false);
   const [salvando, setSalvando] = useState(false);
+  const [supabase, setSupabase] = useState(null);
   const router = useRouter();
+
+  // ✅ Inicializar Supabase apenas no cliente
+  useEffect(() => {
+    if (supabaseUrl && supabaseAnonKey) {
+      import('@supabase/supabase-js').then(({ createClient }) => {
+        const client = createClient(supabaseUrl, supabaseAnonKey);
+        setSupabase(client);
+      });
+    } else {
+      console.error('Variáveis do Supabase não configuradas');
+    }
+  }, []);
 
   useEffect(() => {
     const currentUser = localStorage.getItem("currentUser");
@@ -94,8 +109,12 @@ export default function NextFiapEvent() {
         acertos: acertos
       };
       
-      await adicionarAoRanking(resultado);
-      console.log("Pontos salvos no Supabase com sucesso!");
+      if (supabase) {
+        await adicionarAoRanking(resultado, supabase);
+        console.log("Pontos salvos no Supabase com sucesso!");
+      } else {
+        throw new Error('Supabase não disponível');
+      }
       
     } catch (error) {
       console.error("Erro ao salvar no Supabase:", error);
@@ -120,6 +139,19 @@ export default function NextFiapEvent() {
     }
   };
 
+  // ✅ Simulação de acerto para teste (remova depois)
+  useEffect(() => {
+    const handleKeyPress = (e) => {
+      if (e.key === ' ' && rodadaAtiva && chutesRestantes > 0) {
+        e.preventDefault();
+        registrarAcerto();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [rodadaAtiva, chutesRestantes]);
+
   if (!user) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-[#f5f6f8]">
@@ -140,6 +172,15 @@ export default function NextFiapEvent() {
         <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-2xl p-6 text-center mb-6">
           <h1 className="text-3xl font-bold mb-2">⚽ NEXT Passa a Bola</h1>
           <p className="text-lg">Desafio do Mini Gol - 3 chutes para o ranking!</p>
+          {!supabaseUrl || !supabaseAnonKey ? (
+            <p className="text-yellow-300 text-sm mt-2">
+              ⚠️ Configuração do banco de dados pendente
+            </p>
+          ) : !supabase ? (
+            <p className="text-yellow-300 text-sm mt-2">
+              🔄 Conectando ao banco de dados...
+            </p>
+          ) : null}
         </div>
 
         {!rodadaAtiva && !mostrarResultado ? (
@@ -156,6 +197,13 @@ export default function NextFiapEvent() {
             >
               🚀 INICIAR MINHA RODADA
             </button>
+
+            {/* ✅ Instrução de teste */}
+            <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+              <p className="text-sm text-blue-600">
+                <strong>Para testar:</strong> Pressione <kbd className="px-2 py-1 bg-gray-200 rounded">ESPAÇO</kbd> para simular acertos
+              </p>
+            </div>
 
             <div className="mt-6">
               <button
@@ -196,7 +244,7 @@ export default function NextFiapEvent() {
             </div>
 
             <div className="text-center text-sm text-gray-500">
-              <p>Os pontos serão registrados automaticamente pelos sensores</p>
+              <p>Pressione <kbd className="px-2 py-1 bg-gray-200 rounded">ESPAÇO</kbd> para simular acertos (teste)</p>
             </div>
           </div>
         ) : (
@@ -257,5 +305,6 @@ export default function NextFiapEvent() {
     </div>
   );
 }
+
 
 export { adicionarAoRanking };
