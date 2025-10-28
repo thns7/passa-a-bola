@@ -50,7 +50,7 @@ export default function HomePage() {
       }
     }
 
-    // Fallback com dados do db.json
+    
     async function loadMockData() {
       try {
         const res = await fetch("/data/db.json");
