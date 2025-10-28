@@ -31,7 +31,7 @@ export default function HomePage() {
         
         const API_BASE_URL = process.env.NODE_ENV === 'development' 
           ? 'http://localhost:8000' 
-          : 'https://seu-backend-no-render.onrender.com';
+          : 'https://passa-a-bola.onrender.com';
         
         // Tenta carregar da API primeiro
         const response = await fetch(`${API_BASE_URL}/api/events`);

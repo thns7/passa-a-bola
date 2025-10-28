@@ -52,7 +52,7 @@ export default function NextFiapEvent() {
   const [supabase, setSupabase] = useState(null);
   const router = useRouter();
 
-  // ✅ Inicializar Supabase apenas no cliente
+  
   useEffect(() => {
     if (supabaseUrl && supabaseAnonKey) {
       import('@supabase/supabase-js').then(({ createClient }) => {
