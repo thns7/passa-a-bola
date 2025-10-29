@@ -107,7 +107,7 @@ export default function RegisterPage() {
 
           {error && <p className="text-red-500 text-sm mt-2 text-center">{error}</p>}
 
-          <p className="text-center text-sm mt-4 ">
+          <p className="text-center text-sm mt-4 mb-8">
             Já tem conta?{" "}
             <span
               className="text-[var(--primary-color)] font-semibold cursor-pointer hover:opacity-80 transition-opacity "

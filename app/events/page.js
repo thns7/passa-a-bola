@@ -33,7 +33,7 @@ export default function HomePage() {
           ? 'http://localhost:8000' 
           : 'https://passa-a-bola.onrender.com';
         
-        // Tenta carregar da API primeiro
+        
         const response = await fetch(`${API_BASE_URL}/api/events`);
         
         if (!response.ok) {
@@ -98,17 +98,17 @@ export default function HomePage() {
     }
   };
 
-  // Função para formatar hora do Supabase
+  
   const formatarHora = (horaISO) => {
     if (!horaISO) return '';
-    // Se for formato ISO (HH:MM:SS), extrai só HH:MM
+    
     if (horaISO.includes(':')) {
       return horaISO.substring(0, 5);
     }
-    return horaISO; // Retorna original se não for ISO
+    return horaISO; 
   };
 
-  // Função para obter dados do evento (compatível com ambos os formatos)
+  
   const getEventoData = (evento) => {
     return {
       id: evento.id,
@@ -147,7 +147,7 @@ export default function HomePage() {
     );
   }
 
-  // Encontra o evento NEXT FIAP (pode vir da API ou do db.json)
+ 
   const eventoNextFiap = eventos.find(ev => ev.id === "next-fiap") || 
                         { 
                           id: "next-fiap", 
@@ -160,7 +160,7 @@ export default function HomePage() {
                           img: "/next-fiap-banner.jpg"
                         };
 
-  // Filtra outros eventos (excluindo NEXT FIAP)
+
   const outrosEventos = eventos.filter(ev => ev.id !== "next-fiap");
 
   return (
@@ -201,7 +201,7 @@ export default function HomePage() {
                 <div className="flex-1 text-center md:text-left">
                   <div className="flex items-center justify-center md:justify-start gap-3 mb-3">
                     <span className="bg-yellow-400 text-purple-800 px-4 py-1 rounded-full text-sm font-bold animate-pulse">
-                      🎯 DESAFIO EXCLUSIVO
+                      DESAFIO EXCLUSIVO
                     </span>
                     <span className="bg-white/30 text-white px-3 py-1 rounded-full text-xs">
                       NEXT FIAP 2024
@@ -242,7 +242,6 @@ export default function HomePage() {
                       className="bg-white/20 text-white border-2 border-white/30 px-6 py-4 rounded-xl font-bold text-lg hover:bg-white/30 transform hover:-translate-y-1 transition-all duration-300 flex items-center justify-center group/btn2"
                     >
                       <span>🏆 Ver Ranking</span>
-                      <span className="ml-2 group-hover/btn2:scale-110 transition-transform">📊</span>
                     </button>
                   </div>
                 </div>
@@ -497,7 +496,6 @@ export default function HomePage() {
               </div>
             ) : (
               <div className="text-center py-12">
-                <div className="text-6xl mb-4 text-gray-300">🔍</div>
                 <p className="text-gray-500 text-lg">Nenhuma peneira disponível no momento</p>
               </div>
             )}
