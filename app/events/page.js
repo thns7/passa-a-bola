@@ -153,8 +153,8 @@ export default function HomePage() {
                           id: "next-fiap", 
                           titulo: "NEXT Passa a Bola - Desafio do Mini Gol", 
                           local: "FIAP - São Paulo/SP", 
-                          data: "25-27/10/2024", 
-                          hora: "09:00 - 18:00", 
+                          data: "08/11/2025", 
+                          hora: "12:00 - 15:00", 
                           valor: "R$ Gratuito", 
                           categoria: "DESAFIO ESPECIAL",
                           img: "/next-fiap-banner.jpg"
@@ -204,7 +204,7 @@ export default function HomePage() {
                       DESAFIO EXCLUSIVO
                     </span>
                     <span className="bg-white/30 text-white px-3 py-1 rounded-full text-xs">
-                      NEXT FIAP 2024
+                      NEXT FIAP 2025
                     </span>
                   </div>
                   

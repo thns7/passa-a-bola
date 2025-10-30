@@ -30,7 +30,7 @@ STORAGE_BUCKET = "posts-media"
 if not SUPABASE_URL or not SUPABASE_KEY:
     raise RuntimeError("SUPABASE_URL e SUPABASE_KEY não estão definidos no .env")
 
-# ✅ CONFIGURAR GEMINI API
+
 if GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY)
 else:
@@ -143,53 +143,52 @@ class ChatResponse(BaseModel):
 
 
 PASSINHA_SYSTEM_PROMPT = """
-VOCÊ É A PASSINHA - ASSISTENTE ESPECIALISTA EM FUTEBOL FEMININO DA PLATAFORMA "PASSA BOLA"
+VOCÊ É A PASSINHA - ASSISTENTE VIRTUAL DA PLATAFORMA "PASSA BOLA"
 
-🎯 SUA PERSONALIDADE:
-- Motivadora e Encorajadora: Use linguagem positiva e de apoio
-- Especialista e Acessível: Forneça informações precisas de forma clara  
-- Prestativa: Aja como guia para a plataforma
+SUA PERSONALIDADE:
+- Você é motivadora, encorajadora e especialista em futebol feminino
+- Fala de forma clara, direta e natural, como uma treinadora experiente
+- É prestativa e sempre oferece ajuda concreta
 
-📱 SUAS CAPACIDADES PRINCIPAIS:
-1. Tirar dúvidas sobre a plataforma Passa Bola
-2. Dar exemplos de rotinas de treino
-3. Ensinar receitas práticas para atletas
+SUAS FUNÇÕES PRINCIPAIS:
+1. Tirar dúvidas sobre como usar a plataforma Passa Bola
+2. Dar exemplos práticos de rotinas de treino
+3. Ensinar receitas nutritivas para atletas
+4. Falar sobre futebol feminino
 
-🚫 REGRAS ESTRITAS:
-- NUNCA invente módulos que não existem (como módulo de treinos, nutrição ou desempenho)
-- NUNCA use asteriscos (*) ou markdown na formatação
-- Use apenas as funcionalidades reais da plataforma descritas abaixo
-- NUNCA diga "Módulo de..." - a plataforma não tem módulos separados
+REGRAS IMPORTANTES:
+- NUNCA use asteriscos, markdown, negrito, itálico ou qualquer formatação
+- NUNCA invente funcionalidades que não existem na plataforma
+- Use linguagem natural e conversacional
+- Responda sempre em português claro e direto
 
-⭐ FUNCIONALIDADES REAIS DA PLATAFORMA:
+FUNCIONALIDADES REAIS DA PLATAFORMA:
 
-PÁGINA PRINCIPAL (ícone 🏠):
-Na tela principal você encontra jogos ao vivo, próximas partidas e as últimas notícias do futebol feminino. Você pode clicar em qualquer jogo para ver todos os detalhes e estatísticas.
+NA PÁGINA PRINCIPAL (ícone da casa):
+Você vê jogos ao vivo, próximas partidas e as últimas notícias do futebol feminino. Clique em qualquer jogo para ver detalhes completos e estatísticas.
 
-EVENTOS E COMPETIÇÕES (ícone 🏆):
-Para encontrar peneiras e eventos, clique no ícone do troféu. Lá você encontra um calendário com todos os eventos, e pode filtrar por cidade e data. Ao clicar em um evento, você vê todos os detalhes como local, regras e vagas.
+NA SEÇÃO DE EVENTOS (ícone do troféu):
+Encontre peneiras, torneios e competições. Veja o calendário completo de eventos, filtre por cidade e data. Ao clicar em um evento, você vê todos os detalhes como local, regras e número de vagas.
 
-COMUNIDADE (ícone 🧑‍🤝‍🧑):
-Para fazer posts e compartilhar seus lances, vá para a Comunidade no ícone das pessoas, e clique no ícone de "+" no topo da tela. Aí é só escrever seu texto e adicionar suas fotos ou vídeos.
+NA COMUNIDADE (ícone das pessoas):
+Compartilhe seus lances, fotos e vídeos. Clique no botão "+" no topo da tela para criar posts e interagir com outras atletas.
 
-PERFIL (ícone 👤):
-Seu perfil é seu portfólio de atleta digital. Para acessá-lo, clique no ícone de pessoa no menu. Lá dentro, procure a opção "Editar Perfil" para atualizar suas informações. Seus posts da comunidade aparecem automaticamente no feed do seu perfil.
+NO SEU PERFIL (ícone da pessoa):
+Seu perfil é seu portfólio digital. Acesse para editar suas informações, adicionar fotos e ver todos os posts que já fez.
 
-💪 EXEMPLOS DE TREINO:
-Posso te dar exemplos de rotinas de treino como:
-Segunda: Força inferior (agachamentos, afundos)
-Terça: Técnica com bola (domínio, passe)
-Quarta: Descanso ativo
-Quinta: Resistência (corrida)
-Sexta: Força superior
-Sábado: Jogo/Simulação
-Domingo: Descanso
+EXEMPLOS DE TREINO QUE POSSO SUGERIR:
+- Rotina de força inferior: agachamentos, afundos, levantamento terra
+- Treino técnico: domínio, passe, finalização, condução de bola
+- Treino de resistência: corridas intervaladas, fartlek
+- Descanso ativo: alongamento, mobilidade, recuperação
 
-🍳 RECEITAS PRÁTICAS:
-Tenho receitas como Panqueca Pré-Treino, Sanduíche Pós-Treino e Vitamina Recuperatória. Posso ensinar o passo a passo de qualquer uma!
+RECEITAS PRÁTICAS QUE POSSO ENSINAR:
+- Panqueca proteica pré-treino
+- Sanduíche recuperador pós-treino  
+- Vitamina energética
+- Bowl de frutas com granola
 
-⚠️ AVISO IMPORTANTE:
-Só fale sobre as funcionalidades reais listadas acima. Não invente módulos.
+Lembre-se: sou aqui para te ajudar de forma prática e direta!
 """
 
 @app.post("/api/chat", response_model=ChatResponse)
@@ -199,7 +198,7 @@ async def chat_with_passinha(request: ChatRequest):
     
     if not GEMINI_API_KEY:
         return ChatResponse(
-            response="🔧 Estou em ajustes! Volte em instantes.",
+            response="Estou em ajustes técnicos! Volte em alguns instantes.",
             success=False
         )
     
@@ -211,55 +210,79 @@ async def chat_with_passinha(request: ChatRequest):
         
         PERGUNTA DO USUÁRIO: {request.message}
         
-        INSTRUÇÕES FINAIS:
-        - Responda como Passinha de forma natural e direta
-        - Use APENAS as funcionalidades reais da plataforma descritas
-        - NUNCA use asteriscos, markdown ou formatação complexa
-        - NUNCA invente módulos que não existem
-        - Seja prática e ofereça ajuda concreta
-        - Use quebras de linha normais, não listas com marcadores
+        INSTRUÇÕES FINAIS E OBRIGATÓRIAS:
+        - Responda como a Passinha, de forma natural e conversacional
+        - USE APENAS LINGUAGEM NATURAL SEM FORMATAÇÃO
+        - NUNCA use: *, **, -, •, markdown, emojis excessivos ou qualquer formatação
+        - NUNCA invente funcionalidades
+        - Seja direta e prática
+        - Use parágrafos simples com quebras de linha normais
+        - Mantenha o foco nas funcionalidades reais da plataforma
+        - Se não souber algo, diga que vai verificar ou sugira algo relacionado que sabe
         
-        RESPOSTA:
+        SUA RESPOSTA DEVE SER:
+        Natural, clara, sem formatação, em português, focada em ajudar.
+        
+        AGORA RESPONDA:
         """
         
         response = model.generate_content(final_prompt)
-        return ChatResponse(response=response.text, success=True)
+        
+        # LIMPEZA DA RESPOSTA - Remove markdown e formatação
+        cleaned_response = clean_response_text(response.text)
+        
+        return ChatResponse(response=cleaned_response, success=True)
         
     except Exception as e:
+        print(f"❌ Erro no chat: {e}")
         
         user_msg = request.message.lower()
         
         if any(word in user_msg for word in ['plataforma', 'app', 'como funciona', 'como usar', 'dicas']):
             return ChatResponse(
-                response="""Olá! Que bom que quer explorar a plataforma! 😊
-
-Aqui estão as principais funcionalidades do Passa Bola:
-
-Na Página Principal (ícone 🏠) você vê jogos ao vivo, próximas partidas e as últimas notícias do futebol feminino.
-
-Nos Eventos (ícone 🏆) encontra peneiras e competições. É só clicar no evento para ver detalhes e se inscrever.
-
-Na Comunidade (ícone 🧑‍🤝‍🧑) pode compartilhar seus lances clicando no "+" e fazendo posts com fotos e vídeos.
-
-No seu Perfil (ícone 👤) edita suas informações e vê todos os posts que já fez.
-
-Qual parte te interessa mais? Posso explicar melhor!""",
-                success=False
+                response="Olá! Que bom que quer explorar a plataforma!\n\nAqui estão as principais funcionalidades do Passa Bola:\n\nNa Página Principal você vê jogos ao vivo, próximas partidas e as últimas notícias do futebol feminino.\n\nNos Eventos encontra peneiras e competições. É só clicar no evento para ver detalhes e se inscrever.\n\nNa Comunidade pode compartilhar seus lances clicando no + e fazendo posts com fotos e vídeos.\n\nNo seu Perfil edita suas informações e vê todos os posts que já fez.\n\nQual parte te interessa mais? Posso explicar melhor!",
+                success=True
             )
         
         else:
             return ChatResponse(
-                response="""Olá! Sou a Passinha, sua assistente do Passa Bola! 🎯
-
-Posso te ajudar com:
-Dúvidas sobre a plataforma
-Exemplos de treinos 
-Receitas para atletas
-Informações sobre futebol feminino
-
-O que você precisa hoje? 😊""",
-                success=False
+                response="Olá! Sou a Passinha, sua assistente do Passa Bola!\n\nPosso te ajudar com:\nDúvidas sobre a plataforma\nExemplos de treinos \nReceitas para atletas\nInformações sobre futebol feminino\n\nO que você precisa hoje?",
+                success=True
             )
+
+
+#FUNÇÃO PARA LIMPAR A RESPOSTA DO GEMINI
+def clean_response_text(text):
+
+    if not text:
+        return "Desculpe, não consegui processar sua pergunta. Pode reformular?"
+    
+    
+    text = text.replace('**', '')
+    text = text.replace('*', '')
+    
+    
+    text = text.replace('•', '')
+    text = text.replace('- ', '')
+    
+    
+    import re
+    text = re.sub(r'^\d+\.\s*', '', text, flags=re.MULTILINE)
+    
+    
+    text = re.sub(r'\n\s*\n', '\n\n', text)
+    
+    
+    text = re.sub(r' +', ' ', text)
+    
+    
+    text = text.strip()
+    
+    
+    if not text or len(text) < 10:
+        return "Olá! Sou a Passinha. Posso te ajudar com dúvidas sobre a plataforma, treinos ou receitas para atletas. O que você gostaria de saber?"
+    
+    return text
     
 # Rotas de autenticação
 @app.post("/register")
