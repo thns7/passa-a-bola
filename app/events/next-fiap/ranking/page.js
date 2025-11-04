@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Header from "../../../components/Header";
+//import Header from "../../../components/Header";
 
-const API_BASE_URL = "http://127.0.0.1:8000";
+const API_BASE_URL = "https://passa-a-bola.onrender.com";
 
 export default function NextFiapRanking() {
   const [ranking, setRanking] = useState([]);
@@ -65,18 +65,8 @@ export default function NextFiapRanking() {
     ? ranking.find((item) => item.user_id === user.id)
     : null;
 
-  if (!isClient) {
-    return (
-      <div className="bg-[#f5f6f8] min-h-screen">
-        <Header name="Ranking NEXT FIAP" />
-        <div className="pt-20 text-center">Carregando...</div>
-      </div>
-    );
-  }
-
   return (
     <div className="bg-[#f5f6f8] min-h-screen">
-      <Header name="Ranking NEXT FIAP" />
       
       <main className="pt-20 max-w-4xl mx-auto px-4 py-8">
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 text-center">
