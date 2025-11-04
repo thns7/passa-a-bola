@@ -19,11 +19,16 @@ export default function NextFiapRanking() {
   }, []);
 
   useEffect(() => {
-    if (!isClient) return;
-
-    const currentUser = localStorage.getItem("currentUser");
-    if (currentUser) {
-      setUser(JSON.parse(currentUser));
+    if (isClient) {
+      const currentUser = localStorage.getItem("currentUser");
+      if (currentUser) {
+        try {
+          const parsedUser = JSON.parse(currentUser);
+          setUser(parsedUser);
+        } catch (error) {
+          console.error("Erro ao parsear usuário:", error);
+        }
+      }
     }
   }, [isClient]);
 
@@ -55,9 +60,15 @@ export default function NextFiapRanking() {
         setErro('Erro ao carregar ranking do servidor');
         
         // Fallback para localStorage
-        const rankingLocal = JSON.parse(localStorage.getItem('ranking-next-fiap') || '[]');
-        const rankingOrdenado = rankingLocal.sort((a, b) => (b.pontos || 0) - (a.pontos || 0));
-        setRanking(rankingOrdenado);
+        if (isClient) {
+          try {
+            const rankingLocal = JSON.parse(localStorage.getItem('ranking-next-fiap') || '[]');
+            const rankingOrdenado = rankingLocal.sort((a, b) => (b.pontos || 0) - (a.pontos || 0));
+            setRanking(rankingOrdenado);
+          } catch (storageError) {
+            console.error("Erro ao carregar do localStorage:", storageError);
+          }
+        }
       } finally {
         setCarregando(false);
       }

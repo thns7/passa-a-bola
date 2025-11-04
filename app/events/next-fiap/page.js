@@ -17,7 +17,7 @@ export default function NextFiapEvent() {
   const [erro, setErro] = useState(null);
   const [mostrarInputNome, setMostrarInputNome] = useState(false);
   const [nomeJogador, setNomeJogador] = useState("");
-  const [isClient, setIsClient] = useState(false); // ✅ Novo estado para verificar se está no cliente
+  const [isClient, setIsClient] = useState(false);
   
   const pontosRef = useRef(0);
   const acertosRef = useRef(0);
@@ -25,22 +25,24 @@ export default function NextFiapEvent() {
   
   const router = useRouter();
 
-  // ✅ Verificar se está no cliente
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  // ✅ Modificado: Só acessar localStorage quando estiver no cliente
   useEffect(() => {
-    if (!isClient) return;
-    
-    const currentUser = localStorage.getItem("currentUser");
-    if (currentUser) {
-      const parsedUser = JSON.parse(currentUser);
-      setUser(parsedUser);
-      setNomeJogador(parsedUser.name || "");
+    if (isClient) {
+      const currentUser = localStorage.getItem("currentUser");
+      if (currentUser) {
+        try {
+          const parsedUser = JSON.parse(currentUser);
+          setUser(parsedUser);
+          setNomeJogador(parsedUser.name || "");
+        } catch (error) {
+          console.error("Erro ao parsear usuário:", error);
+        }
+      }
     }
-  }, [isClient]); // ✅ Adicionada dependência isClient
+  }, [isClient]);
 
   const iniciarRodada = () => {
     setMostrarInputNome(true);
@@ -152,18 +154,21 @@ export default function NextFiapEvent() {
       console.error("Erro ao salvar no Supabase:", error);
       setErro("Erro ao salvar no ranking. Tente novamente.");
       
-      // ✅ Modificado: Só usar localStorage se estiver no cliente
       if (isClient) {
-        const rankingAtual = JSON.parse(localStorage.getItem('ranking-next-fiap') || '[]');
-        rankingAtual.push({
-          userId: user?.id,
-          nome: nomeJogador,
-          pontos: pontosRef.current,
-          acertos: acertosRef.current,
-          data: new Date().toISOString()
-        });
-        localStorage.setItem('ranking-next-fiap', JSON.stringify(rankingAtual));
-        console.log("Pontos salvos no localStorage (fallback)");
+        try {
+          const rankingAtual = JSON.parse(localStorage.getItem('ranking-next-fiap') || '[]');
+          rankingAtual.push({
+            userId: user?.id,
+            nome: nomeJogador,
+            pontos: pontosRef.current,
+            acertos: acertosRef.current,
+            data: new Date().toISOString()
+          });
+          localStorage.setItem('ranking-next-fiap', JSON.stringify(rankingAtual));
+          console.log("Pontos salvos no localStorage (fallback)");
+        } catch (storageError) {
+          console.error("Erro ao salvar no localStorage:", storageError);
+        }
       }
     } finally {
       setSalvando(false);
@@ -186,7 +191,7 @@ export default function NextFiapEvent() {
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [rodadaAtiva]);
 
-  // ✅ Loading inicial enquanto não está no cliente
+  // Loading enquanto não está no cliente
   if (!isClient) {
     return (
       <div className="bg-[#f5f6f8] min-h-screen">
@@ -206,7 +211,7 @@ export default function NextFiapEvent() {
       <div className="flex items-center justify-center min-h-screen bg-[#f5f6f8]">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Carregando...</p>
+          <p className="text-gray-600">Carregando usuário...</p>
         </div>
       </div>
     );
