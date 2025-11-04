@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Header from "../../components/Header";
 
-const API_BASE_URL = "https://passa-a-bola.onrender.com";
+const API_BASE_URL = "http://127.0.0.1:8000";
 
 export default function NextFiapEvent() {
   const [user, setUser] = useState(null);
@@ -18,11 +18,11 @@ export default function NextFiapEvent() {
   const [mostrarInputNome, setMostrarInputNome] = useState(false);
   const [nomeJogador, setNomeJogador] = useState("");
   const [isClient, setIsClient] = useState(false);
-  
+
   const pontosRef = useRef(0);
   const acertosRef = useRef(0);
   const chutesRestantesRef = useRef(5);
-  
+
   const router = useRouter();
 
   useEffect(() => {
@@ -30,8 +30,8 @@ export default function NextFiapEvent() {
   }, []);
 
   useEffect(() => {
-    if (isClient) {
-      const currentUser = localStorage.getItem("currentUser");
+    if (typeof window !== "undefined") {
+      const currentUser = window.localStorage.getItem("currentUser");
       if (currentUser) {
         try {
           const parsedUser = JSON.parse(currentUser);
@@ -61,12 +61,10 @@ export default function NextFiapEvent() {
     setAcertos(0);
     setMostrarResultado(false);
     setErro(null);
-    
+
     pontosRef.current = 0;
     acertosRef.current = 0;
     chutesRestantesRef.current = 5;
-
-    console.log(`Rodada iniciada para: ${nomeJogador}`);
   };
 
   const cancelarRodada = () => {
@@ -84,8 +82,6 @@ export default function NextFiapEvent() {
     setPontos(pontosRef.current);
     setAcertos(acertosRef.current);
     setChutesRestantes(chutesRestantesRef.current);
-
-    console.log(`Acerto registrado! Pontos: ${pontosRef.current}, Acertos: ${acertosRef.current}, Chutes restantes: ${chutesRestantesRef.current}`);
 
     if (chutesRestantesRef.current === 0) {
       setTimeout(() => {
@@ -109,21 +105,18 @@ export default function NextFiapEvent() {
           user_id: dados.userId,
           nome: dados.nome,
           pontos: dados.pontos,
-          acertos: dados.acertos
+          acertos: dados.acertos,
         }),
       });
 
       if (res.ok) {
-        const data = await res.json();
-        console.log('Pontos salvos no ranking:', data);
-        return data;
+        return await res.json();
       } else {
         const errorData = await res.json();
-        console.error('Erro ao salvar no ranking:', errorData);
-        throw new Error(errorData.detail || 'Erro ao salvar no ranking');
+        throw new Error(errorData.detail || "Erro ao salvar no ranking");
       }
     } catch (error) {
-      console.error('Erro ao salvar no ranking:', error);
+      console.error("Erro ao salvar no ranking:", error);
       throw error;
     }
   };
@@ -133,29 +126,20 @@ export default function NextFiapEvent() {
     setMostrarResultado(true);
     setSalvando(true);
     setErro(null);
-    
-    try {
-      const pontosFinais = pontosRef.current;
-      const acertosFinais = acertosRef.current;
-      
-      console.log(`FINALIZANDO RODADA: ${nomeJogador} - ${pontosFinais} pontos, ${acertosFinais} acertos`);
 
+    try {
       const resultado = {
         userId: user?.id,
         nome: nomeJogador,
-        pontos: pontosFinais,
-        acertos: acertosFinais
+        pontos: pontosRef.current,
+        acertos: acertosRef.current,
       };
-      
+
       await adicionarAoRanking(resultado);
-      console.log("Pontos salvos no Supabase com sucesso!");
-      
-    } catch (error) {
-      console.error("Erro ao salvar no Supabase:", error);
+    } catch {
       setErro("Erro ao salvar no ranking. Tente novamente.");
     } finally {
       setSalvando(false);
-      
       setTimeout(() => {
         router.push("/events/next-fiap/ranking");
       }, 3000);
@@ -164,27 +148,23 @@ export default function NextFiapEvent() {
 
   useEffect(() => {
     const handleKeyPress = (e) => {
-      if (e.key === ' ' && rodadaAtiva && chutesRestantesRef.current > 0) {
+      if (e.key === " " && rodadaAtiva && chutesRestantesRef.current > 0) {
         e.preventDefault();
         registrarAcerto();
       }
     };
 
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
+    if (typeof window !== "undefined") {
+      window.addEventListener("keydown", handleKeyPress);
+      return () => window.removeEventListener("keydown", handleKeyPress);
+    }
   }, [rodadaAtiva]);
 
-  // Loading enquanto não está no cliente
   if (!isClient) {
     return (
       <div className="bg-[#f5f6f8] min-h-screen">
         <Header name="NEXT Passa a Bola" />
-        <div className="pt-20 max-w-4xl mx-auto px-4 py-8">
-          <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Carregando...</p>
-          </div>
-        </div>
+        <div className="pt-20 text-center">Carregando...</div>
       </div>
     );
   }
@@ -192,10 +172,7 @@ export default function NextFiapEvent() {
   if (!user) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-[#f5f6f8]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Carregando usuário...</p>
-        </div>
+        <div className="text-center">Carregando usuário...</div>
       </div>
     );
   }

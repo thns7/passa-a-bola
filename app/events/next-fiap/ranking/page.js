@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Header from "../../../components/Header";
 
-const API_BASE_URL = "https://passa-a-bola.onrender.com";
+const API_BASE_URL = "http://127.0.0.1:8000";
 
 export default function NextFiapRanking() {
   const [ranking, setRanking] = useState([]);
@@ -19,12 +19,11 @@ export default function NextFiapRanking() {
   }, []);
 
   useEffect(() => {
-    if (isClient) {
-      const currentUser = localStorage.getItem("currentUser");
+    if (typeof window !== "undefined") {
+      const currentUser = window.localStorage.getItem("currentUser");
       if (currentUser) {
         try {
-          const parsedUser = JSON.parse(currentUser);
-          setUser(parsedUser);
+          setUser(JSON.parse(currentUser));
         } catch (error) {
           console.error("Erro ao parsear usuário:", error);
         }
@@ -34,56 +33,43 @@ export default function NextFiapRanking() {
 
   useEffect(() => {
     const carregarRanking = async () => {
-      if (!user || !isClient) return;
-      
+      if (!isClient) return;
+
       try {
         setCarregando(true);
-        setErro(null);
-
         const res = await fetch(`${API_BASE_URL}/api/ranking-next-fiap`);
-        
-        if (res.ok) {
-          const data = await res.json();
-          console.log('Ranking carregado:', data);
-          
-          if (data.success) {
-            setRanking(data.data || []);
-          } else {
-            throw new Error('Erro na resposta da API');
-          }
-        } else {
-          throw new Error('Erro ao carregar ranking do servidor');
-        }
 
-      } catch (error) {
-        console.error('Erro ao carregar ranking:', error);
-        setErro('Erro ao carregar ranking do servidor');
+        if (!res.ok) throw new Error("Erro no servidor");
+
+        const data = await res.json();
+
+        if (!data.success) throw new Error("Erro na resposta");
+
+        setRanking(data.data || []);
+      } catch (err) {
+        setErro("Erro ao carregar ranking");
       } finally {
         setCarregando(false);
       }
     };
 
     carregarRanking();
-  }, [user, isClient]);
+  }, [isClient]);
 
   const getPosicaoUsuario = () => {
     if (!user) return -1;
-    return ranking.findIndex(item => item.user_id === user.id);
+    return ranking.findIndex((item) => item.user_id === user.id);
   };
 
-  const usuarioAtual = user ? ranking.find(item => item.user_id === user.id) : null;
+  const usuarioAtual = user
+    ? ranking.find((item) => item.user_id === user.id)
+    : null;
 
-  // Se ainda não está no cliente, mostrar loading básico
   if (!isClient) {
     return (
       <div className="bg-[#f5f6f8] min-h-screen">
         <Header name="Ranking NEXT FIAP" />
-        <div className="pt-20 max-w-4xl mx-auto px-4 py-8">
-          <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Carregando...</p>
-          </div>
-        </div>
+        <div className="pt-20 text-center">Carregando...</div>
       </div>
     );
   }
