@@ -152,9 +152,10 @@ SUA PERSONALIDADE:
 
 SUAS FUNÇÕES PRINCIPAIS:
 1. Tirar dúvidas sobre como usar a plataforma Passa Bola
-2. Dar exemplos práticos de rotinas de treino
-3. Ensinar receitas nutritivas para atletas
+2. Dar exemplos práticos de rotinas de treino para jogadoras
+3. Ensinar receitas nutritivas para atletas do futebol feminino
 4. Falar sobre futebol feminino
+5. Dar dicas de nutrição esportiva específicas para mulheres atletas
 
 REGRAS IMPORTANTES:
 - NUNCA use asteriscos, markdown, negrito, itálico ou qualquer formatação
@@ -176,17 +177,73 @@ Compartilhe seus lances, fotos e vídeos. Clique no botão "+" no topo da tela p
 NO SEU PERFIL (ícone da pessoa):
 Seu perfil é seu portfólio digital. Acesse para editar suas informações, adicionar fotos e ver todos os posts que já fez.
 
-EXEMPLOS DE TREINO QUE POSSO SUGERIR:
-- Rotina de força inferior: agachamentos, afundos, levantamento terra
-- Treino técnico: domínio, passe, finalização, condução de bola
-- Treino de resistência: corridas intervaladas, fartlek
-- Descanso ativo: alongamento, mobilidade, recuperação
+ROTINAS DE TREINO PARA JOGADORAS:
 
-RECEITAS PRÁTICAS QUE POSSO ENSINAR:
-- Panqueca proteica pré-treino
-- Sanduíche recuperador pós-treino  
-- Vitamina energética
-- Bowl de frutas com granola
+TREINO DE FORÇA PARA MEMBROS INFERIORES (2x por semana):
+Agachamento livre 4 séries de 8-12 repetições
+Afundos com halteres 3 séries de 10-12 repetições por perna
+Elevação pélvica 4 séries de 12-15 repetições
+Cadeira extensora e flexora 3 séries de 12-15 repetições
+
+TREINO TÉCNICO DE FUTEBOL (3x por semana):
+Domínio de bola com ambas as pernas - 15 minutos
+Passe curto e longo - 20 minutos
+Finalização a gol - 15 minutos
+Condução de bola em zigue-zague - 10 minutos
+
+TREINO DE VELOCIDADE E AGILIDADE (2x por semana):
+Sprints de 20-30 metros - 8-10 repetições
+Exercícios de escada de agilidade - 15 minutos
+Mudanças de direção rápidas - 10 minutos
+Pliometria (saltos) - 12 minutos
+
+TREINO DE RESISTÊNCIA (1-2x por semana):
+Corridas intervaladas - 30 segundos rápido, 1 minuto lento
+Fartlek - variação de ritmo durante 30-40 minutos
+Corrida contínua em ritmo moderado - 25-35 minutos
+
+DICAS DE NUTRIÇÃO PARA ATLETAS:
+
+PRÉ-TREINO (1-2 horas antes):
+Panqueca proteica com aveia e banana
+Sanduíche de pão integral com frango e queijo
+Vitamina de banana com aveia e whey protein
+Iogurte natural com granola e mel
+
+PÓS-TREINO (até 30 minutos após):
+Sanduíche de pão integral com atum e queijo
+Vitamina de banana com whey protein e aveia
+Iogurte grego com frutas e mel
+Omelete com 2 ovos e pão integral
+
+RECEITAS PRÁTICAS:
+
+PANQUECA PRÉ-TREINO:
+2 colheres de aveia
+1 ovo
+1 banana amassada
+1 colher de whey protein (opcional)
+Misture tudo e faça na frigideira antiaderente
+
+VITAMINA RECUPERADORA:
+1 banana
+200ml de leite ou bebida vegetal
+1 colher de whey protein
+1 colher de aveia
+1 colher de mel
+Bata tudo no liquidificador
+
+SANDUÍCHE ENERGÉTICO:
+2 fatias de pão integral
+100g de peito de frango desfiado
+1 fatia de queijo branco
+Alface e tomate
+Pode adicionar abacate para gorduras boas
+
+HIDRATAÇÃO:
+Beba água durante todo o dia
+Durante treinos longos, use bebida isotônica caseira (água, sal, mel e limão)
+Após treino, reponha líquidos imediatamente
 
 Lembre-se: sou aqui para te ajudar de forma prática e direta!
 """
@@ -238,7 +295,20 @@ async def chat_with_passinha(request: ChatRequest):
         
         user_msg = request.message.lower()
         
-        if any(word in user_msg for word in ['plataforma', 'app', 'como funciona', 'como usar', 'dicas']):
+        # Respostas específicas para treino e nutrição
+        if any(word in user_msg for word in ['treino', 'exercício', 'treinar', 'prática']):
+            return ChatResponse(
+                response="Olá! Vamos falar de treino?\n\nPara jogadoras, recomendo:\n\nTreino de força 2x por semana com agachamentos, afundos e elevação pélvica.\n\nTreino técnico 3x por semana focado em domínio, passe e finalização.\n\nTreino de velocidade 2x por semana com sprints e exercícios de agilidade.\n\nE não esqueça do descanso! O corpo se fortalece quando descansa.\n\nQual tipo de treino te interessa mais?",
+                success=True
+            )
+        
+        elif any(word in user_msg for word in ['comida', 'alimentação', 'nutrição', 'dieta', 'receita']):
+            return ChatResponse(
+                response="Que bom que se preocupa com a nutrição!\n\nPara pré-treino: panqueca de aveia com banana ou sanduíche integral com frango.\n\nPara pós-treino: vitamina de banana com whey ou iogurte grego com frutas.\n\nHidratação é fundamental: beba água o dia todo e use isotônico caseiro em treinos longos.\n\nQuer uma receita específica ou dica de algum momento do treino?",
+                success=True
+            )
+        
+        elif any(word in user_msg for word in ['plataforma', 'app', 'como funciona', 'como usar', 'dicas']):
             return ChatResponse(
                 response="Olá! Que bom que quer explorar a plataforma!\n\nAqui estão as principais funcionalidades do Passa Bola:\n\nNa Página Principal você vê jogos ao vivo, próximas partidas e as últimas notícias do futebol feminino.\n\nNos Eventos encontra peneiras e competições. É só clicar no evento para ver detalhes e se inscrever.\n\nNa Comunidade pode compartilhar seus lances clicando no + e fazendo posts com fotos e vídeos.\n\nNo seu Perfil edita suas informações e vê todos os posts que já fez.\n\nQual parte te interessa mais? Posso explicar melhor!",
                 success=True
@@ -246,38 +316,26 @@ async def chat_with_passinha(request: ChatRequest):
         
         else:
             return ChatResponse(
-                response="Olá! Sou a Passinha, sua assistente do Passa Bola!\n\nPosso te ajudar com:\nDúvidas sobre a plataforma\nExemplos de treinos \nReceitas para atletas\nInformações sobre futebol feminino\n\nO que você precisa hoje?",
+                response="Olá! Sou a Passinha, sua assistente do Passa Bola!\n\nPosso te ajudar com:\nDúvidas sobre a plataforma\nRotinas de treino para jogadoras\nReceitas e nutrição para atletas\nInformações sobre futebol feminino\n\nO que você precisa hoje?",
                 success=True
             )
 
 
 #FUNÇÃO PARA LIMPAR A RESPOSTA DO GEMINI
 def clean_response_text(text):
-
     if not text:
         return "Desculpe, não consegui processar sua pergunta. Pode reformular?"
     
-    
     text = text.replace('**', '')
     text = text.replace('*', '')
-    
-    
     text = text.replace('•', '')
     text = text.replace('- ', '')
     
-    
     import re
     text = re.sub(r'^\d+\.\s*', '', text, flags=re.MULTILINE)
-    
-    
     text = re.sub(r'\n\s*\n', '\n\n', text)
-    
-    
     text = re.sub(r' +', ' ', text)
-    
-    
     text = text.strip()
-    
     
     if not text or len(text) < 10:
         return "Olá! Sou a Passinha. Posso te ajudar com dúvidas sobre a plataforma, treinos ou receitas para atletas. O que você gostaria de saber?"
