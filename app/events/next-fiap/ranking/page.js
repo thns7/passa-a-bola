@@ -11,18 +11,25 @@ export default function NextFiapRanking() {
   const [user, setUser] = useState(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState(null);
+  const [isClient, setIsClient] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isClient) return;
+
     const currentUser = localStorage.getItem("currentUser");
     if (currentUser) {
       setUser(JSON.parse(currentUser));
     }
-  }, []);
+  }, [isClient]);
 
   useEffect(() => {
     const carregarRanking = async () => {
-      if (!user) return;
+      if (!user || !isClient) return;
       
       try {
         setCarregando(true);
@@ -47,6 +54,7 @@ export default function NextFiapRanking() {
         console.error('Erro ao carregar ranking:', error);
         setErro('Erro ao carregar ranking do servidor');
         
+        // Fallback para localStorage
         const rankingLocal = JSON.parse(localStorage.getItem('ranking-next-fiap') || '[]');
         const rankingOrdenado = rankingLocal.sort((a, b) => (b.pontos || 0) - (a.pontos || 0));
         setRanking(rankingOrdenado);
@@ -56,7 +64,7 @@ export default function NextFiapRanking() {
     };
 
     carregarRanking();
-  }, [user]);
+  }, [user, isClient]);
 
   const getPosicaoUsuario = () => {
     if (!user) return -1;
@@ -64,6 +72,21 @@ export default function NextFiapRanking() {
   };
 
   const usuarioAtual = user ? ranking.find(item => item.user_id === user.id) : null;
+
+  // Se ainda não está no cliente, mostrar loading básico
+  if (!isClient) {
+    return (
+      <div className="bg-[#f5f6f8] min-h-screen">
+        <Header name="Ranking NEXT FIAP" />
+        <div className="pt-20 max-w-4xl mx-auto px-4 py-8">
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Carregando...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-[#f5f6f8] min-h-screen">

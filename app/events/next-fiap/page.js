@@ -17,6 +17,7 @@ export default function NextFiapEvent() {
   const [erro, setErro] = useState(null);
   const [mostrarInputNome, setMostrarInputNome] = useState(false);
   const [nomeJogador, setNomeJogador] = useState("");
+  const [isClient, setIsClient] = useState(false); // ✅ Novo estado para verificar se está no cliente
   
   const pontosRef = useRef(0);
   const acertosRef = useRef(0);
@@ -24,14 +25,22 @@ export default function NextFiapEvent() {
   
   const router = useRouter();
 
+  // ✅ Verificar se está no cliente
   useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // ✅ Modificado: Só acessar localStorage quando estiver no cliente
+  useEffect(() => {
+    if (!isClient) return;
+    
     const currentUser = localStorage.getItem("currentUser");
     if (currentUser) {
       const parsedUser = JSON.parse(currentUser);
       setUser(parsedUser);
       setNomeJogador(parsedUser.name || "");
     }
-  }, []);
+  }, [isClient]); // ✅ Adicionada dependência isClient
 
   const iniciarRodada = () => {
     setMostrarInputNome(true);
@@ -143,16 +152,19 @@ export default function NextFiapEvent() {
       console.error("Erro ao salvar no Supabase:", error);
       setErro("Erro ao salvar no ranking. Tente novamente.");
       
-      const rankingAtual = JSON.parse(localStorage.getItem('ranking-next-fiap') || '[]');
-      rankingAtual.push({
-        userId: user?.id,
-        nome: nomeJogador,
-        pontos: pontosRef.current,
-        acertos: acertosRef.current,
-        data: new Date().toISOString()
-      });
-      localStorage.setItem('ranking-next-fiap', JSON.stringify(rankingAtual));
-      console.log("Pontos salvos no localStorage (fallback)");
+      // ✅ Modificado: Só usar localStorage se estiver no cliente
+      if (isClient) {
+        const rankingAtual = JSON.parse(localStorage.getItem('ranking-next-fiap') || '[]');
+        rankingAtual.push({
+          userId: user?.id,
+          nome: nomeJogador,
+          pontos: pontosRef.current,
+          acertos: acertosRef.current,
+          data: new Date().toISOString()
+        });
+        localStorage.setItem('ranking-next-fiap', JSON.stringify(rankingAtual));
+        console.log("Pontos salvos no localStorage (fallback)");
+      }
     } finally {
       setSalvando(false);
       
@@ -173,6 +185,21 @@ export default function NextFiapEvent() {
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [rodadaAtiva]);
+
+  // ✅ Loading inicial enquanto não está no cliente
+  if (!isClient) {
+    return (
+      <div className="bg-[#f5f6f8] min-h-screen">
+        <Header name="NEXT Passa a Bola" />
+        <div className="pt-20 max-w-4xl mx-auto px-4 py-8">
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Carregando...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!user) {
     return (
