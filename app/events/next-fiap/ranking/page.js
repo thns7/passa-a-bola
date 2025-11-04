@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-//import Header from "../../../components/Header";
+import { Trash2 } from "lucide-react";
 
 const API_BASE_URL = "https://passa-a-bola.onrender.com";
 
@@ -12,6 +12,7 @@ export default function NextFiapRanking() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState(null);
   const [isClient, setIsClient] = useState(false);
+  const [excluindo, setExcluindo] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -23,7 +24,8 @@ export default function NextFiapRanking() {
       const currentUser = window.localStorage.getItem("currentUser");
       if (currentUser) {
         try {
-          setUser(JSON.parse(currentUser));
+          const userData = JSON.parse(currentUser);
+          setUser(userData);
         } catch (error) {
           console.error("Erro ao parsear usuário:", error);
         }
@@ -32,29 +34,62 @@ export default function NextFiapRanking() {
   }, [isClient]);
 
   useEffect(() => {
-    const carregarRanking = async () => {
-      if (!isClient) return;
-
-      try {
-        setCarregando(true);
-        const res = await fetch(`${API_BASE_URL}/api/ranking-next-fiap`);
-
-        if (!res.ok) throw new Error("Erro no servidor");
-
-        const data = await res.json();
-
-        if (!data.success) throw new Error("Erro na resposta");
-
-        setRanking(data.data || []);
-      } catch (err) {
-        setErro("Erro ao carregar ranking");
-      } finally {
-        setCarregando(false);
-      }
-    };
-
     carregarRanking();
   }, [isClient]);
+
+  const carregarRanking = async () => {
+    if (!isClient) return;
+
+    try {
+      setCarregando(true);
+      const res = await fetch(`${API_BASE_URL}/api/ranking-next-fiap`);
+
+      if (!res.ok) throw new Error("Erro no servidor");
+
+      const data = await res.json();
+
+      if (!data.success) throw new Error("Erro na resposta");
+
+      setRanking(data.data || []);
+    } catch (err) {
+      setErro("Erro ao carregar ranking");
+    } finally {
+      setCarregando(false);
+    }
+  };
+
+  const isAdmin = user && user.role === "admin";
+
+  const excluirDoRanking = async (userId, userName) => {
+    if (!isAdmin) return;
+    
+    if (!confirm(`Tem certeza que deseja excluir ${userName} do ranking?`)) {
+      return;
+    }
+
+    try {
+      setExcluindo(userId);
+      setErro(null);
+
+      const res = await fetch(`${API_BASE_URL}/api/ranking-next-fiap/${userId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!res.ok) throw new Error("Erro ao excluir do ranking");
+
+      setRanking(prevRanking => prevRanking.filter(item => item.user_id !== userId));
+      await carregarRanking();
+      
+    } catch (err) {
+      setErro("Erro ao excluir do ranking");
+      console.error("Erro ao excluir:", err);
+    } finally {
+      setExcluindo(null);
+    }
+  };
 
   const getPosicaoUsuario = () => {
     if (!user) return -1;
@@ -107,10 +142,31 @@ export default function NextFiapRanking() {
               </p>
             </div>
           </div>
+
+          {isAdmin && (
+            <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <p className="text-yellow-700 font-semibold">
+                ⚠ Modo Administrador Ativo
+              </p>
+              <p className="text-yellow-600 text-sm">
+                Você pode excluir jogadores do ranking
+              </p>
+            </div>
+          )}
         </div>
 
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-          <h2 className="text-2xl font-bold mb-4 text-center">Classificação</h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-bold text-center flex-1">Classificação</h2>
+            {isAdmin && (
+              <button
+                onClick={carregarRanking}
+                className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition transform hover:scale-105 text-sm"
+              >
+                Atualizar Ranking
+              </button>
+            )}
+          </div>
           
           {carregando ? (
             <div className="text-center py-8">
@@ -130,7 +186,7 @@ export default function NextFiapRanking() {
                       : "bg-white border-gray-100"
                   } ${player.user_id === user?.id ? 'scale-105' : ''}`}
                 >
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-4 flex-1">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${
                       index === 0 ? "bg-yellow-400 text-white shadow-lg" :
                       index === 1 ? "bg-gray-400 text-white shadow-md" :
@@ -140,7 +196,7 @@ export default function NextFiapRanking() {
                     }`}>
                       {index + 1}
                     </div>
-                    <div>
+                    <div className="flex-1">
                       <p className={`font-semibold text-lg ${
                         player.user_id === user?.id ? "text-purple-700" : "text-gray-800"
                       }`}>
@@ -151,12 +207,30 @@ export default function NextFiapRanking() {
                       </p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-2xl font-bold text-purple-700">
-                      {player.pontos || 0} pts
-                    </p>
-                    {index === 0 && (
-                      <p className="text-xs text-yellow-600 font-bold mt-1">LÍDER</p>
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <p className="text-2xl font-bold text-purple-700">
+                        {player.pontos || 0} pts
+                      </p>
+                      {index === 0 && (
+                        <p className="text-xs text-yellow-600 font-bold mt-1">LÍDER</p>
+                      )}
+                    </div>
+                    
+                    {/* BOTÃO DE EXCLUSÃO COM ÍCONE LUCIDE */}
+                    {isAdmin && (
+                      <button
+                        onClick={() => excluirDoRanking(player.user_id, player.nome)}
+                        disabled={excluindo === player.user_id}
+                        className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                        title={`Excluir ${player.nome} do ranking`}
+                      >
+                        {excluindo === player.user_id ? (
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mx-auto"></div>
+                        ) : (
+                          <Trash2 size={18} />
+                        )}
+                      </button>
                     )}
                   </div>
                 </div>
