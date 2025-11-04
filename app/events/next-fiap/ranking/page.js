@@ -3,27 +3,15 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Header from "../../../components/Header";
-import { createClient } from '@supabase/supabase-js';
 
-// ✅ CORRETO: Use variáveis públicas no cliente
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const API_BASE_URL = "https://passa-a-bola.onrender.com";
 
 export default function NextFiapRanking() {
   const [ranking, setRanking] = useState([]);
   const [user, setUser] = useState(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState(null);
-  const [supabase, setSupabase] = useState(null);
   const router = useRouter();
-
-  // ✅ CORRETO: Inicializar Supabase apenas no cliente
-  useEffect(() => {
-    if (supabaseUrl && supabaseAnonKey) {
-      const client = createClient(supabaseUrl, supabaseAnonKey);
-      setSupabase(client);
-    }
-  }, []);
 
   useEffect(() => {
     const currentUser = localStorage.getItem("currentUser");
@@ -34,37 +22,41 @@ export default function NextFiapRanking() {
 
   useEffect(() => {
     const carregarRanking = async () => {
-      if (!user || !supabase) return;
+      if (!user) return;
       
       try {
         setCarregando(true);
         setErro(null);
 
-        // Buscar ranking do Supabase
-        const { data, error } = await supabase
-          .from('ranking_next_fiap')
-          .select('*')
-          .order('pontos', { ascending: false });
-
-        if (error) {
-          console.error('Erro ao carregar ranking:', error);
-          setErro('Erro ao carregar ranking');
-          return;
+        const res = await fetch(`${API_BASE_URL}/api/ranking-next-fiap`);
+        
+        if (res.ok) {
+          const data = await res.json();
+          console.log('Ranking carregado:', data);
+          
+          if (data.success) {
+            setRanking(data.data || []);
+          } else {
+            throw new Error('Erro na resposta da API');
+          }
+        } else {
+          throw new Error('Erro ao carregar ranking do servidor');
         }
-
-        console.log('Ranking carregado:', data);
-        setRanking(data || []);
 
       } catch (error) {
         console.error('Erro ao carregar ranking:', error);
-        setErro('Erro ao carregar ranking');
+        setErro('Erro ao carregar ranking do servidor');
+        
+        const rankingLocal = JSON.parse(localStorage.getItem('ranking-next-fiap') || '[]');
+        const rankingOrdenado = rankingLocal.sort((a, b) => (b.pontos || 0) - (a.pontos || 0));
+        setRanking(rankingOrdenado);
       } finally {
         setCarregando(false);
       }
     };
 
     carregarRanking();
-  }, [user, supabase]);
+  }, [user]);
 
   const getPosicaoUsuario = () => {
     if (!user) return -1;
@@ -73,30 +65,17 @@ export default function NextFiapRanking() {
 
   const usuarioAtual = user ? ranking.find(item => item.user_id === user.id) : null;
 
-  // ✅ Mostrar loading enquanto Supabase não carrega
-  if (!supabase) {
-    return (
-      <div className="bg-[#f5f6f8] min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Inicializando...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="bg-[#f5f6f8] min-h-screen">
       <Header name="Ranking NEXT FIAP" />
       
       <main className="pt-20 max-w-4xl mx-auto px-4 py-8">
-        {/* Cabeçalho do Ranking */}
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 text-center">
           <h1 className="text-3xl font-bold text-purple-800 mb-2">
-            🏆 Ranking NEXT Passa a Bola
+            Ranking NEXT Passa a Bola
           </h1>
           <p className="text-gray-600 mb-4">
-            Cada acerto = 10 pontos • 3 chutes por rodada
+            Cada acerto = 10 pontos • 5 chutes por rodada
           </p>
           
           {erro && (
@@ -131,9 +110,8 @@ export default function NextFiapRanking() {
           </div>
         </div>
 
-        {/* Ranking */}
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-          <h2 className="text-2xl font-bold mb-4 text-center">📊 Classificação</h2>
+          <h2 className="text-2xl font-bold mb-4 text-center">Classificação</h2>
           
           {carregando ? (
             <div className="text-center py-8">
@@ -179,7 +157,7 @@ export default function NextFiapRanking() {
                       {player.pontos || 0} pts
                     </p>
                     {index === 0 && (
-                      <p className="text-xs text-yellow-600 font-bold mt-1">🏆 LÍDER</p>
+                      <p className="text-xs text-yellow-600 font-bold mt-1">LÍDER</p>
                     )}
                   </div>
                 </div>
@@ -187,39 +165,36 @@ export default function NextFiapRanking() {
             </div>
           ) : (
             <div className="text-center py-12">
-              <div className="text-6xl mb-4 text-gray-300">📊</div>
               <h3 className="text-xl font-bold text-gray-700 mb-2">Ranking Vazio</h3>
               <p className="text-gray-500 mb-6">Seja o primeiro a participar do desafio!</p>
               <button
                 onClick={() => router.push("/events/next-fiap")}
                 className="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg transition transform hover:scale-105"
               >
-                🎯 Participar do Desafio
+                Participar do Desafio
               </button>
             </div>
           )}
         </div>
 
-        {/* Botões de Ação */}
         <div className="flex flex-col sm:flex-row gap-4">
           <button
             onClick={() => router.push("/events/next-fiap")}
             className="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-lg transition transform hover:scale-105 text-lg"
           >
-            🎯 Fazer Outra Rodada
+            Fazer Outra Rodada
           </button>
           <button
             onClick={() => router.push("/events")}
             className="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-4 rounded-lg transition transform hover:scale-105 text-lg"
           >
-            📅 Voltar aos Eventos
+            Voltar aos Eventos
           </button>
         </div>
 
-        {/* Informações */}
         <div className="text-center mt-8 text-gray-500 text-sm">
-          <p>⚡ Ranking atualizado automaticamente a cada rodada</p>
-          <p>🏆 Vencedor será anunciado no final do NEXT FIAP!</p>
+          <p>Ranking atualizado automaticamente a cada rodada</p>
+          <p>Vencedor será anunciado no final do NEXT FIAP!</p>
           {usuarioAtual && (
             <p className="mt-2 text-purple-600 font-semibold">
               Sua melhor pontuação: <strong>{usuarioAtual.pontos || 0} pontos</strong>

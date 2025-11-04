@@ -330,24 +330,63 @@ export default function CommunityPage() {
     }
   };
 
-  const handleDeletePost = async (postId) => {
-    if (!confirm("Tem certeza que deseja excluir esta publicação?")) return;
-
-    try {
-      const res = await fetch(`${API_BASE_URL}/posts/${postId}`, {
+  // Nova função para deletar arquivos do Supabase Storage
+const deleteFileFromStorage = async (fileUrl) => {
+  try {
+    // Extrair o nome do arquivo da URL
+    const fileName = fileUrl.split('/').pop();
+    
+    if (fileName) {
+      const res = await fetch(`${API_BASE_URL}/upload/${fileName}`, {
         method: "DELETE"
       });
-
+      
       if (res.ok) {
-        setPosts(posts.filter(post => post.id !== postId));
+        console.log(`Arquivo ${fileName} deletado do storage com sucesso`);
       } else {
-        throw new Error("Erro ao excluir post");
+        console.warn(`Não foi possível deletar o arquivo ${fileName} do storage`);
       }
-    } catch (error) {
-      console.error("Erro ao deletar post:", error);
-      alert("Erro ao excluir publicação. Tente novamente.");
     }
-  };
+  } catch (error) {
+    console.error("Erro ao deletar arquivo do storage:", error);
+    // Não interromper o fluxo principal se houver erro no delete do storage
+  }
+};
+
+const handleDeletePost = async (postId) => {
+  if (!confirm("Tem certeza que deseja excluir esta publicação?")) return;
+
+  try {
+    // Primeiro, buscar o post para obter as URLs dos arquivos
+    const postToDelete = posts.find(post => post.id === postId);
+    
+    if (postToDelete) {
+      // Se o post tem imagem, deletar do storage
+      if (postToDelete.image) {
+        await deleteFileFromStorage(postToDelete.image);
+      }
+      
+      // Se o post tem vídeo, deletar do storage
+      if (postToDelete.video) {
+        await deleteFileFromStorage(postToDelete.video);
+      }
+    }
+
+    // Depois deletar o post do banco de dados
+    const res = await fetch(`${API_BASE_URL}/posts/${postId}`, {
+      method: "DELETE"
+    });
+
+    if (res.ok) {
+      setPosts(posts.filter(post => post.id !== postId));
+    } else {
+      throw new Error("Erro ao excluir post");
+    }
+  } catch (error) {
+    console.error("Erro ao deletar post:", error);
+    alert("Erro ao excluir publicação. Tente novamente.");
+  }
+};
 
   const handleEditPost = async (postId) => {
     if (!editText.trim()) return;

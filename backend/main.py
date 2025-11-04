@@ -283,6 +283,81 @@ def clean_response_text(text):
         return "Olá! Sou a Passinha. Posso te ajudar com dúvidas sobre a plataforma, treinos ou receitas para atletas. O que você gostaria de saber?"
     
     return text
+
+# Rotas para o ranking do NEXT FIAP
+@app.post("/api/ranking-next-fiap")
+async def add_to_ranking_next_fiap(ranking_data: dict):
+    """Adiciona pontuação ao ranking do NEXT FIAP"""
+    try:
+        # Verificar se o usuário existe
+        user_result = supabase.table("users").select("id, name").eq("id", ranking_data.get("user_id")).execute()
+        if not user_result.data:
+            raise HTTPException(status_code=404, detail="Usuário não encontrado")
+
+        # Preparar dados para inserção
+        insert_data = {
+            "user_id": ranking_data.get("user_id"),
+            "nome": ranking_data.get("nome"),
+            "pontos": ranking_data.get("pontos", 0),
+            "acertos": ranking_data.get("acertos", 0),
+            "created_at": datetime.now().isoformat()
+        }
+
+        # Inserir no ranking
+        result = supabase.table("ranking_next_fiap").insert(insert_data).execute()
+        
+        if not result.data:
+            raise HTTPException(status_code=400, detail="Erro ao salvar no ranking")
+            
+        return {
+            "success": True,
+            "message": "Pontuação salva no ranking",
+            "data": result.data[0]
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro interno: {str(e)}")
+
+@app.get("/api/ranking-next-fiap")
+async def get_ranking_next_fiap():
+    """Busca o ranking completo do NEXT FIAP"""
+    try:
+        result = supabase.table("ranking_next_fiap")\
+            .select("*")\
+            .order("pontos", desc=True)\
+            .order("created_at", desc=True)\
+            .execute()
+        
+        return {
+            "success": True,
+            "data": result.data,
+            "count": len(result.data)
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao buscar ranking: {str(e)}")
+
+@app.get("/api/ranking-next-fiap/user/{user_id}")
+async def get_user_ranking(user_id: str):
+    """Busca as pontuações de um usuário específico"""
+    try:
+        result = supabase.table("ranking_next_fiap")\
+            .select("*")\
+            .eq("user_id", user_id)\
+            .order("pontos", desc=True)\
+            .order("created_at", desc=True)\
+            .execute()
+        
+        return {
+            "success": True,
+            "data": result.data,
+            "count": len(result.data)
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao buscar ranking do usuário: {str(e)}")
     
 # Rotas de autenticação
 @app.post("/register")
