@@ -58,17 +58,6 @@ export default function NextFiapRanking() {
       } catch (error) {
         console.error('Erro ao carregar ranking:', error);
         setErro('Erro ao carregar ranking do servidor');
-        
-        // Fallback para localStorage
-        if (isClient) {
-          try {
-            const rankingLocal = JSON.parse(localStorage.getItem('ranking-next-fiap') || '[]');
-            const rankingOrdenado = rankingLocal.sort((a, b) => (b.pontos || 0) - (a.pontos || 0));
-            setRanking(rankingOrdenado);
-          } catch (storageError) {
-            console.error("Erro ao carregar do localStorage:", storageError);
-          }
-        }
       } finally {
         setCarregando(false);
       }

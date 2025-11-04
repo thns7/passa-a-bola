@@ -153,23 +153,6 @@ export default function NextFiapEvent() {
     } catch (error) {
       console.error("Erro ao salvar no Supabase:", error);
       setErro("Erro ao salvar no ranking. Tente novamente.");
-      
-      if (isClient) {
-        try {
-          const rankingAtual = JSON.parse(localStorage.getItem('ranking-next-fiap') || '[]');
-          rankingAtual.push({
-            userId: user?.id,
-            nome: nomeJogador,
-            pontos: pontosRef.current,
-            acertos: acertosRef.current,
-            data: new Date().toISOString()
-          });
-          localStorage.setItem('ranking-next-fiap', JSON.stringify(rankingAtual));
-          console.log("Pontos salvos no localStorage (fallback)");
-        } catch (storageError) {
-          console.error("Erro ao salvar no localStorage:", storageError);
-        }
-      }
     } finally {
       setSalvando(false);
       
