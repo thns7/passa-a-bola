@@ -1,7 +1,15 @@
 <div align="center">
 
 # ⚽ **Passa Bola App**  
-**Acompanhe o melhor do Futebol Feminino!**  
+**Acompanhe o melhor do Futebol Feminino!**
+
+## Equipe (Sala: 1ESPZ)
+- **Enzo Ozzioli** - RM 564812  
+- **Thiago Nascimento** - RM 561967  
+- **Vinicius Herreira** - RM 565662  
+- **Gustavo Rocha** - RM 564152  
+- **Gabriel Santos** - RM 562419  
+
 
 <img src="https://i.ibb.co/DfDRJNq9/imagem-2025-10-24-220611093.png" alt="Banner do Passa Bola" width="100%"/>
 
