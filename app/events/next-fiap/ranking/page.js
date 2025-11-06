@@ -61,35 +61,60 @@ export default function NextFiapRanking() {
   const isAdmin = user && user.role === "admin";
 
   const excluirDoRanking = async (userId, userName) => {
-    if (!isAdmin) return;
+  if (!isAdmin) return;
+  
+  if (!confirm(`Tem certeza que deseja excluir ${userName} do ranking?`)) {
+    return;
+  }
+
+  try {
+    setExcluindo(userId);
+    setErro(null);
+
+    console.log('Tentando excluir usuário:', userId);
+
+    const res = await fetch(`${API_BASE_URL}/api/ranking-next-fiap/${userId}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    console.log('Status da resposta:', res.status);
+    console.log('Resposta OK?', res.ok);
+
     
-    if (!confirm(`Tem certeza que deseja excluir ${userName} do ranking?`)) {
-      return;
+    if (!res.ok) {
+      let errorMessage = "Erro ao excluir do ranking";
+      try {
+        const errorData = await res.json();
+        errorMessage = errorData.detail || errorData.error || errorMessage;
+        console.log('Dados do erro:', errorData);
+      } catch (parseError) {
+        console.log('Não foi possível parsear erro:', parseError);
+        errorMessage = `Erro ${res.status}: ${res.statusText}`;
+      }
+      throw new Error(errorMessage);
     }
 
-    try {
-      setExcluindo(userId);
-      setErro(null);
+    
+    const data = await res.json();
+    console.log('Resposta de sucesso:', data);
 
-      const res = await fetch(`${API_BASE_URL}/api/ranking-next-fiap/${userId}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!res.ok) throw new Error("Erro ao excluir do ranking");
-
-      setRanking(prevRanking => prevRanking.filter(item => item.user_id !== userId));
-      await carregarRanking();
-      
-    } catch (err) {
-      setErro("Erro ao excluir do ranking");
-      console.error("Erro ao excluir:", err);
-    } finally {
-      setExcluindo(null);
-    }
-  };
+    
+    setRanking(prevRanking => prevRanking.filter(item => item.user_id !== userId));
+    
+    
+    setErro(`${userName} excluído do ranking com sucesso!`);
+    setTimeout(() => setErro(null), 3000);
+    
+  } catch (err) {
+    console.error("Erro completo ao excluir:", err);
+    setErro("Erro ao excluir do ranking: " + err.message);
+  } finally {
+    setExcluindo(null);
+  }
+};
 
   const getPosicaoUsuario = () => {
     if (!user) return -1;

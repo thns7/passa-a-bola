@@ -4,6 +4,23 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Header from "../components/Header";
 import BottomNav from "../components/BottomNav";
+import { 
+  Trophy, 
+  Calendar, 
+  MapPin, 
+  DollarSign, 
+  Users, 
+  Star, 
+  Crown,
+  Target,
+  TrendingUp,
+  Clock,
+  Building,
+  Award,
+  Zap,
+  ArrowRight,
+  Swords
+} from "lucide-react";
 
 export default function HomePage() {
   const [user, setUser] = useState(null);
@@ -28,11 +45,9 @@ export default function HomePage() {
       try {
         setLoading(true);
         
-        
         const API_BASE_URL = process.env.NODE_ENV === 'development' 
           ? 'http://localhost:8000' 
           : 'https://passa-a-bola.onrender.com';
-        
         
         const response = await fetch(`${API_BASE_URL}/api/events`);
         
@@ -60,7 +75,6 @@ export default function HomePage() {
       }
     }
 
-    
     async function loadMockData() {
       try {
         const res = await fetch("/data/db.json");
@@ -98,7 +112,6 @@ export default function HomePage() {
     }
   };
 
-  
   const formatarHora = (horaISO) => {
     if (!horaISO) return '';
     
@@ -108,7 +121,6 @@ export default function HomePage() {
     return horaISO; 
   };
 
-  
   const getEventoData = (evento) => {
     return {
       id: evento.id,
@@ -147,7 +159,6 @@ export default function HomePage() {
     );
   }
 
- 
   const eventoNextFiap = eventos.find(ev => ev.id === "next-fiap") || 
                         { 
                           id: "next-fiap", 
@@ -159,7 +170,6 @@ export default function HomePage() {
                           categoria: "DESAFIO ESPECIAL",
                           img: "/next-fiap-banner.jpg"
                         };
-
 
   const outrosEventos = eventos.filter(ev => ev.id !== "next-fiap");
 
@@ -177,7 +187,10 @@ export default function HomePage() {
               <span className="w-3 h-8 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full mr-3"></span>
               Evento em Destaque
             </h2>
-            <span className="text-gray-500 text-sm bg-white px-3 py-1 rounded-full border">🔥 ESPECIAL</span>
+            <span className="text-gray-500 text-sm bg-white px-3 py-1 rounded-full border flex items-center gap-1">
+              <Zap size={14} />
+              ESPECIAL
+            </span>
           </div>
           
           {/* Card Destaque NEXT FIAP */}
@@ -193,17 +206,19 @@ export default function HomePage() {
                 {/* Imagem */}
                 <div className="flex-shrink-0">
                   <div className="w-24 h-24 bg-white/20 rounded-2xl flex items-center justify-center shadow-lg">
-                    <span className="text-4xl">⚽</span>
+                    <Trophy size={40} className="text-white" />
                   </div>
                 </div>
                 
                 {/* Conteúdo */}
                 <div className="flex-1 text-center md:text-left">
                   <div className="flex items-center justify-center md:justify-start gap-3 mb-3">
-                    <span className="bg-yellow-400 text-purple-800 px-4 py-1 rounded-full text-sm font-bold animate-pulse">
+                    <span className="bg-yellow-400 text-purple-800 px-4 py-1 rounded-full text-sm font-bold animate-pulse flex items-center gap-1">
+                      <Target size={14} />
                       DESAFIO EXCLUSIVO
                     </span>
-                    <span className="bg-white/30 text-white px-3 py-1 rounded-full text-xs">
+                    <span className="bg-white/30 text-white px-3 py-1 rounded-full text-xs flex items-center gap-1">
+                      <TrendingUp size={12} />
                       NEXT FIAP 2025
                     </span>
                   </div>
@@ -214,15 +229,15 @@ export default function HomePage() {
                   
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <div className="flex items-center justify-center md:justify-start text-white/90">
-                      <span className="w-5 h-5 mr-2">📍</span>
+                      <MapPin size={18} className="mr-2" />
                       <span>{eventoNextFiap.local}</span>
                     </div>
                     <div className="flex items-center justify-center md:justify-start text-white/90">
-                      <span className="w-5 h-5 mr-2">📅</span>
+                      <Calendar size={18} className="mr-2" />
                       <span>{eventoNextFiap.data} • {eventoNextFiap.hora}</span>
                     </div>
                     <div className="flex items-center justify-center md:justify-start text-white/90">
-                      <span className="w-5 h-5 mr-2">💰</span>
+                      <DollarSign size={18} className="mr-2" />
                       <span className="font-bold text-yellow-300">{eventoNextFiap.valor}</span>
                     </div>
                   </div>
@@ -233,15 +248,16 @@ export default function HomePage() {
                       onClick={() => handleEventClick(eventoNextFiap)}
                       className="bg-white text-purple-600 px-8 py-4 rounded-xl font-bold text-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 shadow-lg flex items-center justify-center group/btn"
                     >
-                      <span>🎯 Começar Desafio</span>
-                      <span className="ml-2 group-hover/btn:translate-x-1 transition-transform">→</span>
+                      <span>Começar Desafio</span>
+                      <ArrowRight size={20} className="ml-2 group-hover/btn:translate-x-1 transition-transform" />
                     </button>
                     
                     <button
                       onClick={() => router.push("/events/next-fiap/ranking")}
                       className="bg-white/20 text-white border-2 border-white/30 px-6 py-4 rounded-xl font-bold text-lg hover:bg-white/30 transform hover:-translate-y-1 transition-all duration-300 flex items-center justify-center group/btn2"
                     >
-                      <span>🏆 Ver Ranking</span>
+                      <Trophy size={20} className="mr-2" />
+                      <span>Ver Ranking</span>
                     </button>
                   </div>
                 </div>
@@ -257,8 +273,9 @@ export default function HomePage() {
               <span className="w-3 h-8 bg-[var(--primary-color)] rounded-full mr-3"></span>
               Outros Eventos
             </h2>
-            <span className="text-gray-500 text-sm bg-white px-3 py-1 rounded-full border">
-              📅 {outrosEventos.length} Eventos
+            <span className="text-gray-500 text-sm bg-white px-3 py-1 rounded-full border flex items-center gap-1">
+              <Calendar size={14} />
+              {outrosEventos.length} Eventos
             </span>
           </div>
           
@@ -277,7 +294,8 @@ export default function HomePage() {
                         alt={evento.titulo}
                         className="h-48 w-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />
-                      <div className="absolute top-3 left-3 bg-[var(--primary-color)] text-white px-3 py-1 rounded-full text-xs font-bold">
+                      <div className="absolute top-3 left-3 bg-[var(--primary-color)] text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                        <Star size={12} />
                         {evento.categoria || "EVENTO"}
                       </div>
                       <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -287,21 +305,21 @@ export default function HomePage() {
                       <h3 className="font-bold text-gray-800 text-lg mb-2 line-clamp-2">{evento.titulo}</h3>
                       <div className="space-y-2 mb-4">
                         <div className="flex items-center text-gray-600 text-sm">
-                          <span className="w-4 h-4 mr-2">📍</span>
+                          <MapPin size={16} className="mr-2" />
                           <span className="line-clamp-1">{evento.local}</span>
                         </div>
                         <div className="flex items-center text-gray-600 text-sm">
-                          <span className="w-4 h-4 mr-2">📅</span>
+                          <Calendar size={16} className="mr-2" />
                           <span>{evento.data} • {evento.hora}</span>
                         </div>
                         <div className="flex items-center text-gray-600 text-sm">
-                          <span className="w-4 h-4 mr-2">💰</span>
+                          <DollarSign size={16} className="mr-2" />
                           <span className="font-semibold text-green-600">{evento.valor}</span>
                         </div>
                         {/* Mostra vagas disponíveis se vier da API */}
                         {ev.max_inscricoes && (
                           <div className="flex items-center text-gray-600 text-sm">
-                            <span className="w-4 h-4 mr-2">👥</span>
+                            <Users size={16} className="mr-2" />
                             <span>
                               {ev.inscricoes_atuais || 0}/{ev.max_inscricoes} vagas
                             </span>
@@ -314,7 +332,7 @@ export default function HomePage() {
                         className="w-full bg-gradient-to-r from-[var(--primary-color)] to-purple-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300 flex items-center justify-center group/btn"
                       >
                         <span>Inscreva-se</span>
-                        <span className="ml-2 group-hover/btn:translate-x-1 transition-transform">→</span>
+                        <ArrowRight size={18} className="ml-2 group-hover/btn:translate-x-1 transition-transform" />
                       </button>
                     </div>
                   </div>
@@ -323,7 +341,7 @@ export default function HomePage() {
             </div>
           ) : (
             <div className="bg-white rounded-2xl border-2 border-dashed border-gray-300 p-8 text-center">
-              <div className="text-6xl mb-4 text-gray-400">📅</div>
+              <Calendar size={48} className="mx-auto mb-4 text-gray-400" />
               <h3 className="text-xl font-bold text-gray-700 mb-2">Nenhum evento disponível</h3>
               <p className="text-gray-500">Novos eventos em breve!</p>
             </div>
@@ -337,8 +355,9 @@ export default function HomePage() {
               <span className="w-3 h-8 bg-yellow-500 rounded-full mr-3"></span>
               Copa Premium
             </h2>
-            <span className="text-gray-500 text-sm bg-white px-3 py-1 rounded-full border">
-              🏆 {copas.length > 0 ? 'Exclusiva' : 'Em Breve'}
+            <span className="text-gray-500 text-sm bg-white px-3 py-1 rounded-full border flex items-center gap-1">
+              <Crown size={14} />
+              {copas.length > 0 ? 'Exclusiva' : 'Em Breve'}
             </span>
           </div>
           
@@ -356,7 +375,7 @@ export default function HomePage() {
                   <div className="relative z-10 p-6">
                     <div className="flex items-center mb-4">
                       <div className="w-16 h-16 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center mr-4 shadow-lg">
-                        <span className="text-3xl">🏆</span>
+                        <Trophy size={32} className="text-white" />
                       </div>
                       <div>
                         <h3 className="font-bold text-gray-800 text-2xl">{copa.titulo}</h3>
@@ -366,29 +385,29 @@ export default function HomePage() {
                     
                     <div className="space-y-3 mb-6">
                       <div className="flex items-center text-gray-700">
-                        <span className="w-5 h-5 mr-2 text-gray-500">📍</span>
+                        <MapPin size={16} className="mr-2 text-gray-500" />
                         <span className="text-sm">{copa.local}</span>
                       </div>
                       <div className="flex items-center text-gray-700">
-                        <span className="w-5 h-5 mr-2 text-gray-500">📅</span>
+                        <Calendar size={16} className="mr-2 text-gray-500" />
                         <span className="text-sm">{copa.data} • {copa.hora}</span>
                       </div>
                       <div className="flex items-center text-gray-700">
-                        <span className="w-5 h-5 mr-2 text-gray-500">💰</span>
+                        <DollarSign size={16} className="mr-2 text-gray-500" />
                         <span className="text-sm font-bold text-green-600">{copa.valor}</span>
                       </div>
                       <div className="flex items-center text-gray-700">
-                        <span className="w-5 h-5 mr-2 text-gray-500">⭐</span>
+                        <Award size={16} className="mr-2 text-gray-500" />
                         <span className="text-sm">Premiação: R$ 2.000 para o campeão</span>
                       </div>
                     </div>
 
                     <button
                       onClick={() => router.push(`/events/${c.id}/inscricao`)}
-                      className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white py-4 rounded-xl font-bold hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300 group/btn shadow-md text-lg"
+                      className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white py-4 rounded-xl font-bold hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300 group/btn shadow-md text-lg flex items-center justify-center"
                     >
                       <span>Participar da Copa</span>
-                      <span className="ml-2 group-hover/btn:scale-110 transition-transform">⚔️</span>
+                      <Swords size={20} className="ml-2 group-hover/btn:scale-110 transition-transform" />
                     </button>
                   </div>
                 </div>
@@ -397,7 +416,7 @@ export default function HomePage() {
             
             {copas.length === 0 && (
               <div className="bg-white rounded-2xl border-2 border-dashed border-yellow-300 p-8 text-center">
-                <div className="text-6xl mb-4 text-yellow-400">🏆</div>
+                <Trophy size={48} className="mx-auto mb-4 text-yellow-400" />
                 <h3 className="text-xl font-bold text-gray-700 mb-2">Nova Copa em Breve</h3>
                 <p className="text-gray-500">Estamos preparando uma copa especial para você!</p>
               </div>
@@ -412,8 +431,9 @@ export default function HomePage() {
               <span className="w-3 h-8 bg-[var(--primary-color)] rounded-full mr-3"></span>
               Peneiras Profissionais
             </h2>
-            <span className="text-gray-500 text-sm bg-white px-3 py-1 rounded-full border">
-              ⭐ {peneiras.length} Oportunidades
+            <span className="text-gray-500 text-sm bg-white px-3 py-1 rounded-full border flex items-center gap-1">
+              <Star size={14} />
+              {peneiras.length} Oportunidades
             </span>
           </div>
           
@@ -425,31 +445,31 @@ export default function HomePage() {
                     <tr className="bg-gradient-to-r from-[var(--primary-color)] to-purple-600">
                       <th className="p-4 md:p-6 text-left text-white font-bold text-sm md:text-base">
                         <div className="flex items-center">
-                          <span className="mr-2">🏛️</span>
+                          <Building size={16} className="mr-2" />
                           Clube
                         </div>
                       </th>
                       <th className="p-4 md:p-6 text-left text-white font-bold text-sm md:text-base">
                         <div className="flex items-center">
-                          <span className="mr-2">📅</span>
+                          <Calendar size={16} className="mr-2" />
                           Data
                         </div>
                       </th>
                       <th className="p-4 md:p-6 text-left text-white font-bold text-sm md:text-base">
                         <div className="flex items-center">
-                          <span className="mr-2">👥</span>
+                          <Users size={16} className="mr-2" />
                           Idade
                         </div>
                       </th>
                       <th className="p-4 md:p-6 text-left text-white font-bold text-sm md:text-base">
                         <div className="flex items-center">
-                          <span className="mr-2">📍</span>
+                          <MapPin size={16} className="mr-2" />
                           Local
                         </div>
                       </th>
                       <th className="p-4 md:p-6 text-left text-white font-bold text-sm md:text-base">
                         <div className="flex items-center">
-                          <span className="mr-2">💰</span>
+                          <DollarSign size={16} className="mr-2" />
                           Valor
                         </div>
                       </th>
@@ -466,7 +486,7 @@ export default function HomePage() {
                         <td className="p-4 md:p-6 text-gray-800 font-semibold">
                           <div className="flex items-center">
                             <div className="w-8 h-8 bg-gradient-to-r from-[var(--primary-color)] to-purple-500 rounded-lg flex items-center justify-center mr-3 shadow-sm">
-                              <span className="text-xs text-white">⚽</span>
+                              <Trophy size={14} className="text-white" />
                             </div>
                             {p.clube}
                           </div>
@@ -517,9 +537,10 @@ export default function HomePage() {
               </p>
               <button 
                 onClick={() => router.push("/events")}
-                className="bg-white text-[var(--primary-color)] px-8 py-4 rounded-xl font-bold text-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 shadow-lg"
+                className="bg-white text-[var(--primary-color)] px-8 py-4 rounded-xl font-bold text-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 shadow-lg flex items-center justify-center mx-auto"
               >
                 Explorar Todos os Eventos
+                <ArrowRight size={20} className="ml-2" />
               </button>
             </div>
           </div>

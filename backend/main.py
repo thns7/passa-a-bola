@@ -377,10 +377,38 @@ async def add_to_ranking_next_fiap(ranking_data: dict):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro interno: {str(e)}")
+    
+    
+
+@app.delete("/api/ranking-next-fiap/{user_id}")
+async def delete_from_ranking(user_id: str):
+   
+    try:
+        
+        result = supabase.table("ranking_next_fiap")\
+            .delete()\
+            .eq("user_id", user_id)\
+            .execute()
+        
+        if not result.data:
+            
+            return {
+                "success": True,
+                "message": "Usuário removido do ranking"
+            }
+            
+        return {
+            "success": True,
+            "message": "Usuário excluído do ranking com sucesso",
+            "data": result.data[0] if result.data else None
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao excluir do ranking: {str(e)}")
 
 @app.get("/api/ranking-next-fiap")
 async def get_ranking_next_fiap():
-    """Busca o ranking completo do NEXT FIAP"""
+    
     try:
         result = supabase.table("ranking_next_fiap")\
             .select("*")\
@@ -416,7 +444,7 @@ async def get_user_ranking(user_id: str):
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao buscar ranking do usuário: {str(e)}")
-    
+
 # Rotas de autenticação
 @app.post("/register")
 def register(user: User):
